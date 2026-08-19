@@ -1,89 +1,10 @@
-# -*- coding: utf-8 -*-
-"""Shared page furniture for the generated documentation.
-
-    Both doc/reference.html and doc/internals.html are built from this module:
-    it owns the escaping helpers, the block builders, the design tokens and the
-    page shell, so the two documents stay a matched pair.
-"""
-
-import html, re, io, os
-
-def esc(s):
-    return html.escape(s, quote=False)
-
-MODE_RE = re.compile(r'(?<=[(,\s])([+\-?:@])(?=[A-Z])')
-
-def code(s):
-    """Escaped inline code with mode letters marked up."""
-    return MODE_RE.sub(r'<span class="mode">\1</span>', esc(s))
-
-def lit(s):
-    """Marks text that contains literal backticks, so it is not read as code."""
-    return '\x01' + s
-
-def inline(s):
-    """Escapes text, then turns `x` into inline code."""
-    if s.startswith('\x01'):
-        return esc(s[1:])
-    if s.count('`') % 2:
-        raise SystemExit('unbalanced backtick in: %r' % s)
-    out, parts = [], esc(s).split('`')
-    for i, p in enumerate(parts):
-        out.append(p if i % 2 == 0 else '<code>%s</code>' % p)
-    return ''.join(out)
-
-def para(s):
-    return '<p>%s</p>' % inline(s)
-
-def ul(items):
-    return '<ul>%s</ul>' % ''.join('<li>%s</li>' % inline(i) for i in items)
-
-def pre(s):
-    return '<pre><code>%s</code></pre>' % esc(s.strip('\n'))
-
-def table(headers, rows, cls=''):
-    h = ''.join('<th>%s</th>' % inline(x) for x in headers)
-    body = []
-    for r in rows:
-        body.append('<tr>%s</tr>' % ''.join('<td>%s</td>' % inline(c) for c in r))
-    return ('<div class="scroll"><table class="%s"><thead><tr>%s</tr></thead>'
-            '<tbody>%s</tbody></table></div>' % (cls, h, ''.join(body)))
-
-def note(kind, title, body):
-    return ('<aside class="note note-%s"><span class="note-tag">%s</span>'
-            '<div>%s</div></aside>' % (kind, esc(title), inline(body)))
-
-GROUPS = []
-
-def preds(entries):
-    """entries: list of (signature, description) or ('##', 'Group name')."""
-    out = ['<div class="preds">']
-    for sig, desc in entries:
-        if sig == '##':
-            gid = 'g-' + re.sub(r'[^a-z0-9]+', '-', desc.lower()).strip('-')
-            GROUPS.append((gid, desc))
-            out.append('<h4 class="pred-group" id="%s">%s</h4>' % (gid, esc(desc)))
-            continue
-        key = esc((sig + ' ' + desc).lower().replace('"', ''))
-        out.append('<div class="pred" data-key="%s">'
-                   '<code class="sig">%s</code>'
-                   '<div class="pdesc">%s</div></div>' % (key, code(sig), inline(desc)))
-    out.append('</div>')
-    return ''.join(out)
-
-
-# ---------------------------------------------------------------- sections
-
-SECTIONS = []
-
-def section(sid, title, body):
-    SECTIONS.append((sid, title, body))
-
-def figure(svg, caption):
-    return '<figure>%s<figcaption>%s</figcaption></figure>' % (svg, inline(caption))
-# ---------------------------------------------------------------- page shell
-
-CSS = """
+<title>C Prolog</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A Prolog interpreter written from scratch in C99: reader, engine, copying garbage collector and library, with no dependencies beyond libc.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
 :root {
   color-scheme: light;
   --paper:      #F6F7FA;
@@ -486,127 +407,209 @@ footer {
   font-size: 0.8rem;
   color: var(--muted);
 }
-"""
 
-JS = """
-(function () {
-  var input = document.getElementById('pfilter');
-  var count = document.getElementById('pcount');
-  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
-  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
-  var total = preds.length;
+/* ---- landing page ---- */
+.hero {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.hero-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 3.2rem 2rem 2.6rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-top: 2.4rem; }
+}
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.1rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.7rem;
+  text-wrap: balance;
+}
+.hero .lede {
+  font-size: 1.12rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.4rem;
+  max-width: 46ch;
+}
+.hero .meta {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.cta { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.cta a {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+}
+.cta a.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+  font-weight: 500;
+}
+.cta a:hover { border-color: var(--accent); color: var(--accent); }
+.cta a.primary:hover { color: var(--surface); opacity: 0.9; }
 
-  function report(n, filtering) {
-    if (!count) return;
-    count.textContent = filtering ? n + ' of ' + total + ' shown'
-                                  : total + ' predicates';
-  }
-  report(total, false);
+.term {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  white-space: pre;
+}
+.term .q { color: var(--accent); font-weight: 500; }
+.term .c { color: var(--muted); }
 
-  if (input && count) {
-    input.addEventListener('input', function () {
-      var q = input.value.trim().toLowerCase();
-      var shown = 0;
-      preds.forEach(function (el) {
-        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
-        el.classList.toggle('hidden', !hit);
-        if (hit) shown++;
-      });
-      groups.forEach(function (g) {
-        var any = false, el = g.nextElementSibling;
-        while (el && el.classList.contains('pred')) {
-          if (!el.classList.contains('hidden')) { any = true; break; }
-          el = el.nextElementSibling;
-        }
-        g.classList.toggle('hidden', !any);
-      });
-      report(shown, q.length > 0);
-    });
-  }
+.band { max-width: 1080px; margin: 0 auto; padding: 3.2rem 2rem 0; }
+.band h2 {
+  font-size: 0.72rem;
+  font-family: var(--sans);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 0 1.4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.6rem 2.4rem;
+}
+.grid h3 { margin: 0 0 0.4rem; font-size: 1.02rem; }
+.grid p { margin: 0; font-size: 0.95rem; color: var(--muted); }
+.grid .fig {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  display: block;
+  margin-top: 0.5rem;
+}
 
-  /* Highlight the section the reader is in. */
-  var links = {};
-  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
-    links[a.getAttribute('href').slice(1)] = a;
-  });
-  var targets = document.querySelectorAll('section[id]');
-  var current = null;
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (!entry.isIntersecting) return;
-      var link = links[entry.target.id];
-      if (!link || link === current) return;
-      if (current) current.classList.remove('active');
-      link.classList.add('active');
-      current = link;
-    });
-  }, { rootMargin: '0px 0px -75% 0px' });
-  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
-})();
-"""
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
+.card {
+  display: block;
+  text-decoration: none;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1.2rem 1.3rem;
+  background: var(--surface);
+  color: inherit;
+}
+.card:hover { border-color: var(--accent); }
+.card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; color: var(--accent); }
+.card p { margin: 0; font-size: 0.92rem; color: var(--muted); }
 
-# The two documents cross-link to each other. In a checkout they sit side by
-# side, so the links are relative; when they are published as separate pages,
-# each has its own URL, which is supplied through the environment:
-#
-#   DOC_URL_REFERENCE=... DOC_URL_INTERNALS=... make doc
-#
-DOCS = [('index.html',     'Overview',           'DOC_URL_INDEX'),
-        ('reference.html', 'Language reference', 'DOC_URL_REFERENCE'),
-        ('internals.html', 'Engine internals',   'DOC_URL_INTERNALS')]
+table.plain { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 0.88rem; }
+table.plain td { padding: 0.45rem 1rem 0.45rem 0; border-bottom: 1px solid var(--rule-soft); color: var(--ink-soft); vertical-align: top; }
+table.plain td:first-child { font-family: var(--mono); font-size: 0.82rem; color: var(--ink); white-space: nowrap; }
 
-def render(title, prompt, subtitle, outfile, sub_under=None):
-    """Writes one document. sub_under names the section whose predicate groups
-       are listed as sub-entries in the contents rail."""
-    toc = []
-    for sid, sec_title, _ in SECTIONS:
-        toc.append('<li><a href="#%s">%s</a></li>' % (sid, esc(sec_title)))
-        if sub_under and sid == sub_under:
-            subs = ''.join('<li><a href="#%s">%s</a></li>' % (gid, esc(name))
-                           for gid, name in GROUPS)
-            toc.append('<li><ol class="sub">%s</ol></li>' % subs)
+.site-footer {
+  max-width: 1080px;
+  margin: 3.5rem auto 0;
+  padding: 1.3rem 2rem 3rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.site-footer a { color: var(--muted); }
+</style>
 
-    body = []
-    for sid, sec_title, content in SECTIONS:
-        body.append('<section id="%s"><h2>%s</h2>%s</section>'
-                    % (sid, esc(sec_title), content))
+<header class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1>C Prolog</h1>
+      <p class="lede">A Prolog interpreter written from scratch in C99 — reader,
+        engine, garbage collector and library, with no dependencies beyond libc.</p>
+      <div class="meta">
+        <span>MIT licensed</span><span>C99, no dependencies</span>
+        <span>macOS, Linux, BSD</span>
+      </div>
+      <nav class="cta">
+        <a class="primary" href="https://github.com/hansolovkarlsson/cprolog">Get the source</a>
+        <a href="reference.html">Language reference</a>
+        <a href="internals.html">Engine internals</a>
+      </nav>
+    </div>
+    <div><div class="term"><span class="c">$ git clone https://github.com/hansolovkarlsson/cprolog</span>
+<span class="c">$ cd cprolog &amp;&amp; make</span>
+<span class="c">$ ./prolog</span>
+C Prolog 1.0 -- a Prolog interpreter in C
+Type help. for help, halt. to quit.
 
-    nav = ''.join(
-        '<a href="%s"%s>%s</a>'
-        % (os.environ.get(env) or fname,
-           ' aria-current="page"' if fname == outfile else '', esc(name))
-        for fname, name, env in DOCS)
+<span class="q">?- X = hello, atom_length(X, N).</span>
+X = hello,
+N = 5.
 
-    page = """<title>%s</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
-<style>%s</style>
-<header class="masthead">
-  <div class="masthead-inner">
-    <h1>%s</h1>
-    <span class="prompt">%s</span>
-    <p>%s</p>
-    <nav class="docnav" aria-label="Documents">%s</nav>
+<span class="q">?- member(X, [a,b,c]).</span>
+X = a ;
+X = b ;
+X = c ;
+false.
+
+<span class="q">?- findall(Y, (between(1,5,X), Y is X*X), Squares).</span>
+Squares = [1,4,9,16,25].</div></div>
   </div>
 </header>
-<div class="shell">
-  <nav class="rail" aria-label="Contents">
-    <p class="rail-title">Contents</p>
-    <ol>%s</ol>
-  </nav>
-  <main>
-    %s
-    <footer>Generated from the interpreter's own tables and checked against the
-    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
-    for the library written in Prolog.</footer>
-  </main>
-</div>
-<script>%s</script>
-""" % (esc(title), CSS, esc(title), esc(prompt), inline(subtitle), nav,
-       ''.join(toc), ''.join(body), JS)
 
-    with io.open('docs/' + outfile, 'w', encoding='utf-8') as f:
-        f.write(page)
-    print('wrote docs/' + outfile)
+<section class="band">
+  <h2>What it is</h2>
+  <div class="grid"><div><h3>An engine you can read</h3><p>No abstract machine and no clause compiler: goals live in an explicit list, alternatives on a choice point stack, and cut is one integer carried in each goal frame. The whole solver is one file.</p><span class="fig">5,300 lines of C99, no dependencies beyond libc</span></div><div><h3>Memory that behaves</h3><p>Backtracking rewinds the heap to a choice point's mark, a copying collector handles what backtracking cannot, and generators retry a single choice point so failure-driven loops stay flat.</p><span class="fig">5M-iteration recursion: 25 MB · 1M-iteration loop: 2.8 MB</span></div><div><h3>The language, not a subset</h3><p>A full operator-precedence reader with user-defined operators, grammars, exceptions, bagof/setof, format/2,3, streams, first-argument indexing and UTF-8 text throughout.</p><span class="fig">162 builtin predicates</span></div><div><h3>Tested like a compiler</h3><p>The suite runs three times: normally, with the collector forced every 1024 inferences, and under the address and undefined behaviour sanitizers. It builds warning-free under both clang and gcc.</p><span class="fig">248 tests · make check · make test-asan</span></div></div>
+</section>
+
+<section class="band">
+  <h2>Build and run</h2>
+  <div class="cards" style="grid-template-columns: minmax(0,1fr);">
+    <div class="card">
+      <p style="font-family: var(--mono); font-size: 0.82rem; color: var(--ink); line-height: 1.8;">
+make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 tests, twice</span><br>make examples</p>
+    </div>
+  </div>
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.92rem; max-width: 68ch;">
+    Nothing to configure and nothing to install: a C99 compiler and make are the
+    whole toolchain. <code>make install</code> puts the binary in
+    <code>/usr/local/bin</code>.</p>
+</section>
+
+<section class="band">
+  <h2>Documentation</h2>
+  <div class="cards"><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a></div>
+</section>
+
+<section class="band">
+  <h2>Examples in the repository</h2>
+  <table class="plain"><tbody><tr><td>examples/queens.pl</td><td>The N queens problem, printed as a board. All 92 solutions for 8 queens take 9 ms.</td></tr><tr><td>examples/zebra.pl</td><td>Einstein's riddle, solved by plain unification and backtracking in under a millisecond.</td></tr><tr><td>examples/calc.pl</td><td>A calculator: a grammar that reads an arithmetic expression and evaluates it as it parses.</td></tr><tr><td>examples/hanoi.pl</td><td>Towers of Hanoi, the first recursive program most people write in Prolog.</td></tr><tr><td>examples/family.pl</td><td>Facts, rules and queries — the place to start if Prolog is new to you.</td></tr></tbody></table>
+</section>
+
+<footer class="site-footer">
+  <span>MIT licensed</span>
+  <a href="https://github.com/hansolovkarlsson/cprolog">Source on GitHub</a>
+  <a href="https://github.com/hansolovkarlsson/cprolog/blob/main/ROADMAP.md">Roadmap</a>
+  <span>Documentation generated from the interpreter's own tables.</span>
+</footer>

@@ -20,12 +20,13 @@ X = c ;
 false.
 ```
 
-Two generated documents live in `doc/`:
-[`reference.html`](doc/reference.html) is the language reference — syntax,
-control, arithmetic, every builtin predicate, grammars, errors and the
-deviations from ISO — and [`internals.html`](doc/internals.html) describes how
-the engine is built and where the design costs something. Both are rebuilt with
-`make doc`.
+Documentation is published at
+**[hansolovkarlsson.github.io/cprolog](https://hansolovkarlsson.github.io/cprolog/)**:
+a [language reference](https://hansolovkarlsson.github.io/cprolog/reference.html)
+covering syntax, control, arithmetic, every builtin predicate, grammars and
+errors, and an [engine internals](https://hansolovkarlsson.github.io/cprolog/internals.html)
+document describing how the interpreter is built and where the design costs
+something. Both are generated into `docs/` by `make doc`.
 
 ## Building
 
@@ -194,6 +195,10 @@ sorting, the list library, the database, the reader and writer (including
 round-tripping), `format/2`, grammars, streams, and deep recursion under the
 collector. `make check` runs them both normally and with the collector
 running constantly; `make test-asan` runs both under the sanitizers.
+
+## Roadmap
+
+Known work and deliberate non-goals are listed in [ROADMAP.md](ROADMAP.md).
 
 ## Licence
 

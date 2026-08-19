@@ -306,7 +306,10 @@ static int eval_binary(int f, Term *expr, Num *a, Num *b, Num *out)
             out->i = a->i >> b->i;
         } else if (!strcmp(name, "<<")) {
             if (b->i < 0 || b->i > 63) return evaluation_error("undefined");
-            out->i = a->i << b->i;
+            /* Shifting a negative value left is undefined in C, so the shift
+               is done unsigned; the result is the two's complement one that
+               every Prolog gives. */
+            out->i = (long long)((unsigned long long)a->i << b->i);
         } else if (!strcmp(name, "/\\")) out->i = a->i & b->i;
         else if (!strcmp(name, "\\/")) out->i = a->i | b->i;
         else if (!strcmp(name, "xor")) out->i = a->i ^ b->i;

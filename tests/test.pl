@@ -58,6 +58,9 @@ test(ar_abs_sign,     (X is abs(-3), Y is sign(-3), X =:= 3, Y =:= -1)).
 test(ar_bits,         (X is 5 /\ 3, Y is 5 \/ 3, Z is 5 xor 3, W is \ 5,
                        X =:= 1, Y =:= 7, Z =:= 6, W =:= -6)).
 test(ar_shift,        (X is 1 << 10, Y is 1024 >> 3, X =:= 1024, Y =:= 128)).
+test(ar_shift_neg,    (X is -1 << 2, Y is -8 >> 1, X =:= -4, Y =:= -4)).
+test(ar_shift_range,  (catch(_ is 1 << 64, error(evaluation_error(undefined),_), true),
+                       catch(_ is 1 << -1, error(evaluation_error(undefined),_), true))).
 test(ar_gcd,          X is gcd(12, 18), X =:= 6).
 test(ar_trig,         (X is cos(0.0), X =:= 1.0)).
 test(ar_sqrt,         X is sqrt(16.0), X =:= 4.0).

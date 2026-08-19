@@ -30,7 +30,7 @@ int text_of(Term *t, char **out, size_t *len)
         char buf[64];
         if (t->tag == TAG_INT) snprintf(buf, sizeof(buf), "%lld", IV(t));
         else format_float(buf, sizeof(buf), FV(t));
-        *out = strdup(buf);
+        *out = pl_strdup(buf);
         if (len) *len = strlen(buf);
         return 1;
     }

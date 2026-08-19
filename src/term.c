@@ -31,6 +31,17 @@ static void heap_init(void)
     heap_head = heap_cur = chunk_new(HEAP_CHUNK_MIN);
 }
 
+/* strdup is POSIX, not C99, and is hidden by glibc under -std=c99: calling it
+   there truncates the returned pointer to an int. */
+char *pl_strdup(const char *s)
+{
+    size_t n = strlen(s) + 1;
+    char *p = (char *)malloc(n);
+    if (!p) { fprintf(stderr, "prolog: out of memory\n"); exit(1); }
+    memcpy(p, s, n);
+    return p;
+}
+
 void *heap_alloc(size_t n)
 {
     HeapChunk *c;

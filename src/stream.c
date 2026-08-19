@@ -83,7 +83,7 @@ PStream *stream_open(const char *path, const char *mode, int is_input)
     streams[i].in_use = 1;
     streams[i].is_input = is_input;
     streams[i].alias = -1;
-    streams[i].name = strdup(path);
+    streams[i].name = pl_strdup(path);
     streams[i].peeked = -2;
     return &streams[i];
 }

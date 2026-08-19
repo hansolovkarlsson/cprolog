@@ -65,6 +65,7 @@ struct HeapChunk { HeapChunk *next; size_t size, used; char *data; };
 
 typedef struct { HeapChunk *chunk; size_t used; unsigned epoch; } HeapMark;
 
+char    *pl_strdup(const char *s);
 void    *heap_alloc(size_t n);
 HeapMark heap_mark(void);
 void     heap_release(HeapMark m);

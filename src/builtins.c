@@ -100,6 +100,7 @@ Term *parse_number_str(const char *s, size_t n)
 
 static int get_atom(Term *t, int *a)
 {
+    *a = 0;                 /* always written, so callers need no initialiser */
     t = deref(t);
     if (t->tag == TAG_VAR) return instantiation_error();
     if (t->tag != TAG_ATOM) return type_error("atom", t);
@@ -109,6 +110,7 @@ static int get_atom(Term *t, int *a)
 
 static int get_int(Term *t, long long *v)
 {
+    *v = 0;
     t = deref(t);
     if (t->tag == TAG_VAR) return instantiation_error();
     if (t->tag != TAG_INT) return type_error("integer", t);
@@ -119,6 +121,8 @@ static int get_int(Term *t, long long *v)
 static int get_text(Term *t, char **s, size_t *n, const char *type)
 {
     Term *d = deref(t);
+    *s = NULL;
+    if (n) *n = 0;
     if (d->tag == TAG_VAR) return instantiation_error();
     if (!text_of(d, s, n)) return type_error(type, d);
     return PL_OK;
@@ -296,8 +300,13 @@ static int arith_cmp_bi(Term **A, int lo, int hi)
 }
 
 BI(bi_num_eq) { UNUSED; return arith_cmp_bi(A, 0, 0); }
-BI(bi_num_ne) { UNUSED; int c; if (arith_compare(A[0], A[1], &c) != PL_OK)
-                   return PL_ERROR; RET(c != 0); }
+BI(bi_num_ne)
+{
+    UNUSED;
+    int c;
+    if (arith_compare(A[0], A[1], &c) != PL_OK) return PL_ERROR;
+    RET(c != 0);
+}
 BI(bi_num_lt) { UNUSED; return arith_cmp_bi(A, -1, -1); }
 BI(bi_num_gt) { UNUSED; return arith_cmp_bi(A, 1, 1); }
 BI(bi_num_le) { UNUSED; return arith_cmp_bi(A, -1, 0); }
@@ -968,6 +977,8 @@ static void msort_rec(Term **a, Term **tmp, int n)
 static int list_to_array(Term *l, Term ***out, int *n)
 {
     int cap = 64, k = 0;
+    *out = NULL;
+    *n = 0;
     Term **a = (Term **)malloc((size_t)cap * sizeof(Term *));
     l = deref(l);
     while (l->tag == TAG_STR && FN(l) == a_dot && AR(l) == 2) {
@@ -2089,7 +2100,7 @@ BI(bi_op_list)
     UNUSED;
     Term **buf;
     int i = 0, n = 0, cap = 128;
-    int prec, type, atom;
+    int prec = 0, type = 0, atom = 0;
     int f_op = intern("op");
 
     buf = (Term **)malloc((size_t)cap * sizeof(Term *));

@@ -9,7 +9,7 @@
     interpreter.
 """
 import io, os
-from docpage import CSS, esc, inline, DOCS
+from docpage import CSS, esc, inline, DOCS, FAVICON
 
 REPO = 'https://github.com/hansolovkarlsson/cprolog'
 
@@ -245,6 +245,7 @@ def render():
     return """<title>C Prolog</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="A Prolog interpreter written from scratch in C99: reader, engine, copying garbage collector and library, with no dependencies beyond libc.">
+<!--FAVICON-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
@@ -312,5 +313,5 @@ make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 test
        transcript(), highlights, cards, examples, REPO, REPO)
 
 with io.open('docs/index.html', 'w', encoding='utf-8') as f:
-    f.write(render())
+    f.write(render().replace('<!--FAVICON-->', FAVICON))
 print('wrote docs/index.html')

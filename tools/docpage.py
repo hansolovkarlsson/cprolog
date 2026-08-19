@@ -551,6 +551,9 @@ JS = """
 #
 #   DOC_URL_REFERENCE=... DOC_URL_INTERNALS=... make doc
 #
+# The tab icon, kept out of the format strings: it is percent-encoded.
+FAVICON = ('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'26\' font-size=\'26\'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">')
+
 DOCS = [('index.html',     'Overview',           'DOC_URL_INDEX'),
         ('reference.html', 'Language reference', 'DOC_URL_REFERENCE'),
         ('internals.html', 'Engine internals',   'DOC_URL_INTERNALS')]
@@ -579,6 +582,7 @@ def render(title, prompt, subtitle, outfile, sub_under=None):
 
     page = """<title>%s</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--FAVICON-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
@@ -606,6 +610,8 @@ def render(title, prompt, subtitle, outfile, sub_under=None):
 <script>%s</script>
 """ % (esc(title), CSS, esc(title), esc(prompt), inline(subtitle), nav,
        ''.join(toc), ''.join(body), JS)
+
+    page = page.replace('<!--FAVICON-->', FAVICON)
 
     with io.open('docs/' + outfile, 'w', encoding='utf-8') as f:
         f.write(page)

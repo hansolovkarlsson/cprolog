@@ -133,13 +133,13 @@ static void run_query(Term *goal, Term *names)
     rc = machine_run(base);
     for (;;) {
         if (rc == PL_OK) {
-            int n = print_bindings(names);
-            if (n == 0) {
-                printf("true");
-                if (m_cp_top > base && ask_more()) { rc = machine_redo(base); continue; }
-                printf(".\n");
+            if (print_bindings(names) == 0) printf("true");
+            if (m_cp_top > base) {
+                /* More solutions may exist, so wait for the reader. Their
+                   newline is what ends the line -- printing a full stop after
+                   it would leave one sitting on a line of its own. */
+                if (ask_more()) { rc = machine_redo(base); continue; }
             } else {
-                if (m_cp_top > base && ask_more()) { rc = machine_redo(base); continue; }
                 printf(".\n");
             }
             break;

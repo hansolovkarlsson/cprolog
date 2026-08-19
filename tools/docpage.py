@@ -27,9 +27,15 @@ def inline(s):
         return esc(s[1:])
     if s.count('`') % 2:
         raise SystemExit('unbalanced backtick in: %r' % s)
-    out, parts = [], esc(s).split('`')
-    for i, p in enumerate(parts):
-        out.append(p if i % 2 == 0 else '<code>%s</code>' % p)
+    out = []
+    for i, part in enumerate(esc(s).split('`')):
+        if i % 2:
+            out.append('<code>%s</code>' % part)
+            continue
+        # **bold** and [text](target), outside code spans only
+        part = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', part)
+        part = re.sub(r'\[([^\]]+)\]\(([^)\s]+)\)', r'<a href="\2">\1</a>', part)
+        out.append(part)
     return ''.join(out)
 
 def para(s):
@@ -435,6 +441,70 @@ a:focus-visible, .rail a:focus-visible {
   outline-offset: 2px;
   border-radius: 2px;
 }
+/* ---- tutorial furniture ---- */
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "\25B8\00A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "\25BE\00A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
 /* ---- figures ---- */
 figure { margin: 0 0 1.7rem; }
 figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
@@ -554,9 +624,10 @@ JS = """
 # The tab icon, kept out of the format strings: it is percent-encoded.
 FAVICON = ('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'26\' font-size=\'26\'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">')
 
-DOCS = [('index.html',     'Overview',           'DOC_URL_INDEX'),
-        ('reference.html', 'Language reference', 'DOC_URL_REFERENCE'),
-        ('internals.html', 'Engine internals',   'DOC_URL_INTERNALS')]
+DOCS = [('index.html',      'Overview',           'DOC_URL_INDEX'),
+        ('tutorial-1.html', 'Tutorial',           'DOC_URL_TUTORIAL1'),
+        ('reference.html',  'Language reference', 'DOC_URL_REFERENCE'),
+        ('internals.html',  'Engine internals',   'DOC_URL_INTERNALS')]
 
 def render(title, prompt, subtitle, outfile, sub_under=None):
     """Writes one document. sub_under names the section whose predicate groups

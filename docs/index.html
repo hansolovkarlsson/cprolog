@@ -357,6 +357,70 @@ a:focus-visible, .rail a:focus-visible {
   outline-offset: 2px;
   border-radius: 2px;
 }
+/* ---- tutorial furniture ---- */
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "B8 A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "BE A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
 /* ---- figures ---- */
 figure { margin: 0 0 1.7rem; }
 figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
@@ -553,7 +617,8 @@ table.plain td:first-child { font-family: var(--mono); font-size: 0.82rem; color
         <span>macOS, Linux, BSD</span>
       </div>
       <nav class="cta">
-        <a class="primary" href="https://github.com/hansolovkarlsson/cprolog">Get the source</a>
+        <a class="primary" href="tutorial-1.html">Start the tutorial</a>
+        <a href="https://github.com/hansolovkarlsson/cprolog">Get the source</a>
         <a href="reference.html">Language reference</a>
         <a href="internals.html">Engine internals</a>
       </nav>
@@ -600,7 +665,7 @@ make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 test
 
 <section class="band">
   <h2>Documentation</h2>
-  <div class="cards"><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a></div>
+  <div class="cards"><a class="card" href="tutorial-1.html"><h3>Tutorial, level 1</h3><p>New to Prolog, or returning to it? Facts, rules, unification and the search, taught with queries you run against this interpreter.</p></a><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a></div>
 </section>
 
 <section class="band">

@@ -9,7 +9,7 @@
     interpreter.
 """
 import io, os
-from docpage import CSS, esc, inline, DOCS, FAVICON
+from docpage import CSS, esc, inline, FAVICON
 
 REPO = 'https://github.com/hansolovkarlsson/cprolog'
 
@@ -204,16 +204,6 @@ EXAMPLES = [
                            'new to you.'),
 ]
 
-def nav():
-    here = 'index.html'
-    out = []
-    for fname, name, env in DOCS:
-        href = os.environ.get(env) or fname
-        cur = ' aria-current="page"' if fname == here else ''
-        out.append('<a href="%s"%s>%s</a>' % (href, cur, esc(name)))
-    out.append('<a href="%s">GitHub</a>' % REPO)
-    return ''.join(out)
-
 def transcript():
     rows = []
     for kind, text in TRANSCRIPT:
@@ -229,6 +219,10 @@ def render():
         % (esc(t), inline(b), esc(f)) for t, b, f in HIGHLIGHTS)
 
     cards = ''.join([
+        '<a class="card" href="%s"><h3>Tutorial, level 1</h3><p>New to Prolog, or '
+        'returning to it? Facts, rules, unification and the search, taught with '
+        'queries you run against this interpreter.</p></a>'
+        % (os.environ.get('DOC_URL_TUTORIAL1') or 'tutorial-1.html'),
         '<a class="card" href="%s"><h3>Language reference</h3><p>Syntax, control, '
         'arithmetic, every builtin predicate, grammars, errors, and where it parts '
         'company with the ISO standard.</p></a>'
@@ -262,7 +256,8 @@ def render():
         <span>macOS, Linux, BSD</span>
       </div>
       <nav class="cta">
-        <a class="primary" href="%s">Get the source</a>
+        <a class="primary" href="%s">Start the tutorial</a>
+        <a href="%s">Get the source</a>
         <a href="%s">Language reference</a>
         <a href="%s">Engine internals</a>
       </nav>
@@ -307,6 +302,7 @@ make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 test
   <span>Documentation generated from the interpreter's own tables.</span>
 </footer>
 """ % (CSS, EXTRA_CSS,
+       os.environ.get('DOC_URL_TUTORIAL1') or 'tutorial-1.html',
        REPO,
        os.environ.get('DOC_URL_REFERENCE') or 'reference.html',
        os.environ.get('DOC_URL_INTERNALS') or 'internals.html',

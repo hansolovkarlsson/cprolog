@@ -356,6 +356,70 @@ a:focus-visible, .rail a:focus-visible {
   outline-offset: 2px;
   border-radius: 2px;
 }
+/* ---- tutorial furniture ---- */
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "B8 A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "BE A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
 /* ---- figures ---- */
 figure { margin: 0 0 1.7rem; }
 figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
@@ -413,7 +477,7 @@ footer {
     <h1>C Prolog Internals</h1>
     <span class="prompt">?- engine design</span>
     <p>How the interpreter is built: terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — and the places the design costs something.</p>
-    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="reference.html">Language reference</a><a href="internals.html" aria-current="page">Engine internals</a></nav>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html" aria-current="page">Engine internals</a></nav>
   </div>
 </header>
 <div class="shell">

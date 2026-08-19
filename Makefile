@@ -55,10 +55,13 @@ examples: $(BIN)
 	./$(BIN) -q examples/family.pl -g "descendants(esther,D), format('~w~n',[D])"
 
 # The documentation is generated; tools/docpage.py holds the shared shell.
-doc: docs/index.html docs/reference.html docs/internals.html
+doc: docs/index.html docs/tutorial-1.html docs/reference.html docs/internals.html
 
 docs/index.html: tools/gen_index.py tools/docpage.py
 	python3 tools/gen_index.py
+
+docs/tutorial-1.html: tools/gen_tutorial1.py tools/docpage.py tutorial/level1.pl
+	python3 tools/gen_tutorial1.py
 
 docs/reference.html: tools/gen_reference.py tools/docpage.py
 	python3 tools/gen_reference.py

@@ -1,0 +1,635 @@
+<title>Prolog Tutorial, Level 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--ochre);
+  white-space: nowrap;
+  padding-top: 0.28rem;
+  flex: 0 0 auto;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  .note-tag { width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- tutorial furniture ---- */
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "B8 A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "BE A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>Prolog Tutorial, Level 1</h1>
+    <span class="prompt">?- level 1</span>
+    <p>Facts, rules, unification and the search — the whole model, using the interpreter in this repository. Every query on this page was run against it.</p>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html" aria-current="page">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Contents</p>
+    <ol><li><a href="#start">Before you begin</a></li><li><a href="#idea">The idea in one page</a></li><li><a href="#facts">Facts</a></li><li><a href="#asking">Asking questions</a></li><li><a href="#unification">Variables and unification</a></li><li><a href="#rules">Rules</a></li><li><a href="#search">How Prolog answers</a></li><li><a href="#recursion">Recursion</a></li><li><a href="#arithmetic">Arithmetic</a></li><li><a href="#errors">When things go wrong</a></li><li><a href="#exercises">Exercises</a></li><li><a href="#next">Where this goes next</a></li></ol>
+  </nav>
+  <main>
+    <section id="start"><h2>Before you begin</h2><p>This tutorial teaches the basics of Prolog using the interpreter in this repository. Everything shown here was run against it, so if a transcript says the answer is <code>X = 7</code>, that is what you will see.</p><p>Build it and start the toplevel:</p><pre><code>$ make
+$ ./prolog
+C Prolog 1.0 -- a Prolog interpreter in C
+Type help. for help, halt. to quit.
+
+?-</code></pre><p>The <code>?-</code> is the prompt: it is Prolog asking you for a question. Type <code>halt.</code> to leave — including the full stop, which is how Prolog knows you have finished a sentence.</p><p>The programs in this tutorial are in <code>tutorial/level1.pl</code>. Load the file when you start:</p><pre><code>$ ./prolog tutorial/level1.pl</code></pre><aside class="note note-try"><span class="note-tag">Follow along</span><div>Read this page with a terminal open beside it. Prolog is quick to try things in, and the point of the language is hard to feel without watching it answer.</div></aside></section><section id="idea"><h2>The idea in one page</h2><p>Most languages are built from instructions: do this, then do that, return a value. Prolog is built from two other things — facts you state, and questions you ask. You describe what is true, and the system searches for a way to prove what you ask about.</p><p>A program is a set of relations. <code>parent(esther, hannah)</code> says that esther and hannah stand in the parent relation. It is not a function call and it returns nothing; it is a statement that this is so.</p><p>The consequence takes some getting used to: a relation can be used in any direction. One definition of <code>parent/2</code> answers all of these:</p><ul><li>Is esther a parent of hannah? — ask <code>parent(esther, hannah)</code></li><li>Who are esther's children? — ask <code>parent(esther, Child)</code></li><li>Whose parent is hannah? — ask <code>parent(Who, lars)</code></li><li>Which parent-child pairs exist at all? — ask <code>parent(P, C)</code></li></ul><p>You never wrote three functions for that. You wrote facts, and asked different questions about them.</p></section><section id="facts"><h2>Facts</h2><p>A fact is a relation name and its arguments, ended by a full stop. Here is the start of <code>tutorial/level1.pl</code>:</p><pre><code>parent(esther, hannah).
+parent(esther, isaac).
+parent(hannah, lars).
+parent(hannah, maja).
+parent(isaac, nils).
+
+female(esther).
+female(hannah).
+female(maja).
+
+male(isaac).
+male(lars).
+male(nils).</code></pre><p>Three rules of spelling matter from the start:</p><div class="scroll"><table class=""><thead><tr><th>Written as</th><th>Means</th></tr></thead><tbody><tr><td>esther, hannah, parent</td><td>An <strong>atom</strong>: a name that stands for itself. It begins with a lower-case letter.</td></tr><tr><td>Child, Who, X</td><td>A <strong>variable</strong>: a blank to be filled in. It begins with a capital letter or an underscore.</td></tr><tr><td>parent(esther, hannah)</td><td>A relation applied to arguments. No space before the bracket.</td></tr><tr><td>.</td><td>Ends every fact, rule and question. Forgetting it is the most common beginner error.</td></tr></tbody></table></div><p><code>parent/2</code> is how a relation is named when you talk about it: the name, then how many arguments it takes. <code>parent/2</code> and <code>parent/3</code> would be different relations entirely.</p><aside class="note note-impl"><span class="note-tag">Order matters, and it is the order you wrote</span><div>Prolog tries facts and rules from the top of the file downwards. That is not an implementation detail you can ignore — it decides the order of answers, and sometimes whether you get any.</div></aside></section><section id="asking"><h2>Asking questions</h2><p>With the file loaded, ask whether something is true. A question with no variables gets a yes or no:</p><pre><code>?- parent(hannah, lars).
+true 
+
+?- parent(hannah, esther).
+false.</code></pre><p><code>true</code> means Prolog proved it from what you gave it. <code>false</code> means it could not — which is not quite the same as "this is false in the world". Prolog only knows what is in the file. Nothing there says hannah is a parent of esther, so the answer is no.</p><p>Notice the space after the first <code>true</code>, where the second answer ends in a full stop. The space means Prolog is waiting: it has found one proof but there may be more, and it wants to know whether to look. Press return to stop, or <code>;</code> and return to search on.</p><p>That is more interesting with a variable in the question. A variable asks Prolog to find values that make the question true:</p><pre><code>?- parent(esther, C).
+C = hannah ;
+C = isaac.</code></pre><p>The first answer came back with a space after it; typing <code>;</code> asked for another; after <code>C = isaac</code> there was a full stop, because Prolog could see there were no more clauses left to try.</p><p>Keep asking past the last answer and you get <code>false</code> — meaning "no further proof", not "the previous answers were wrong":</p><pre><code>?- parent(X, lars).
+X = hannah ;
+false.</code></pre><aside class="note note-try"><span class="note-tag">Try these</span><div><code>parent(P, C)</code> on its own — every pair in the database, one <code>;</code> at a time. Then <code>male(X)</code>, then <code>female(esther)</code>.</div></aside><p>A variable you do not care about can be written <code>_</code>, the anonymous variable. <code>parent(esther, _)</code> asks whether esther has any child at all without asking who.</p></section><section id="unification"><h2>Variables and unification</h2><p>The single most important thing to understand about Prolog is what <code>=</code> does, because it is not assignment. <code>X = hannah</code> does not store hannah in X. It asks: can these two things be made the same?</p><pre><code>?- X = hannah.
+X = hannah.</code></pre><p>They can, by letting X stand for hannah. That is <strong>unification</strong>: matching two terms, filling in variables as needed to make them identical. It works on structure, in both directions at once:</p><pre><code>?- f(a, B) = f(A, b).
+B = b,
+A = a.</code></pre><p>Prolog lined the two terms up: same name <code>f</code>, same number of arguments, then argument by argument. <code>a</code> had to match <code>A</code>, so A stands for a; <code>B</code> had to match <code>b</code>, so B stands for b.</p><p>When two terms cannot be made the same, unification simply fails:</p><pre><code>?- f(a) = g(a).
+false.
+
+?- f(a, b) = f(a).
+false.</code></pre><p>This is why a variable in a question works the way it does. Asking <code>parent(esther, C)</code> means: find a fact that unifies with this pattern. <code>parent(esther, hannah)</code> does, with C standing for hannah.</p><aside class="note note-impl"><span class="note-tag">A variable is filled in once, but only until Prolog backtracks</span><div>Within one proof a variable that has been given a value keeps it — there is no reassignment. When Prolog gives up on a line of reasoning and tries another, the values it filled in along the way are undone. That undoing is what lets the next answer be found.</div></aside></section><section id="rules"><h2>Rules</h2><p>A rule says that something is true <strong>if</strong> something else is. The <code>:-</code> is the "if", and the comma is "and":</p><pre><code>mother(M, C) :- parent(M, C), female(M).</code></pre><p>Read it aloud: M is the mother of C if M is a parent of C, and M is female. The part before <code>:-</code> is the head, the part after is the body.</p><pre><code>?- mother(M, lars).
+M = hannah </code></pre><p>Rules may use other rules, and may use themselves — which comes later on this page. A grandparent is a parent of a parent:</p><pre><code>grandparent(G, C) :- parent(G, P), parent(P, C).</code></pre><p>The variable <code>P</code> appears twice in the body and nowhere in the head. That is what ties the two goals together: the same person must be both esther's child and lars's parent. A variable that appears only inside the body is local to the rule.</p><pre><code>?- grandparent(G, lars).
+G = esther 
+
+?- grandparent(esther, C).
+C = lars ;
+C = maja ;
+C = nils.</code></pre><p>One more, which needs a way of saying "different":</p><pre><code>sibling(A, B) :- parent(P, A), parent(P, B), A \== B.</code></pre><p><code>A \== B</code> succeeds when A and B are not the same term. Without it, everybody would be their own sibling, since <code>parent(hannah, lars)</code> matches both goals at once.</p><ol class="task"><li><p>Write <code>grandmother/2</code> using <code>grandparent/2</code> and <code>female/1</code>.</p></li><li><p>Write <code>father_of_a_son/1</code>: someone who is the father of a male child.</p></li></ol><details class="ex"><summary>Solutions</summary><div class="ex-body"><pre><code>grandmother(G, C) :- grandparent(G, C), female(G).
+
+father_of_a_son(F) :- father(F, C), male(C).</code></pre><p>Test them with <code>grandmother(G, lars).</code> and <code>father_of_a_son(X).</code> — the second answers <code>X = isaac</code>.</p></div></details></section><section id="search"><h2>How Prolog answers</h2><p>It is worth being precise about what happens when you ask a question, because everything else follows from it. Take <code>grandparent(esther, C)</code>.</p><figure><div class="svg-frame"><svg viewBox="0 0 700 300" role="img" aria-label="The search tree for grandparent(esther, C): the rule produces two goals, the first has two solutions for P, and the second yields three answers in all." xmlns="http://www.w3.org/2000/svg"><defs><marker id="t-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" opacity="0.55"/></marker></defs><rect x="240" y="10" width="220" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="350" y="30" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">grandparent(esther, C)</text><line x1="350" y1="40" x2="350" y2="66" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#t-ar)"/><text x="362" y="60" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6">the only rule turns it into two goals</text><rect x="215" y="70" width="270" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="350" y="90" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">parent(esther, P), parent(P, C)</text><line x1="300" y1="100" x2="150" y2="136" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#t-ar)"/><line x1="400" y1="100" x2="545" y2="136" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#t-ar)"/><text x="196" y="112" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">P = hannah</text><text x="504" y="112" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">P = isaac</text><rect x="60" y="140" width="180" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="150" y="160" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">parent(hannah, C)</text><rect x="460" y="140" width="170" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="545" y="160" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">parent(isaac, C)</text><line x1="120" y1="170" x2="90" y2="206" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#t-ar)"/><line x1="180" y1="170" x2="215" y2="206" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#t-ar)"/><line x1="545" y1="170" x2="545" y2="206" stroke="currentColor" stroke-width="1.1" opacity="0.55" marker-end="url(#t-ar)"/><rect x="35" y="210" width="110" height="28" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="90" y="229" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">C = lars</text><rect x="160" y="210" width="110" height="28" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="215" y="229" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">C = maja</text><rect x="490" y="210" width="110" height="28" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="545" y="229" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle" opacity="0.95">C = nils</text><text x="350" y="268" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="middle" opacity="0.7">Prolog walks this tree left to right, top to bottom, and reports each leaf as an answer</text></svg></div><figcaption>Prolog works through this tree from the left. Each branch is a choice it can come back to, and each leaf it reaches is one answer.</figcaption></figure><p>Step by step:</p><ol class="task"><li><p>The question <code>grandparent(esther, C)</code> matches the head of the rule, so it is replaced by the rule's body: <code>parent(esther, P), parent(P, C)</code>.</p></li><li><p>Prolog takes the leftmost goal first. <code>parent(esther, P)</code> matches the first fact about esther, so P stands for hannah. It remembers that another fact could have matched.</p></li><li><p>Now the second goal, with P filled in: <code>parent(hannah, C)</code>. That matches, C stands for lars, and there are no goals left — so <code>C = lars</code> is an answer.</p></li><li><p>Asked for more, Prolog goes back to its most recent choice. <code>parent(hannah, C)</code> had another match: <code>C = maja</code>.</p></li><li><p>Out of matches there, it goes further back, to the choice it left at <code>parent(esther, P)</code>: P stands for isaac instead. The undoing matters here — C is a blank again before the search continues.</p></li><li><p><code>parent(isaac, C)</code> gives <code>C = nils</code>. Nothing is left to try anywhere, so the next request for an answer would be <code>false</code>.</p></li></ol><p>That is the whole engine: try goals left to right, try clauses top to bottom, and on failure go back to the most recent choice and take the next option. It is called <strong>backtracking</strong>, and it is doing the work that loops and conditionals do in other languages.</p></section><section id="recursion"><h2>Recursion</h2><p><code>grandparent/2</code> reaches exactly two generations. For any distance, a rule has to refer to itself. The pattern is always the same: one clause that stops, and one that takes a step and recurses.</p><pre><code>ancestor(A, D) :- parent(A, D).
+ancestor(A, D) :- parent(A, X), ancestor(X, D).</code></pre><p>The first clause is the base case: a parent is an ancestor. The second says A is an ancestor of D if A is a parent of somebody who is an ancestor of D.</p><pre><code>?- ancestor(esther, D).
+D = hannah ;
+D = isaac ;
+D = lars ;
+D = maja ;
+D = nils </code></pre><p>The order is worth reading twice. Both of esther's children come first, because the base-case clause is tried before the recursive one. Only when those are exhausted does Prolog take a step down and start again.</p><h3>The mistake everybody makes once</h3><p>Write the recursive call first and you get a program that never answers:</p><pre><code>ancestor(A, D) :- ancestor(A, X), parent(X, D).   % do not do this
+ancestor(A, D) :- parent(A, D).</code></pre><p>To prove <code>ancestor(esther, D)</code>, Prolog must first prove <code>ancestor(esther, X)</code> — which sends it to the same clause, which asks the same thing again. It never reaches a fact. The interpreter will sit there consuming memory until you interrupt it with Ctrl-C.</p><p>The cure is the discipline above: <strong>make progress before you recurse</strong>. In the working version the recursive clause consumes a <code>parent</code> step first, so each call is asked about someone further down the tree, and the questions eventually run out.</p><ol class="task"><li><p>Using <code>ancestor/2</code>, ask who all of lars's ancestors are. Which direction of the relation is that?</p></li><li><p>Write <code>descendant/2</code> in terms of <code>ancestor/2</code>.</p></li></ol><details class="ex"><summary>Solutions</summary><div class="ex-body"><pre><code>?- ancestor(A, lars).
+A = hannah ;
+A = esther 
+
+descendant(D, A) :- ancestor(A, D).</code></pre><p>The first is the same relation read the other way round — no new code needed, which is the pay-off for describing relations rather than writing functions.</p></div></details></section><section id="arithmetic"><h2>Arithmetic</h2><p>Numbers need one special word, because of what <code>=</code> really means. Unification matches structure, so this succeeds without computing anything:</p><pre><code>?- X = 3 + 4.
+X = 3+4.</code></pre><p>X now stands for the term <code>3+4</code> — a compound term with two arguments, exactly like <code>parent(esther, hannah)</code> has two. To evaluate it, ask for that specifically with <code>is</code>:</p><pre><code>?- X is 3 + 4.
+X = 7.</code></pre><p><code>is</code> evaluates the expression on its right and unifies the result with the left. Everything in the expression must already have a value:</p><pre><code>?- X is Y + 1.
+ERROR: Arguments are not sufficiently instantiated</code></pre><p>This is the one place where Prolog stops being able to run in several directions: <code>is</code> computes forwards only. Comparisons work the same way, evaluating both sides:</p><div class="scroll"><table class="mono1"><thead><tr><th>Written</th><th>True when</th></tr></thead><tbody><tr><td>X =:= Y</td><td>the two expressions have equal values (<code>2 + 2 =:= 4</code>)</td></tr><tr><td>X =\= Y</td><td>their values differ</td></tr><tr><td>X &lt; Y</td><td>less than; also <code>&gt;</code>, <code>=&lt;</code>, <code>&gt;=</code></td></tr><tr><td>X = Y</td><td>the two terms unify — no arithmetic at all</td></tr><tr><td>X == Y</td><td>the two terms are already identical, without unifying them</td></tr></tbody></table></div><p>Note <code>=&lt;</code> for "less than or equal", not <code>&lt;=</code>. In the tutorial file:</p><pre><code>age_in(Person, Year, Age) :-
+    born(Person, Born),
+    Age is Year - Born.
+
+?- age_in(hannah, 2026, A).
+A = 54.</code></pre><ol class="task"><li><p>Write <code>age_gap/3</code>, true when the gap between two people's birth years is a given number of years. Which arguments have to be bound when you call it?</p></li></ol><details class="ex"><summary>Solution</summary><div class="ex-body"><pre><code>age_gap(A, B, Gap) :-
+    born(A, YearA),
+    born(B, YearB),
+    Gap is YearB - YearA.
+
+?- age_gap(hannah, lars, G).
+G = 26.</code></pre><p>A and B must be bound to people, because <code>is</code> needs both years before it can subtract. <code>Gap</code> is the one argument that may be a variable.</p></div></details></section><section id="errors"><h2>When things go wrong</h2><p>Four messages account for most of what a beginner sees.</p><div class="scroll"><table class=""><thead><tr><th>Message</th><th>What happened</th></tr></thead><tbody><tr><td>Unknown procedure: parnet/2</td><td>A name Prolog has never heard of — nearly always a typo, or a file that was not loaded. Check the spelling and the argument count.</td></tr><tr><td>Arguments are not sufficiently instantiated</td><td>Something needed a value and got a blank. Usually <code>is</code> with an unbound variable on the right.</td></tr><tr><td>Syntax error: operator expected</td><td>Most often a missing full stop at the end of a line, or an unclosed bracket or quote.</td></tr><tr><td>false.</td><td>Not an error at all: Prolog could not prove what you asked. Check your facts, and check the argument order — <code>parent(lars, hannah)</code> is a different claim from <code>parent(hannah, lars)</code>.</td></tr></tbody></table></div><aside class="note note-try"><span class="note-tag">A useful habit</span><div>When a query surprises you, ask a simpler one. If <code>grandparent(esther, C)</code> gives nothing, try <code>parent(esther, P)</code> and then <code>parent(hannah, C)</code> by hand. The goal that fails first is where the mistake is.</div></aside></section><section id="exercises"><h2>Exercises</h2><p>These use <code>tutorial/level1.pl</code> and nothing beyond this page. Try them in the toplevel before opening the solutions.</p><ol class="task"><li><p>How many children does esther have? Ask a question that shows them, one at a time.</p></li><li><p>Write <code>parent_of_two/1</code>: someone with at least two different children.</p></li><li><p>Write <code>aunt_or_uncle/2</code>, true when the first person is a sibling of the second person's parent.</p></li><li><p>Write <code>same_generation/2</code> for people who share a parent, then say why this is not the same relation as <code>sibling/2</code>.</p></li><li><p>Without running it, predict the answers to <code>sibling(X, Y)</code> and their order. Then check.</p></li><li><p>Write <code>eldest_child/2</code>: a child of a given person who was born before all their other children. This one is harder than it looks — say what makes it awkward with only what you know so far.</p></li></ol><details class="ex"><summary>Solutions</summary><div class="ex-body"><p><strong>1.</strong> <code>parent(esther, C).</code> and press <code>;</code> — two children, hannah and isaac.</p><pre><code>% 2.
+parent_of_two(P) :- parent(P, A), parent(P, B), A \== B.
+
+% 3.
+aunt_or_uncle(A, C) :- parent(P, C), sibling(A, P).
+
+% 4.
+same_generation(A, B) :- parent(P, A), parent(P, B).</code></pre><p><strong>2.</strong> answers <code>esther</code> twice and <code>hannah</code> twice, for the same reason as exercise 5: the two children can be picked in either order. Getting each answer once needs <code>setof/3</code>, in Level 2.</p><p><strong>4.</strong> <code>same_generation/2</code> has no <code>A \== B</code>, so it also says everybody shares a generation with themselves. <code>sibling/2</code> excludes that.</p><p><strong>5.</strong> Four answers, in this order:</p><pre><code>?- sibling(X, Y).
+X = hannah,
+Y = isaac ;
+X = isaac,
+Y = hannah ;
+X = lars,
+Y = maja ;
+X = maja,
+Y = lars </code></pre><p>Each answer binds two variables, and the toplevel prints one binding per line.</p><p>Two things to notice. Esther's children are siblings too, which is easy to forget when you are thinking about the younger pair. And every pair comes out twice, once in each order, because the rule's two goals can match the two children either way round — nothing says the first argument has to come first in the file.</p><p><strong>6.</strong> The awkward part is "before all their other children": that is a claim about every other child, and so far you can only state claims about particular ones. It needs negation or a way of gathering all the answers at once — both of which are Level 2. A half-answer with what you have:</p><pre><code>% true when C is a child of P and no *known* younger sibling was found first --
+% correct only if you check every candidate yourself
+older_child(P, C, Other) :-
+    parent(P, C), parent(P, Other), C \== Other,
+    born(C, Y1), born(Other, Y2), Y1 &lt; Y2.</code></pre></div></details></section><section id="next"><h2>Where this goes next</h2><p>You now have the whole model: facts, rules, unification, and a search that backtracks. Everything else in Prolog is built from those four things.</p><p>Level 2 takes on the parts that make it practical:</p><ul><li><strong>Lists</strong> — the workhorse structure, and the recursion patterns that go with them.</li><li><strong>Collecting answers</strong> — <code>findall/3</code> and friends, for the questions that ask about *all* the solutions at once, like the eldest-child exercise above.</li><li><strong>Controlling the search</strong> — <code>\\+</code> for negation, and the cut for committing to a choice.</li><li><strong>Building your own data</strong> — terms as structures, and the operators that make them readable.</li></ul><p>Until then, the <a href="reference.html">language reference</a> lists every predicate this interpreter provides, with the modes each argument takes.</p></section>
+    <footer>Generated from the interpreter's own tables and checked against the
+    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
+    for the library written in Prolog.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

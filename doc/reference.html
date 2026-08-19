@@ -1,0 +1,523 @@
+<title>C Prolog Reference</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--ochre);
+  white-space: nowrap;
+  padding-top: 0.28rem;
+  flex: 0 0 auto;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  .note-tag { width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>C Prolog Reference</h1>
+    <span class="prompt">?- version 1.0</span>
+    <p>The language as this interpreter implements it: syntax, control, arithmetic, every builtin predicate, grammars, errors, and the places it parts company with the ISO standard.</p>
+    <nav class="docnav" aria-label="Documents"><a href="reference.html" aria-current="page">Language reference</a><a href="internals.html">Engine internals</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Contents</p>
+    <ol><li><a href="#notation">Reading this manual</a></li><li><a href="#running">Running the interpreter</a></li><li><a href="#syntax">Syntax</a></li><li><a href="#operators">Operators</a></li><li><a href="#terms">Terms and the standard order</a></li><li><a href="#control">Control constructs</a></li><li><a href="#arithmetic">Arithmetic</a></li><li><a href="#builtins">Builtin predicates</a></li><li><ol class="sub"><li><a href="#g-testing-the-type-of-a-term">Testing the type of a term</a></li><li><a href="#g-unification-and-comparison">Unification and comparison</a></li><li><a href="#g-constructing-and-inspecting-terms">Constructing and inspecting terms</a></li><li><a href="#g-atoms-numbers-and-text">Atoms, numbers and text</a></li><li><a href="#g-finding-all-solutions">Finding all solutions</a></li><li><a href="#g-sorting">Sorting</a></li><li><a href="#g-lists">Lists</a></li><li><a href="#g-control-library">Control (library)</a></li><li><a href="#g-the-database">The database</a></li><li><a href="#g-writing-terms">Writing terms</a></li><li><a href="#g-formatted-output">Formatted output</a></li><li><a href="#g-reading-terms-and-streams">Reading terms and streams</a></li><li><a href="#g-loading-flags-and-the-system">Loading, flags and the system</a></li></ol></li><li><a href="#dcg">Grammars</a></li><li><a href="#errors">Exceptions and errors</a></li><li><a href="#flags">Flags</a></li><li><a href="#limits">Deviations and limits</a></li></ol>
+  </nav>
+  <main>
+    <section id="notation"><h2>Reading this manual</h2><p>This is the reference for C Prolog, a Prolog interpreter written in C99. It describes the language the interpreter actually implements: every predicate, operator, arithmetic function and directive listed here was checked against the running system, and anything the interpreter does not provide is listed under Deviations and limits at the end.</p><p>Predicate entries give the argument modes in the usual notation:</p><div class="scroll"><table class="mono1"><thead><tr><th>Mode</th><th>Meaning</th></tr></thead><tbody><tr><td>+Arg</td><td>Input. Must be instantiated when the predicate is called.</td></tr><tr><td>-Arg</td><td>Output. Normally unbound at call time; the predicate binds it.</td></tr><tr><td>?Arg</td><td>Either. May be bound or unbound, and the predicate works both ways.</td></tr><tr><td>@Arg</td><td>Input that is inspected but never bound.</td></tr><tr><td>:Goal</td><td>A goal, called by the predicate.</td></tr></tbody></table></div><p>Predicates whose name begins with <code>$</code> are interpreter internals used by the bootstrap library. They are not part of the language and may change.</p></section><section id="running"><h2>Running the interpreter</h2><p>The interpreter is a single executable. Given files, it loads them; given <code>-g</code>, it runs a goal and exits; given neither, it starts the interactive toplevel.</p><pre><code>prolog [options] [file ...]
+
+  -g, --goal GOAL   run GOAL after loading the files
+  -t, --top         enter the toplevel even after -g
+  -q, --quiet       do not print the banner
+  -v, --version     print the version and exit
+  -h, --help        print the usage message</code></pre><p>Several <code>-g</code> options may be given; they run in order. A file name may omit the <code>.pl</code> extension, and may be written in path notation, so <code>[examples/family]</code> and <code>consult('examples/family.pl')</code> load the same file.</p><h3>The toplevel</h3><p>The toplevel reads a goal terminated by a full stop and prints the bindings of the named variables in the query, or <code>true.</code> when there are none and <code>false.</code> when the goal has no solution.</p><pre><code>?- append(X, Y, [a,b]).
+X = [],
+Y = [a,b] ;
+X = [a],
+Y = [b] ;
+X = [a,b],
+Y = [] ;
+false.</code></pre><div class="scroll"><table class=""><thead><tr><th>Key</th><th>Effect</th></tr></thead><tbody><tr><td>;  or  space</td><td>Ask for the next solution.</td></tr><tr><td>return</td><td>Accept this solution and return to the prompt.</td></tr><tr><td>.  or  a</td><td>Stop enumerating.</td></tr><tr><td>Ctrl-D</td><td>Leave the interpreter, like halt.</td></tr></tbody></table></div><p>Answers are written with <code>quoted(true)</code> and a depth limit of 100, so a binding to a very large term prints as a truncated term ending in <code>|...</code>. Use <code>write/1</code> or <code>print/1</code> inside the goal to see it in full.</p><h3>Loading programs</h3><p>A file is a sequence of clauses and directives. A directive <code>:- Goal.</code> is run as soon as it is read, which is how operators and flags take effect for the rest of the file. Clauses for a predicate need not be contiguous, and loading a file again adds its clauses to those already there rather than replacing them.</p><p><code>initialization(Goal)</code> defers <code>Goal</code> until every file named on the command line has been loaded, which is the usual way to write a script:</p><pre><code>:- initialization(main).
+
+main :-
+    format("hello~n"),
+    halt.</code></pre><h3>Exit status</h3><div class="scroll"><table class=""><thead><tr><th>Situation</th><th>Status</th></tr></thead><tbody><tr><td>Normal exit, or halt/0</td><td>0</td></tr><tr><td>halt(N)</td><td>N</td></tr><tr><td>A -g goal raised an uncaught exception</td><td>1</td></tr><tr><td>A file named on the command line could not be opened</td><td>1</td></tr><tr><td>A -g goal failed</td><td>0, with a warning on standard error</td></tr></tbody></table></div></section><section id="syntax"><h2>Syntax</h2><h3>Terms</h3><p>Every piece of Prolog data is a term: a variable, an atom, an integer, a float, or a compound term. Lists and strings are compound terms in disguise.</p><div class="scroll"><table class="mono2"><thead><tr><th>Term</th><th>Written as</th></tr></thead><tbody><tr><td>Variable</td><td>X, Value, _rest, or _ for an anonymous variable</td></tr><tr><td>Atom</td><td>foo, [], !, ;, +, the empty atom '', or any quoted text</td></tr><tr><td>Integer</td><td>42, -7, 0x1f, 0o17, 0b1011, 0'a, 1_000_000</td></tr><tr><td>Float</td><td>3.14, -0.5, 6.02e23, 1.0e-9</td></tr><tr><td>Compound</td><td>point(1,2), a+b, [H|T], {a,b}</td></tr></tbody></table></div><h3>Atoms</h3><p>An atom is written as a lowercase letter followed by letters, digits and underscores; as a sequence of the symbol characters <code>+ - * / \\ ^ &lt; &gt; = ~ : . ? @ # &amp; $</code>; as one of the solo atoms <code>[] {} ! ;</code>; or as any text in single quotes. Inside quotes, a doubled quote <code>''</code> stands for one quote and the escape sequences below apply.</p><div class="scroll"><table class="mono1"><thead><tr><th>Escape</th><th>Meaning</th></tr></thead><tbody><tr><td>\a</td><td>alert (7)</td></tr><tr><td>\b</td><td>backspace (8)</td></tr><tr><td>\f</td><td>form feed (12)</td></tr><tr><td>\n</td><td>newline (10)</td></tr><tr><td>\r</td><td>return (13)</td></tr><tr><td>\t</td><td>tab (9)</td></tr><tr><td>\v</td><td>vertical tab (11)</td></tr><tr><td>\e</td><td>escape (27)</td></tr><tr><td>\s</td><td>space (32)</td></tr><tr><td>\0</td><td>null; \NNN\ is any octal code</td></tr><tr><td>\xHH\</td><td>hexadecimal character code</td></tr><tr><td>\\  \'  \"  \`</td><td>the character itself</td></tr><tr><td>\ at end of line</td><td>line continuation, produces nothing</td></tr></tbody></table></div><h3>Numbers</h3><p>Integers are 64-bit and signed. Besides decimal, they may be written in hexadecimal (<code>0x</code>), octal (<code>0o</code>) or binary (<code>0b</code>), and underscores may separate digit groups. The form <code>0'c</code> is the character code of <code>c</code>, so <code>0'a</code> is 97; escape sequences work there too, and <code>0'''</code> is the quote character.</p><p>A float needs a digit on both sides of the point: <code>1.0</code>, not <code>1.</code> — and <code>X = 1.</code> reads as the integer 1 followed by the end of the clause. An exponent may follow, as in <code>1.5e10</code>.</p><h3>Strings</h3><p>Text in double quotes is read according to the <code>double_quotes</code> flag, whose default is <code>codes</code>. There is no separate string type.</p><div class="scroll"><table class="mono1"><thead><tr><th>Flag value</th><th>"ab" reads as</th></tr></thead><tbody><tr><td>codes (default)</td><td>[97,98], a list of character codes</td></tr><tr><td>chars</td><td>[a,b], a list of one-character atoms</td></tr><tr><td>atom</td><td>the atom 'ab'</td></tr></tbody></table></div><p>Text in back quotes is always a code list, whatever the flag says. Because the flag is consulted while reading, changing it affects the clauses that follow the directive, not the one it appears in.</p><h3>Lists and curly terms</h3><p><code>[a,b,c]</code> is shorthand for <code>'.'(a,'.'(b,'.'(c,[])))</code>, and <code>[H|T]</code> is <code>'.'(H,T)</code>. The empty list <code>[]</code> is an atom, not a compound term. <code>{a,b}</code> is shorthand for <code>{}((a,b))</code> and is mostly used in grammar rules.</p><h3>Comments</h3><p><code>%</code> starts a comment that runs to the end of the line; <code>/*</code> and <code>*/</code> bracket a comment that may span lines. Comments count as layout, so they may appear anywhere between tokens.</p><h3>Clauses and directives</h3><p>A clause is <code>Head :- Body.</code> or, for a fact, <code>Head.</code>; a directive is <code>:- Goal.</code> or <code>?- Goal.</code>; a grammar rule is <code>Head --&gt; Body.</code>. Every one ends with a full stop: a <code>.</code> followed by layout or end of file. That is why <code>foo. bar.</code> on one line is two clauses but <code>X = a.b</code> is not — there the dot is an ordinary symbol character.</p><aside class="note note-impl"><span class="note-tag">Reading errors</span><div>A clause with a syntax error is reported on standard error and skipped; loading continues with the next clause, so one bad clause does not stop a file from loading.</div></aside></section><section id="operators"><h2>Operators</h2><p>An operator lets a compound term be written in infix, prefix or postfix position. It has a priority from 1 to 1200 — lower binds tighter — and a type that says where the arguments sit and how they associate: <code>f</code> marks the operator, <code>x</code> an argument of strictly lower priority, <code>y</code> an argument of the same priority or lower.</p><div class="scroll"><table class="ops"><thead><tr><th>Priority</th><th>Type</th><th>Operators</th></tr></thead><tbody><tr><td>1200</td><td>xfx</td><td>:-   --&gt;</td></tr><tr><td>1200</td><td>fx</td><td>:-   ?-</td></tr><tr><td>1100</td><td>xfy</td><td>;    |</td></tr><tr><td>1050</td><td>xfy</td><td>-&gt;   *-&gt;</td></tr><tr><td>1000</td><td>xfy</td><td>,</td></tr><tr><td>990</td><td>xfx</td><td>:=</td></tr><tr><td>900</td><td>fy</td><td>\+</td></tr><tr><td>700</td><td>xfx</td><td>=   \=   ==   \==   =@=   \=@=   @&lt;   @&gt;   @=&lt;   @&gt;=   =..   is   =:=   =\=   &lt;   &gt;   =&lt;   &gt;=   as   &gt;:&lt;   :&lt;</td></tr><tr><td>600</td><td>xfy</td><td>:</td></tr><tr><td>500</td><td>yfx</td><td>+   -   /\   \/   xor</td></tr><tr><td>400</td><td>yfx</td><td>*   /   //   rem   mod   div   divmod   &lt;&lt;   &gt;&gt;</td></tr><tr><td>200</td><td>xfx</td><td>**</td></tr><tr><td>200</td><td>xfy</td><td>^</td></tr><tr><td>200</td><td>fy</td><td>-   +   \</td></tr><tr><td>100</td><td>yfx</td><td>.</td></tr><tr><td>1</td><td>fx</td><td>$</td></tr></tbody></table></div><p>So <code>a-b-c</code> is <code>(a-b)-c</code> because <code>-</code> is <code>yfx</code>, while <code>a^b^c</code> is <code>a^(b^c)</code> because <code>^</code> is <code>xfy</code>, and <code>a = b = c</code> is a syntax error because <code>=</code> is <code>xfx</code>. An argument of a compound term or an element of a list has a maximum priority of 999, which is why a term containing <code>,</code> must be parenthesised there: <code>f((a,b))</code>.</p><p><code>|</code> used as an infix operator in a body is read as <code>;</code>. Operators are ordinary atoms, so <code>X = (+)</code> and <code>Y = -(1,2)</code> are both fine.</p><div class="preds"><div class="pred" data-key="op(+priority, +type, +name) defines name as an operator, or a list of names in one call. priority 0 removes the definition. type is one of xfx, xfy, yfx, fy, fx, xf, yf. redefining `,` is not allowed."><code class="sig">op(<span class="mode">+</span>Priority, <span class="mode">+</span>Type, <span class="mode">+</span>Name)</code><div class="pdesc">Defines Name as an operator, or a list of names in one call. Priority 0 removes the definition. Type is one of xfx, xfy, yfx, fy, fx, xf, yf. Redefining <code>,</code> is not allowed.</div></div><div class="pred" data-key="current_op(?priority, ?type, ?name) enumerates the operators currently defined, on backtracking."><code class="sig">current_op(<span class="mode">?</span>Priority, <span class="mode">?</span>Type, <span class="mode">?</span>Name)</code><div class="pdesc">Enumerates the operators currently defined, on backtracking.</div></div></div><aside class="note note-impl"><span class="note-tag">Directives run while reading</span><div>op/3 takes effect for the clauses read after it, so an operator used in a file must be declared by a directive earlier in that file.</div></aside></section><section id="terms"><h2>Terms and the standard order</h2><p>Terms are ordered by a total order used by the comparison predicates, by <code>sort/2</code> and <code>msort/2</code>, and by <code>setof/3</code>:</p><pre><code>Var  &lt;  Number  &lt;  Atom  &lt;  Compound</code></pre><ul><li>Variables come first, ordered by age — the order is stable within a run but carries no other meaning.</li><li>Numbers compare by value, so <code>1 @&lt; 1.5 @&lt; 2</code>. When an integer and a float are equal in value the float comes first, so <code>1.0 @&lt; 1</code>.</li><li>Atoms compare alphabetically by their text.</li><li>Compound terms compare first by arity, then by name, then by their arguments left to right. Because a list is a compound term, <code>f(x) @&lt; [a]</code> — arity 1 before arity 2.</li></ul><p>Two terms are identical (<code>==</code>) when they have the same structure and the same variables in the same places; they are variants (<code>=@=</code>) when they are the same up to a consistent renaming of variables, so <code>f(A,B) =@= f(X,Y)</code> holds but <code>f(A,A) =@= f(X,Y)</code> does not.</p><aside class="note note-impl"><span class="note-tag">Cyclic terms</span><div>Unification does not do an occurs check, so <code>X = f(X)</code> succeeds and builds a cyclic term. Comparing, copying or printing one will not terminate. Use unify_with_occurs_check/2 where that matters.</div></aside></section><section id="control"><h2>Control constructs</h2><p>These are recognised by the solver itself rather than being ordinary predicates, which is what lets cut and exceptions work across them.</p><div class="preds"><div class="pred" data-key="true succeeds once."><code class="sig">true</code><div class="pdesc">Succeeds once.</div></div><div class="pred" data-key="fail fails. `false` is the same."><code class="sig">fail</code><div class="pdesc">Fails. <code>false</code> is the same.</div></div><div class="pred" data-key="(:goal1, :goal2) conjunction: both goals must succeed."><code class="sig">(<span class="mode">:</span>Goal1, <span class="mode">:</span>Goal2)</code><div class="pdesc">Conjunction: both goals must succeed.</div></div><div class="pred" data-key="(:goal1 ; :goal2) disjunction: tries goal1, and on backtracking goal2."><code class="sig">(<span class="mode">:</span>Goal1 ; <span class="mode">:</span>Goal2)</code><div class="pdesc">Disjunction: tries Goal1, and on backtracking Goal2.</div></div><div class="pred" data-key="(:cond -&gt; :then ; :else) if-then-else. if cond has a solution, its first one is committed to and then runs; otherwise else runs. without an else branch, `(cond -&gt; then)` fails when cond fails."><code class="sig">(<span class="mode">:</span>Cond -&gt; <span class="mode">:</span>Then ; <span class="mode">:</span>Else)</code><div class="pdesc">If-then-else. If Cond has a solution, its first one is committed to and Then runs; otherwise Else runs. Without an else branch, <code>(Cond -&gt; Then)</code> fails when Cond fails.</div></div><div class="pred" data-key="(:cond *-&gt; :then ; :else) soft cut. runs then for every solution of cond; runs else only if cond has no solution at all."><code class="sig">(<span class="mode">:</span>Cond *-&gt; <span class="mode">:</span>Then ; <span class="mode">:</span>Else)</code><div class="pdesc">Soft cut. Runs Then for every solution of Cond; runs Else only if Cond has no solution at all.</div></div><div class="pred" data-key="\+ :goal true when goal has no solution. bindings made while proving goal are undone. `not/1` is a synonym."><code class="sig">\+ <span class="mode">:</span>Goal</code><div class="pdesc">True when Goal has no solution. Bindings made while proving Goal are undone. <code>not/1</code> is a synonym.</div></div><div class="pred" data-key="! cut: commits to the clause and to every choice made since the parent goal was called."><code class="sig">!</code><div class="pdesc">Cut: commits to the clause and to every choice made since the parent goal was called.</div></div><div class="pred" data-key="call(:goal) calls goal. a cut inside is local to the call."><code class="sig">call(<span class="mode">:</span>Goal)</code><div class="pdesc">Calls Goal. A cut inside is local to the call.</div></div><div class="pred" data-key="call(:goal, +extra, ...) appends the extra arguments to goal and calls it, so `call(plus(1), 2, x)` calls `plus(1,2,x)`. the standard defines call/2 to call/8; any number of arguments is accepted here."><code class="sig">call(<span class="mode">:</span>Goal, <span class="mode">+</span>Extra, ...)</code><div class="pdesc">Appends the extra arguments to Goal and calls it, so <code>call(plus(1), 2, X)</code> calls <code>plus(1,2,X)</code>. The standard defines call/2 to call/8; any number of arguments is accepted here.</div></div><div class="pred" data-key="catch(:goal, ?catcher, :recovery) runs goal; if it throws a ball that unifies with catcher, undoes the bindings and runs recovery instead. other balls pass through."><code class="sig">catch(<span class="mode">:</span>Goal, <span class="mode">?</span>Catcher, <span class="mode">:</span>Recovery)</code><div class="pdesc">Runs Goal; if it throws a ball that unifies with Catcher, undoes the bindings and runs Recovery instead. Other balls pass through.</div></div><div class="pred" data-key="throw(+ball) throws ball to the nearest matching catch/3. the ball is copied, so it survives the unwinding."><code class="sig">throw(<span class="mode">+</span>Ball)</code><div class="pdesc">Throws Ball to the nearest matching catch/3. The ball is copied, so it survives the unwinding.</div></div></div><h3>How cut behaves</h3><p>A cut removes the choice points created since its clause was entered, including the clause alternatives of the predicate it appears in. It is transparent to <code>,</code> <code>;</code> <code>-&gt;</code> — a cut in either branch of a disjunction cuts the enclosing clause — and opaque to <code>call/1</code>, <code>\+/1</code>, <code>findall/3</code> and the other predicates that call a goal, where it only cuts inside that goal.</p><pre><code>first(X) :- member(X, [1,2,3]), !.     % one solution: X = 1
+all(X)   :- member(X, [1,2,3]).        % three solutions
+
+?- findall(X, (member(X,[1,2,3]), call(!)), L).
+L = [1,2,3].                            % the cut is local to call/1</code></pre><aside class="note note-impl"><span class="note-tag">Cut in a condition</span><div>A cut in the condition of if-then-else is local to the condition, as the condition is already committed to its first solution.</div></aside></section><section id="arithmetic"><h2>Arithmetic</h2><p>Arithmetic happens only where a predicate asks for it: <code>is/2</code>, the arithmetic comparisons, and a few library predicates. Elsewhere <code>2+3</code> is just a term. Evaluation is recursive over the expression, and an unbound variable or an unknown function raises an error rather than failing.</p><div class="preds"><div class="pred" data-key="-number is +expr evaluates expr and unifies the result with number."><code class="sig">-Number is <span class="mode">+</span>Expr</code><div class="pdesc">Evaluates Expr and unifies the result with Number.</div></div><div class="pred" data-key="+expr1 =:= +expr2 the two expressions evaluate to equal numbers."><code class="sig">+Expr1 =:= <span class="mode">+</span>Expr2</code><div class="pdesc">The two expressions evaluate to equal numbers.</div></div><div class="pred" data-key="+expr1 =\= +expr2 they evaluate to different numbers."><code class="sig">+Expr1 =\= <span class="mode">+</span>Expr2</code><div class="pdesc">They evaluate to different numbers.</div></div><div class="pred" data-key="+expr1 &lt; +expr2 less than; also `&gt;`, `=&lt;`, `&gt;=`."><code class="sig">+Expr1 &lt; <span class="mode">+</span>Expr2</code><div class="pdesc">Less than; also <code>&gt;</code>, <code>=&lt;</code>, <code>&gt;=</code>.</div></div></div><p>Integers are 64-bit; mixing an integer and a float in an operation gives a float. Comparisons convert as needed, so <code>1 =:= 1.0</code> is true even though <code>1 == 1.0</code> is false.</p><h3>Functions of one argument</h3><div class="scroll"><table class="mono1"><thead><tr><th>Function</th><th>Result</th></tr></thead><tbody><tr><td>-X   +X   abs(X)</td><td>Negation, identity, absolute value.</td></tr><tr><td>sign(X)</td><td>Sign as -1, 0 or 1; a float argument gives a float.</td></tr><tr><td>min(X,Y)   max(X,Y)</td><td>Smaller or larger of two numbers; returns one argument unchanged, and the first when they compare equal.</td></tr><tr><td>sqrt(X)   exp(X)   log(X)   log2(X)</td><td>Float results; log of a non-positive number is an evaluation error.</td></tr><tr><td>sin cos tan asin acos atan</td><td>Trigonometry in radians, float results.</td></tr><tr><td>sinh cosh tanh asinh acosh atanh</td><td>Hyperbolic functions.</td></tr><tr><td>float(X)</td><td>X as a float.</td></tr><tr><td>integer(X)</td><td>X rounded to the nearest integer.</td></tr><tr><td>float_integer_part(X)   float_fractional_part(X)</td><td>The two halves of a float, both floats.</td></tr><tr><td>truncate(X)   round(X)   ceiling(X)   floor(X)</td><td>Float to integer: toward zero, to nearest (halves away from zero), up, down.</td></tr><tr><td>\ X</td><td>Bitwise complement.</td></tr><tr><td>msb(X)</td><td>Position of the most significant bit of a positive integer.</td></tr><tr><td>succ(X)</td><td>X + 1, for integers.</td></tr><tr><td>random(X)</td><td>A random integer in 0 .. X-1.</td></tr><tr><td>random_float</td><td>A random float in 0.0 .. 1.0.</td></tr></tbody></table></div><h3>Functions of two arguments</h3><div class="scroll"><table class="mono1"><thead><tr><th>Function</th><th>Result</th></tr></thead><tbody><tr><td>X + Y   X - Y   X * Y</td><td>Integer when both arguments are integers, else float. Integer overflow raises an evaluation error.</td></tr><tr><td>X / Y</td><td>Integer division when both are integers and the division is exact, otherwise float division. Dividing by zero raises an evaluation error.</td></tr><tr><td>X // Y</td><td>Integer division truncating toward zero.</td></tr><tr><td>X div Y</td><td>Integer division truncating toward negative infinity.</td></tr><tr><td>X mod Y</td><td>Remainder with the sign of the divisor: <code>-7 mod 2</code> is 1.</td></tr><tr><td>X rem Y</td><td>Remainder with the sign of the dividend: <code>-7 rem 2</code> is -1.</td></tr><tr><td>X ** Y</td><td>Power. Integer when both are integers and Y is not negative, otherwise float.</td></tr><tr><td>X ^ Y</td><td>Power, integers only when both are integers: a negative exponent on an integer base other than 1 or -1 is a type error.</td></tr><tr><td>X &gt;&gt; Y   X &lt;&lt; Y</td><td>Arithmetic shift, integers only.</td></tr><tr><td>X /\ Y   X \/ Y   xor(X,Y)</td><td>Bitwise and, or, exclusive or.</td></tr><tr><td>gcd(X,Y)</td><td>Greatest common divisor.</td></tr><tr><td>atan2(Y,X)   atan(Y,X)</td><td>Angle of the point (X,Y) in radians.</td></tr><tr><td>copysign(X,Y)</td><td>Magnitude of X with the sign of Y.</td></tr><tr><td>log(X,Y)</td><td>Logarithm of Y in base X.</td></tr><tr><td>min(X,Y)   max(X,Y)</td><td>As above.</td></tr></tbody></table></div><h3>Constants</h3><div class="scroll"><table class="mono1"><thead><tr><th>Constant</th><th>Value</th></tr></thead><tbody><tr><td>pi   e   epsilon</td><td>The usual constants as floats.</td></tr><tr><td>inf   infinite   nan</td><td>Float infinity and not-a-number.</td></tr><tr><td>max_tagged_integer   min_tagged_integer</td><td>The largest and smallest integer.</td></tr><tr><td>random</td><td>A random float in 0.0 .. 1.0.</td></tr><tr><td>cputime</td><td>Processor time used, in seconds, as a float.</td></tr><tr><td>realtime</td><td>Wall clock time as an integer, in seconds since the epoch.</td></tr><tr><td>[c]</td><td>A one-element code list evaluates to that character code, so <code>X is "a"</code> gives 97.</td></tr></tbody></table></div><aside class="note note-impl"><span class="note-tag">No bignums</span><div>Integer results that do not fit in 64 bits raise <code>evaluation_error(int_overflow)</code> rather than growing, and there are no rational numbers.</div></aside></section><section id="builtins"><h2>Builtin predicates</h2><p>The predicates below are always available. Those defined in C and those written in the bootstrap library are not distinguished here, because they behave the same way; both can be shadowed only by the library ones, since redefining a built-in predicate written in C raises a permission error.</p><div class="filter"><label class="visually-hidden" for="pfilter">Filter predicates</label><input id="pfilter" type="search" placeholder="Filter predicates: try sort, atom_, findall" autocomplete="off" spellcheck="false"><span class="filter-count" id="pcount"></span></div><div class="preds"><h4 class="pred-group" id="g-testing-the-type-of-a-term">Testing the type of a term</h4><div class="pred" data-key="var(@term) term is an unbound variable."><code class="sig">var(<span class="mode">@</span>Term)</code><div class="pdesc">Term is an unbound variable.</div></div><div class="pred" data-key="nonvar(@term) term is not an unbound variable."><code class="sig">nonvar(<span class="mode">@</span>Term)</code><div class="pdesc">Term is not an unbound variable.</div></div><div class="pred" data-key="atom(@term) term is an atom, including [] and {}."><code class="sig">atom(<span class="mode">@</span>Term)</code><div class="pdesc">Term is an atom, including [] and {}.</div></div><div class="pred" data-key="number(@term) term is an integer or a float."><code class="sig">number(<span class="mode">@</span>Term)</code><div class="pdesc">Term is an integer or a float.</div></div><div class="pred" data-key="integer(@term) term is an integer."><code class="sig">integer(<span class="mode">@</span>Term)</code><div class="pdesc">Term is an integer.</div></div><div class="pred" data-key="float(@term) term is a float."><code class="sig">float(<span class="mode">@</span>Term)</code><div class="pdesc">Term is a float.</div></div><div class="pred" data-key="atomic(@term) term is an atom or a number."><code class="sig">atomic(<span class="mode">@</span>Term)</code><div class="pdesc">Term is an atom or a number.</div></div><div class="pred" data-key="compound(@term) term has a functor and at least one argument."><code class="sig">compound(<span class="mode">@</span>Term)</code><div class="pdesc">Term has a functor and at least one argument.</div></div><div class="pred" data-key="callable(@term) term is an atom or a compound term."><code class="sig">callable(<span class="mode">@</span>Term)</code><div class="pdesc">Term is an atom or a compound term.</div></div><div class="pred" data-key="is_list(@term) term is a proper list, ending in []."><code class="sig">is_list(<span class="mode">@</span>Term)</code><div class="pdesc">Term is a proper list, ending in [].</div></div><div class="pred" data-key="ground(@term) term contains no unbound variables."><code class="sig">ground(<span class="mode">@</span>Term)</code><div class="pdesc">Term contains no unbound variables.</div></div><div class="pred" data-key="must_be(+type, @term) succeeds if term is of type, otherwise raises a type or instantiation error. types: integer, nonneg, positive_integer, float, number, atom, atomic, callable, var, nonvar, boolean, list."><code class="sig">must_be(<span class="mode">+</span>Type, <span class="mode">@</span>Term)</code><div class="pdesc">Succeeds if Term is of Type, otherwise raises a type or instantiation error. Types: integer, nonneg, positive_integer, float, number, atom, atomic, callable, var, nonvar, boolean, list.</div></div><h4 class="pred-group" id="g-unification-and-comparison">Unification and comparison</h4><div class="pred" data-key="?term1 = ?term2 unifies the two terms. no occurs check."><code class="sig">?Term1 = <span class="mode">?</span>Term2</code><div class="pdesc">Unifies the two terms. No occurs check.</div></div><div class="pred" data-key="?term1 \= ?term2 the terms do not unify; makes no bindings."><code class="sig">?Term1 \= <span class="mode">?</span>Term2</code><div class="pdesc">The terms do not unify; makes no bindings.</div></div><div class="pred" data-key="unify_with_occurs_check(?t1, ?t2) unifies with an occurs check, so no cyclic term can be built."><code class="sig">unify_with_occurs_check(<span class="mode">?</span>T1, <span class="mode">?</span>T2)</code><div class="pdesc">Unifies with an occurs check, so no cyclic term can be built.</div></div><div class="pred" data-key="@term1 == @term2 the terms are identical, without unifying anything."><code class="sig">@Term1 == <span class="mode">@</span>Term2</code><div class="pdesc">The terms are identical, without unifying anything.</div></div><div class="pred" data-key="@term1 \== @term2 the terms are not identical."><code class="sig">@Term1 \== <span class="mode">@</span>Term2</code><div class="pdesc">The terms are not identical.</div></div><div class="pred" data-key="@term1 =@= @term2 the terms are variants: identical up to variable renaming."><code class="sig">@Term1 =@= <span class="mode">@</span>Term2</code><div class="pdesc">The terms are variants: identical up to variable renaming.</div></div><div class="pred" data-key="@term1 \=@= @term2 the terms are not variants."><code class="sig">@Term1 \=@= <span class="mode">@</span>Term2</code><div class="pdesc">The terms are not variants.</div></div><div class="pred" data-key="@term1 @&lt; @term2 term1 comes before term2 in the standard order; also `@&gt;`, `@=&lt;`, `@&gt;=`."><code class="sig">@Term1 @&lt; <span class="mode">@</span>Term2</code><div class="pdesc">Term1 comes before Term2 in the standard order; also <code>@&gt;</code>, <code>@=&lt;</code>, <code>@&gt;=</code>.</div></div><div class="pred" data-key="compare(?order, @t1, @t2) order is one of `&lt;`, `=`, `&gt;`, according to the standard order."><code class="sig">compare(<span class="mode">?</span>Order, <span class="mode">@</span>T1, <span class="mode">@</span>T2)</code><div class="pdesc">Order is one of <code>&lt;</code>, <code>=</code>, <code>&gt;</code>, according to the standard order.</div></div><h4 class="pred-group" id="g-constructing-and-inspecting-terms">Constructing and inspecting terms</h4><div class="pred" data-key="functor(?term, ?name, ?arity) relates a term to its name and arity. with term unbound, builds a term with fresh arguments; an arity of 0 gives the atom name."><code class="sig">functor(<span class="mode">?</span>Term, <span class="mode">?</span>Name, <span class="mode">?</span>Arity)</code><div class="pdesc">Relates a term to its name and arity. With Term unbound, builds a term with fresh arguments; an arity of 0 gives the atom Name.</div></div><div class="pred" data-key="arg(+n, +term, ?arg) arg is the nth argument of term, counting from 1. fails if n is out of range."><code class="sig">arg(<span class="mode">+</span>N, <span class="mode">+</span>Term, <span class="mode">?</span>Arg)</code><div class="pdesc">Arg is the Nth argument of Term, counting from 1. Fails if N is out of range.</div></div><div class="pred" data-key="?term =.. ?list list is term's name followed by its arguments, so `f(a,b) =.. [f,a,b]`. an atomic term gives a one-element list."><code class="sig">?Term =.. <span class="mode">?</span>List</code><div class="pdesc">List is Term's name followed by its arguments, so <code>f(a,b) =.. [f,a,b]</code>. An atomic term gives a one-element list.</div></div><div class="pred" data-key="copy_term(+term, -copy) copy is term with all its variables replaced by fresh ones."><code class="sig">copy_term(<span class="mode">+</span>Term, <span class="mode">-</span>Copy)</code><div class="pdesc">Copy is Term with all its variables replaced by fresh ones.</div></div><div class="pred" data-key="term_variables(+term, -vars) vars are the variables of term, in the order they first appear."><code class="sig">term_variables(<span class="mode">+</span>Term, <span class="mode">-</span>Vars)</code><div class="pdesc">Vars are the variables of Term, in the order they first appear.</div></div><div class="pred" data-key="numbervars(+term, +start, -end) binds each variable in term to `'$var'(n)`, numbering from start. such terms print as a, b, ... under write/1 and print/1."><code class="sig">numbervars(<span class="mode">+</span>Term, <span class="mode">+</span>Start, <span class="mode">-</span>End)</code><div class="pdesc">Binds each variable in Term to <code>'$VAR'(N)</code>, numbering from Start. Such terms print as A, B, ... under write/1 and print/1.</div></div><div class="pred" data-key="setarg(+n, +term, +value) replaces the nth argument of term with value. the change is undone on backtracking."><code class="sig">setarg(<span class="mode">+</span>N, <span class="mode">+</span>Term, <span class="mode">+</span>Value)</code><div class="pdesc">Replaces the Nth argument of Term with Value. The change is undone on backtracking.</div></div><h4 class="pred-group" id="g-atoms-numbers-and-text">Atoms, numbers and text</h4><div class="pred" data-key="atom_length(+atomic, ?length) length is the number of characters in atomic, which may be an atom or a number. counts characters, not bytes."><code class="sig">atom_length(<span class="mode">+</span>Atomic, <span class="mode">?</span>Length)</code><div class="pdesc">Length is the number of characters in Atomic, which may be an atom or a number. Counts characters, not bytes.</div></div><div class="pred" data-key="atom_codes(?atom, ?codes) relates an atom or number to a list of character codes."><code class="sig">atom_codes(<span class="mode">?</span>Atom, <span class="mode">?</span>Codes)</code><div class="pdesc">Relates an atom or number to a list of character codes.</div></div><div class="pred" data-key="atom_chars(?atom, ?chars) relates an atom or number to a list of one-character atoms."><code class="sig">atom_chars(<span class="mode">?</span>Atom, <span class="mode">?</span>Chars)</code><div class="pdesc">Relates an atom or number to a list of one-character atoms.</div></div><div class="pred" data-key="char_code(?char, ?code) relates a one-character atom to its character code."><code class="sig">char_code(<span class="mode">?</span>Char, <span class="mode">?</span>Code)</code><div class="pdesc">Relates a one-character atom to its character code.</div></div><div class="pred" data-key="number_codes(?number, ?codes) relates a number to its text as codes; raises a syntax error if the text is not a number."><code class="sig">number_codes(<span class="mode">?</span>Number, <span class="mode">?</span>Codes)</code><div class="pdesc">Relates a number to its text as codes; raises a syntax error if the text is not a number.</div></div><div class="pred" data-key="number_chars(?number, ?chars) the same, with one-character atoms."><code class="sig">number_chars(<span class="mode">?</span>Number, <span class="mode">?</span>Chars)</code><div class="pdesc">The same, with one-character atoms.</div></div><div class="pred" data-key="atom_number(?atom, ?number) converts between an atom and a number, and fails quietly if the atom is not a number."><code class="sig">atom_number(<span class="mode">?</span>Atom, <span class="mode">?</span>Number)</code><div class="pdesc">Converts between an atom and a number, and fails quietly if the atom is not a number.</div></div><div class="pred" data-key="atom_concat(?a, ?b, ?c) c is the concatenation of a and b. with c bound and either a or b unbound, enumerates every split of c on backtracking."><code class="sig">atom_concat(<span class="mode">?</span>A, <span class="mode">?</span>B, <span class="mode">?</span>C)</code><div class="pdesc">C is the concatenation of A and B. With C bound and either A or B unbound, enumerates every split of C on backtracking.</div></div><div class="pred" data-key="sub_atom(+atom, ?before, ?len, ?after, ?sub) sub is the substring of atom with before characters before it, len characters long and after characters after. enumerates all substrings when unbound, and finds occurrences when sub is given."><code class="sig">sub_atom(<span class="mode">+</span>Atom, <span class="mode">?</span>Before, <span class="mode">?</span>Len, <span class="mode">?</span>After, <span class="mode">?</span>Sub)</code><div class="pdesc">Sub is the substring of Atom with Before characters before it, Len characters long and After characters after. Enumerates all substrings when unbound, and finds occurrences when Sub is given.</div></div><div class="pred" data-key="sub_string(+s, ?b, ?l, ?a, ?sub) a synonym for sub_atom/5."><code class="sig">sub_string(<span class="mode">+</span>S, <span class="mode">?</span>B, <span class="mode">?</span>L, <span class="mode">?</span>A, <span class="mode">?</span>Sub)</code><div class="pdesc">A synonym for sub_atom/5.</div></div><div class="pred" data-key="upcase_atom(+atom, -upper) upper is atom with ascii letters upper-cased."><code class="sig">upcase_atom(<span class="mode">+</span>Atom, <span class="mode">-</span>Upper)</code><div class="pdesc">Upper is Atom with ASCII letters upper-cased.</div></div><div class="pred" data-key="downcase_atom(+atom, -lower) lower is atom with ascii letters lower-cased."><code class="sig">downcase_atom(<span class="mode">+</span>Atom, <span class="mode">-</span>Lower)</code><div class="pdesc">Lower is Atom with ASCII letters lower-cased.</div></div><div class="pred" data-key="atomic_list_concat(+list, -atom) concatenates a list of atomics into atom."><code class="sig">atomic_list_concat(<span class="mode">+</span>List, <span class="mode">-</span>Atom)</code><div class="pdesc">Concatenates a list of atomics into Atom.</div></div><div class="pred" data-key="atomic_list_concat(?list, +sep, ?atom) joins list with sep between the parts. with list unbound, splits atom on sep instead."><code class="sig">atomic_list_concat(<span class="mode">?</span>List, <span class="mode">+</span>Sep, <span class="mode">?</span>Atom)</code><div class="pdesc">Joins List with Sep between the parts. With List unbound, splits Atom on Sep instead.</div></div><div class="pred" data-key="concat_atom(?list, ?atom) a synonym for atomic_list_concat/2, also with /3."><code class="sig">concat_atom(<span class="mode">?</span>List, <span class="mode">?</span>Atom)</code><div class="pdesc">A synonym for atomic_list_concat/2, also with /3.</div></div><div class="pred" data-key="term_to_atom(?term, ?atom) writes term to atom with quoting, or reads atom as a term when term is unbound."><code class="sig">term_to_atom(<span class="mode">?</span>Term, <span class="mode">?</span>Atom)</code><div class="pdesc">Writes Term to Atom with quoting, or reads Atom as a term when Term is unbound.</div></div><div class="pred" data-key="term_string(?term, ?atom) a synonym for term_to_atom/2."><code class="sig">term_string(<span class="mode">?</span>Term, <span class="mode">?</span>Atom)</code><div class="pdesc">A synonym for term_to_atom/2.</div></div><div class="pred" data-key="atom_to_term(+atom, -term, -bindings) reads atom as a term; bindings is a list of `name=var` for the named variables."><code class="sig">atom_to_term(<span class="mode">+</span>Atom, <span class="mode">-</span>Term, <span class="mode">-</span>Bindings)</code><div class="pdesc">Reads Atom as a term; Bindings is a list of <code>Name=Var</code> for the named variables.</div></div><h4 class="pred-group" id="g-finding-all-solutions">Finding all solutions</h4><div class="pred" data-key="findall(?template, :goal, -bag) bag holds a copy of template for every solution of goal, in order. succeeds with [] when there is none."><code class="sig">findall(<span class="mode">?</span>Template, <span class="mode">:</span>Goal, <span class="mode">-</span>Bag)</code><div class="pdesc">Bag holds a copy of Template for every solution of Goal, in order. Succeeds with [] when there is none.</div></div><div class="pred" data-key="findall(?template, :goal, -bag, +tail) as findall/3, but the list ends in tail rather than []."><code class="sig">findall(<span class="mode">?</span>Template, <span class="mode">:</span>Goal, <span class="mode">-</span>Bag, <span class="mode">+</span>Tail)</code><div class="pdesc">As findall/3, but the list ends in Tail rather than [].</div></div><div class="pred" data-key="findnsols(+n, ?template, :goal, -bag) as findall/3, but stops after n solutions."><code class="sig">findnsols(<span class="mode">+</span>N, <span class="mode">?</span>Template, <span class="mode">:</span>Goal, <span class="mode">-</span>Bag)</code><div class="pdesc">As findall/3, but stops after N solutions.</div></div><div class="pred" data-key="bagof(?template, :goal, -bag) like findall/3, but fails when there is no solution, and backtracks over the bindings of the free variables of goal, which group the results. `v^goal` marks v as not free."><code class="sig">bagof(<span class="mode">?</span>Template, <span class="mode">:</span>Goal, <span class="mode">-</span>Bag)</code><div class="pdesc">Like findall/3, but fails when there is no solution, and backtracks over the bindings of the free variables of Goal, which group the results. <code>V^Goal</code> marks V as not free.</div></div><div class="pred" data-key="setof(?template, :goal, -set) as bagof/3, with the result sorted and duplicates removed."><code class="sig">setof(<span class="mode">?</span>Template, <span class="mode">:</span>Goal, <span class="mode">-</span>Set)</code><div class="pdesc">As bagof/3, with the result sorted and duplicates removed.</div></div><div class="pred" data-key="aggregate_all(+spec, :goal, -result) aggregates over all solutions. spec is count, count(t), sum(e), max(e), min(e), bag(t) or set(t); max and min fail when there is no solution."><code class="sig">aggregate_all(<span class="mode">+</span>Spec, <span class="mode">:</span>Goal, <span class="mode">-</span>Result)</code><div class="pdesc">Aggregates over all solutions. Spec is count, count(T), sum(E), max(E), min(E), bag(T) or set(T); max and min fail when there is no solution.</div></div><div class="pred" data-key="forall(:cond, :action) action succeeds for every solution of cond. makes no bindings."><code class="sig">forall(<span class="mode">:</span>Cond, <span class="mode">:</span>Action)</code><div class="pdesc">Action succeeds for every solution of Cond. Makes no bindings.</div></div><div class="pred" data-key="^(?var, :goal) outside bagof/3 and setof/3, simply calls goal."><code class="sig">^(<span class="mode">?</span>Var, <span class="mode">:</span>Goal)</code><div class="pdesc">Outside bagof/3 and setof/3, simply calls Goal.</div></div><h4 class="pred-group" id="g-sorting">Sorting</h4><div class="pred" data-key="sort(+list, -sorted) sorts into the standard order and removes duplicates."><code class="sig">sort(<span class="mode">+</span>List, <span class="mode">-</span>Sorted)</code><div class="pdesc">Sorts into the standard order and removes duplicates.</div></div><div class="pred" data-key="msort(+list, -sorted) sorts into the standard order, keeping duplicates."><code class="sig">msort(<span class="mode">+</span>List, <span class="mode">-</span>Sorted)</code><div class="pdesc">Sorts into the standard order, keeping duplicates.</div></div><div class="pred" data-key="sort(+key, +order, +list, -sorted) sorts on argument key of each element — 0 means the whole element — with order one of `@&lt;`, `@=&lt;`, `@&gt;`, `@&gt;=`. the strict orders remove duplicate keys. the sort is stable."><code class="sig">sort(<span class="mode">+</span>Key, <span class="mode">+</span>Order, <span class="mode">+</span>List, <span class="mode">-</span>Sorted)</code><div class="pdesc">Sorts on argument Key of each element — 0 means the whole element — with Order one of <code>@&lt;</code>, <code>@=&lt;</code>, <code>@&gt;</code>, <code>@&gt;=</code>. The strict orders remove duplicate keys. The sort is stable.</div></div><div class="pred" data-key="keysort(+pairs, -sorted) sorts a list of `key-value` pairs by key only, keeping the original order of equal keys."><code class="sig">keysort(<span class="mode">+</span>Pairs, <span class="mode">-</span>Sorted)</code><div class="pdesc">Sorts a list of <code>Key-Value</code> pairs by key only, keeping the original order of equal keys.</div></div><div class="pred" data-key="predsort(:pred, +list, -sorted) sorts using `call(pred, order, a, b)`, which must bind order to `&lt;`, `=` or `&gt;`. elements compared `=` are dropped."><code class="sig">predsort(<span class="mode">:</span>Pred, <span class="mode">+</span>List, <span class="mode">-</span>Sorted)</code><div class="pdesc">Sorts using <code>call(Pred, Order, A, B)</code>, which must bind Order to <code>&lt;</code>, <code>=</code> or <code>&gt;</code>. Elements compared <code>=</code> are dropped.</div></div><h4 class="pred-group" id="g-lists">Lists</h4><div class="pred" data-key="append(?a, ?b, ?c) c is a followed by b. with c bound, enumerates every way of splitting it."><code class="sig">append(<span class="mode">?</span>A, <span class="mode">?</span>B, <span class="mode">?</span>C)</code><div class="pdesc">C is A followed by B. With C bound, enumerates every way of splitting it.</div></div><div class="pred" data-key="append(+listoflists, -list) concatenates a list of lists."><code class="sig">append(<span class="mode">+</span>ListOfLists, <span class="mode">-</span>List)</code><div class="pdesc">Concatenates a list of lists.</div></div><div class="pred" data-key="member(?elem, ?list) elem is a member of list; enumerates on backtracking."><code class="sig">member(<span class="mode">?</span>Elem, <span class="mode">?</span>List)</code><div class="pdesc">Elem is a member of List; enumerates on backtracking.</div></div><div class="pred" data-key="memberchk(?elem, +list) as member/2, but only the first solution."><code class="sig">memberchk(<span class="mode">?</span>Elem, <span class="mode">+</span>List)</code><div class="pdesc">As member/2, but only the first solution.</div></div><div class="pred" data-key="length(?list, ?length) length is the number of elements of list. builds a list of fresh variables when list is unbound, and enumerates lengths when both are unbound."><code class="sig">length(<span class="mode">?</span>List, <span class="mode">?</span>Length)</code><div class="pdesc">Length is the number of elements of List. Builds a list of fresh variables when List is unbound, and enumerates lengths when both are unbound.</div></div><div class="pred" data-key="reverse(+list, -reversed) reversed has the elements of list in reverse order."><code class="sig">reverse(<span class="mode">+</span>List, <span class="mode">-</span>Reversed)</code><div class="pdesc">Reversed has the elements of List in reverse order.</div></div><div class="pred" data-key="nth0(?index, ?list, ?elem) elem is the index-th element counting from 0; enumerates when index is unbound."><code class="sig">nth0(<span class="mode">?</span>Index, <span class="mode">?</span>List, <span class="mode">?</span>Elem)</code><div class="pdesc">Elem is the Index-th element counting from 0; enumerates when Index is unbound.</div></div><div class="pred" data-key="nth1(?index, ?list, ?elem) as nth0/3, counting from 1."><code class="sig">nth1(<span class="mode">?</span>Index, <span class="mode">?</span>List, <span class="mode">?</span>Elem)</code><div class="pdesc">As nth0/3, counting from 1.</div></div><div class="pred" data-key="last(+list, -last) last is the last element of list."><code class="sig">last(<span class="mode">+</span>List, <span class="mode">-</span>Last)</code><div class="pdesc">Last is the last element of List.</div></div><div class="pred" data-key="select(?elem, ?list, ?rest) rest is list with one occurrence of elem removed."><code class="sig">select(<span class="mode">?</span>Elem, <span class="mode">?</span>List, <span class="mode">?</span>Rest)</code><div class="pdesc">Rest is List with one occurrence of Elem removed.</div></div><div class="pred" data-key="select(?x, ?xs, ?y, ?ys) ys is xs with one x replaced by y."><code class="sig">select(<span class="mode">?</span>X, <span class="mode">?</span>Xs, <span class="mode">?</span>Y, <span class="mode">?</span>Ys)</code><div class="pdesc">Ys is Xs with one X replaced by Y.</div></div><div class="pred" data-key="selectchk(?elem, +list, -rest) as select/3, committed to the first solution."><code class="sig">selectchk(<span class="mode">?</span>Elem, <span class="mode">+</span>List, <span class="mode">-</span>Rest)</code><div class="pdesc">As select/3, committed to the first solution.</div></div><div class="pred" data-key="subtract(+set, +delete, -result) result holds the elements of set that are not in delete."><code class="sig">subtract(<span class="mode">+</span>Set, <span class="mode">+</span>Delete, <span class="mode">-</span>Result)</code><div class="pdesc">Result holds the elements of Set that are not in Delete.</div></div><div class="pred" data-key="intersection(+a, +b, -c) c holds the elements of a that also occur in b."><code class="sig">intersection(<span class="mode">+</span>A, <span class="mode">+</span>B, <span class="mode">-</span>C)</code><div class="pdesc">C holds the elements of A that also occur in B.</div></div><div class="pred" data-key="union(+a, +b, -c) c holds the elements of a not in b, followed by b."><code class="sig">union(<span class="mode">+</span>A, <span class="mode">+</span>B, <span class="mode">-</span>C)</code><div class="pdesc">C holds the elements of A not in B, followed by B.</div></div><div class="pred" data-key="delete(+list, @elem, -rest) rest is list without the elements that unify with elem."><code class="sig">delete(<span class="mode">+</span>List, <span class="mode">@</span>Elem, <span class="mode">-</span>Rest)</code><div class="pdesc">Rest is List without the elements that unify with Elem.</div></div><div class="pred" data-key="exclude(:pred, +list, -rest) rest holds the elements for which pred fails."><code class="sig">exclude(<span class="mode">:</span>Pred, <span class="mode">+</span>List, <span class="mode">-</span>Rest)</code><div class="pdesc">Rest holds the elements for which Pred fails.</div></div><div class="pred" data-key="include(:pred, +list, -rest) rest holds the elements for which pred succeeds."><code class="sig">include(<span class="mode">:</span>Pred, <span class="mode">+</span>List, <span class="mode">-</span>Rest)</code><div class="pdesc">Rest holds the elements for which Pred succeeds.</div></div><div class="pred" data-key="partition(:pred, +list, -incl, -excl) both of the above in one pass."><code class="sig">partition(<span class="mode">:</span>Pred, <span class="mode">+</span>List, <span class="mode">-</span>Incl, <span class="mode">-</span>Excl)</code><div class="pdesc">Both of the above in one pass.</div></div><div class="pred" data-key="maplist(:goal, ?list) calls goal on each element. also maplist/3, /4 and /5 for two, three and four lists walked in step."><code class="sig">maplist(<span class="mode">:</span>Goal, <span class="mode">?</span>List)</code><div class="pdesc">Calls Goal on each element. Also maplist/3, /4 and /5 for two, three and four lists walked in step.</div></div><div class="pred" data-key="foldl(:goal, +list, +v0, -v) threads an accumulator through the list with `call(goal, elem, acc0, acc)`. foldl/5 walks two lists."><code class="sig">foldl(<span class="mode">:</span>Goal, <span class="mode">+</span>List, <span class="mode">+</span>V0, <span class="mode">-</span>V)</code><div class="pdesc">Threads an accumulator through the list with <code>call(Goal, Elem, Acc0, Acc)</code>. foldl/5 walks two lists.</div></div><div class="pred" data-key="sum_list(+list, -sum) sum of a list of numbers; `sumlist/2` is a synonym."><code class="sig">sum_list(<span class="mode">+</span>List, <span class="mode">-</span>Sum)</code><div class="pdesc">Sum of a list of numbers; <code>sumlist/2</code> is a synonym.</div></div><div class="pred" data-key="max_list(+list, -max) largest number in the list; also min_list/2."><code class="sig">max_list(<span class="mode">+</span>List, <span class="mode">-</span>Max)</code><div class="pdesc">Largest number in the list; also min_list/2.</div></div><div class="pred" data-key="max_member(-max, +list) largest element in the standard order; also min_member/2."><code class="sig">max_member(<span class="mode">-</span>Max, <span class="mode">+</span>List)</code><div class="pdesc">Largest element in the standard order; also min_member/2.</div></div><div class="pred" data-key="numlist(+low, +high, -list) list is [low, low+1, ..., high]."><code class="sig">numlist(<span class="mode">+</span>Low, <span class="mode">+</span>High, <span class="mode">-</span>List)</code><div class="pdesc">List is [Low, Low+1, ..., High].</div></div><div class="pred" data-key="permutation(?list, ?perm) perm is a permutation of list."><code class="sig">permutation(<span class="mode">?</span>List, <span class="mode">?</span>Perm)</code><div class="pdesc">Perm is a permutation of List.</div></div><div class="pred" data-key="flatten(+nested, -flat) flattens nested lists into one list."><code class="sig">flatten(<span class="mode">+</span>Nested, <span class="mode">-</span>Flat)</code><div class="pdesc">Flattens nested lists into one list.</div></div><div class="pred" data-key="list_to_set(+list, -set) removes duplicates, keeping the first occurrence of each element."><code class="sig">list_to_set(<span class="mode">+</span>List, <span class="mode">-</span>Set)</code><div class="pdesc">Removes duplicates, keeping the first occurrence of each element.</div></div><div class="pred" data-key="pairs_keys_values(?pairs, ?keys, ?values) relates a list of `key-value` pairs to its keys and values; also pairs_keys/2 and pairs_values/2."><code class="sig">pairs_keys_values(<span class="mode">?</span>Pairs, <span class="mode">?</span>Keys, <span class="mode">?</span>Values)</code><div class="pdesc">Relates a list of <code>Key-Value</code> pairs to its keys and values; also pairs_keys/2 and pairs_values/2.</div></div><div class="pred" data-key="between(+low, +high, ?x) x is an integer from low to high. enumerates when x is unbound, tests when it is bound. high may be `inf` or `infinite`. the enumeration runs from a single choice point, so a failure-driven loop over it uses constant space."><code class="sig">between(<span class="mode">+</span>Low, <span class="mode">+</span>High, <span class="mode">?</span>X)</code><div class="pdesc">X is an integer from Low to High. Enumerates when X is unbound, tests when it is bound. High may be <code>inf</code> or <code>infinite</code>. The enumeration runs from a single choice point, so a failure-driven loop over it uses constant space.</div></div><div class="pred" data-key="succ(?int1, ?int2) int2 is int1 + 1, for non-negative integers; works in either direction."><code class="sig">succ(<span class="mode">?</span>Int1, <span class="mode">?</span>Int2)</code><div class="pdesc">Int2 is Int1 + 1, for non-negative integers; works in either direction.</div></div><div class="pred" data-key="plus(?int1, ?int2, ?int3) int3 is int1 + int2, with any one of the three unbound."><code class="sig">plus(<span class="mode">?</span>Int1, <span class="mode">?</span>Int2, <span class="mode">?</span>Int3)</code><div class="pdesc">Int3 is Int1 + Int2, with any one of the three unbound.</div></div><div class="pred" data-key="apply(:goal, +extraargs) calls goal with the extra arguments appended."><code class="sig">apply(<span class="mode">:</span>Goal, <span class="mode">+</span>ExtraArgs)</code><div class="pdesc">Calls Goal with the extra arguments appended.</div></div><h4 class="pred-group" id="g-control-library">Control (library)</h4><div class="pred" data-key="once(:goal) calls goal and commits to its first solution."><code class="sig">once(<span class="mode">:</span>Goal)</code><div class="pdesc">Calls Goal and commits to its first solution.</div></div><div class="pred" data-key="ignore(:goal) calls goal once; succeeds even when goal fails."><code class="sig">ignore(<span class="mode">:</span>Goal)</code><div class="pdesc">Calls Goal once; succeeds even when Goal fails.</div></div><div class="pred" data-key="not(:goal) a synonym for `\+`."><code class="sig">not(<span class="mode">:</span>Goal)</code><div class="pdesc">A synonym for <code>\+</code>.</div></div><div class="pred" data-key="repeat succeeds, and succeeds again every time it is backtracked into. like between/3 it runs from a single choice point, so a `repeat, ..., !` loop uses constant space. a cut or an exception is the only way out."><code class="sig">repeat</code><div class="pdesc">Succeeds, and succeeds again every time it is backtracked into. Like between/3 it runs from a single choice point, so a <code>repeat, ..., !</code> loop uses constant space. A cut or an exception is the only way out.</div></div><div class="pred" data-key="assertion(:goal) succeeds if goal succeeds, otherwise throws `assertion_failed(goal)`."><code class="sig">assertion(<span class="mode">:</span>Goal)</code><div class="pdesc">Succeeds if Goal succeeds, otherwise throws <code>assertion_failed(Goal)</code>.</div></div><h4 class="pred-group" id="g-the-database">The database</h4><div class="pred" data-key="assertz(+clause) adds clause at the end of its predicate. the clause is copied, so later bindings do not affect it. `assert/1` is a synonym."><code class="sig">assertz(<span class="mode">+</span>Clause)</code><div class="pdesc">Adds Clause at the end of its predicate. The clause is copied, so later bindings do not affect it. <code>assert/1</code> is a synonym.</div></div><div class="pred" data-key="asserta(+clause) adds clause at the front of its predicate."><code class="sig">asserta(<span class="mode">+</span>Clause)</code><div class="pdesc">Adds Clause at the front of its predicate.</div></div><div class="pred" data-key="retract(+clause) removes the first clause that unifies with clause; on backtracking, removes the next one."><code class="sig">retract(<span class="mode">+</span>Clause)</code><div class="pdesc">Removes the first clause that unifies with Clause; on backtracking, removes the next one.</div></div><div class="pred" data-key="retractall(+head) removes every clause whose head unifies with head, and makes the predicate known and dynamic so that later calls fail rather than raise an error."><code class="sig">retractall(<span class="mode">+</span>Head)</code><div class="pdesc">Removes every clause whose head unifies with Head, and makes the predicate known and dynamic so that later calls fail rather than raise an error.</div></div><div class="pred" data-key="abolish(+name/+arity) removes all clauses of a predicate."><code class="sig">abolish(<span class="mode">+</span>Name/+Arity)</code><div class="pdesc">Removes all clauses of a predicate.</div></div><div class="pred" data-key="clause(+head, ?body) enumerates the clauses of a predicate; a fact has the body `true`."><code class="sig">clause(<span class="mode">+</span>Head, <span class="mode">?</span>Body)</code><div class="pdesc">Enumerates the clauses of a predicate; a fact has the body <code>true</code>.</div></div><div class="pred" data-key="dynamic(+spec) declares predicates dynamic, so calling them fails instead of raising an existence error. spec is a `name/arity`, a comma sequence, or a list."><code class="sig">dynamic(<span class="mode">+</span>Spec)</code><div class="pdesc">Declares predicates dynamic, so calling them fails instead of raising an existence error. Spec is a <code>Name/Arity</code>, a comma sequence, or a list.</div></div><div class="pred" data-key="discontiguous(+spec) accepted and recorded; clauses may be spread out anyway."><code class="sig">discontiguous(<span class="mode">+</span>Spec)</code><div class="pdesc">Accepted and recorded; clauses may be spread out anyway.</div></div><div class="pred" data-key="current_predicate(?name/?arity) enumerates the predicates that have been defined."><code class="sig">current_predicate(<span class="mode">?</span>Name/?Arity)</code><div class="pdesc">Enumerates the predicates that have been defined.</div></div><div class="pred" data-key="predicate_property(+head, ?prop) currently only the property `defined`."><code class="sig">predicate_property(<span class="mode">+</span>Head, <span class="mode">?</span>Prop)</code><div class="pdesc">Currently only the property <code>defined</code>.</div></div><div class="pred" data-key="nb_setval(+key, +value) stores a copy of value under the atom key, outside the database."><code class="sig">nb_setval(<span class="mode">+</span>Key, <span class="mode">+</span>Value)</code><div class="pdesc">Stores a copy of Value under the atom Key, outside the database.</div></div><div class="pred" data-key="nb_getval(+key, -value) retrieves the value stored under key."><code class="sig">nb_getval(<span class="mode">+</span>Key, <span class="mode">-</span>Value)</code><div class="pdesc">Retrieves the value stored under Key.</div></div><div class="pred" data-key="b_setval(+key, +value) accepted as a synonym of nb_setval/2; the assignment is not undone on backtracking. also b_getval/2."><code class="sig">b_setval(<span class="mode">+</span>Key, <span class="mode">+</span>Value)</code><div class="pdesc">Accepted as a synonym of nb_setval/2; the assignment is not undone on backtracking. Also b_getval/2.</div></div><h4 class="pred-group" id="g-writing-terms">Writing terms</h4><div class="pred" data-key="write(?term) writes term without quoting, honouring operators and `'$var'(n)` names."><code class="sig">write(<span class="mode">?</span>Term)</code><div class="pdesc">Writes Term without quoting, honouring operators and <code>'$VAR'(N)</code> names.</div></div><div class="pred" data-key="print(?term) writes term with quoting, like writeq/1."><code class="sig">print(<span class="mode">?</span>Term)</code><div class="pdesc">Writes Term with quoting, like writeq/1.</div></div><div class="pred" data-key="writeq(?term) writes term with quotes where they would be needed to read it back."><code class="sig">writeq(<span class="mode">?</span>Term)</code><div class="pdesc">Writes Term with quotes where they would be needed to read it back.</div></div><div class="pred" data-key="write_canonical(?term) writes term quoted and without operator notation, so lists print as `'.'(1,'.'(2,[]))`."><code class="sig">write_canonical(<span class="mode">?</span>Term)</code><div class="pdesc">Writes Term quoted and without operator notation, so lists print as <code>'.'(1,'.'(2,[]))</code>.</div></div><div class="pred" data-key="write_term(?term, +options) writes term under options: `quoted(bool)`, `ignore_ops(bool)`, `numbervars(bool)`, `max_depth(n)`."><code class="sig">write_term(<span class="mode">?</span>Term, <span class="mode">+</span>Options)</code><div class="pdesc">Writes Term under Options: <code>quoted(Bool)</code>, <code>ignore_ops(Bool)</code>, <code>numbervars(Bool)</code>, <code>max_depth(N)</code>.</div></div><div class="pred" data-key="writeln(?term) writes term and a newline."><code class="sig">writeln(<span class="mode">?</span>Term)</code><div class="pdesc">Writes Term and a newline.</div></div><div class="pred" data-key="portray_clause(+clause) writes a clause as it would be listed, with numbered variables, indented body goals and a closing full stop."><code class="sig">portray_clause(<span class="mode">+</span>Clause)</code><div class="pdesc">Writes a clause as it would be listed, with numbered variables, indented body goals and a closing full stop.</div></div><div class="pred" data-key="nl writes a newline."><code class="sig">nl</code><div class="pdesc">Writes a newline.</div></div><div class="pred" data-key="tab(+n) writes n spaces."><code class="sig">tab(<span class="mode">+</span>N)</code><div class="pdesc">Writes N spaces.</div></div><div class="pred" data-key="put_char(+char) writes a one-character atom."><code class="sig">put_char(<span class="mode">+</span>Char)</code><div class="pdesc">Writes a one-character atom.</div></div><div class="pred" data-key="print_message(+kind, +message) prints an error term on standard error the way the toplevel does."><code class="sig">print_message(<span class="mode">+</span>Kind, <span class="mode">+</span>Message)</code><div class="pdesc">Prints an error term on standard error the way the toplevel does.</div></div><h4 class="pred-group" id="g-formatted-output">Formatted output</h4><div class="pred" data-key="format(+format) writes format, which may be an atom or a code list."><code class="sig">format(<span class="mode">+</span>Format)</code><div class="pdesc">Writes Format, which may be an atom or a code list.</div></div><div class="pred" data-key="format(+format, +args) writes format, taking arguments from the list args. a single non-list argument is taken as a one-element list."><code class="sig">format(<span class="mode">+</span>Format, <span class="mode">+</span>Args)</code><div class="pdesc">Writes Format, taking arguments from the list Args. A single non-list argument is taken as a one-element list.</div></div><div class="pred" data-key="format(+sink, +format, +args) writes to a stream, or captures the output when sink is `atom(a)`, `string(a)`, `codes(c)` or `chars(c)`."><code class="sig">format(<span class="mode">+</span>Sink, <span class="mode">+</span>Format, <span class="mode">+</span>Args)</code><div class="pdesc">Writes to a stream, or captures the output when Sink is <code>atom(A)</code>, <code>string(A)</code>, <code>codes(C)</code> or <code>chars(C)</code>.</div></div><h4 class="pred-group" id="g-reading-terms-and-streams">Reading terms and streams</h4><div class="pred" data-key="read(?term) reads a term from the current input; gives `end_of_file` at the end."><code class="sig">read(<span class="mode">?</span>Term)</code><div class="pdesc">Reads a term from the current input; gives <code>end_of_file</code> at the end.</div></div><div class="pred" data-key="read_term(?term, +options) as read/1, with `variable_names(l)`, `variables(l)` or `singletons(l)`."><code class="sig">read_term(<span class="mode">?</span>Term, <span class="mode">+</span>Options)</code><div class="pdesc">As read/1, with <code>variable_names(L)</code>, <code>variables(L)</code> or <code>singletons(L)</code>.</div></div><div class="pred" data-key="open(+file, +mode, -stream) opens file in mode `read`, `write` or `append`. open/4 takes an options list, which is accepted and ignored."><code class="sig">open(<span class="mode">+</span>File, <span class="mode">+</span>Mode, <span class="mode">-</span>Stream)</code><div class="pdesc">Opens File in mode <code>read</code>, <code>write</code> or <code>append</code>. open/4 takes an options list, which is accepted and ignored.</div></div><div class="pred" data-key="close(+stream) closes a stream."><code class="sig">close(<span class="mode">+</span>Stream)</code><div class="pdesc">Closes a stream.</div></div><div class="pred" data-key="current_input(-stream) the stream read/1 uses; also current_output/1."><code class="sig">current_input(<span class="mode">-</span>Stream)</code><div class="pdesc">The stream read/1 uses; also current_output/1.</div></div><div class="pred" data-key="set_input(+stream) makes stream the current input; also set_output/1."><code class="sig">set_input(<span class="mode">+</span>Stream)</code><div class="pdesc">Makes Stream the current input; also set_output/1.</div></div><div class="pred" data-key="with_output_to(+sink, :goal) calls goal once with the output captured into sink, which is `atom(a)`, `string(a)`, `codes(c)` or `chars(c)`."><code class="sig">with_output_to(<span class="mode">+</span>Sink, <span class="mode">:</span>Goal)</code><div class="pdesc">Calls Goal once with the output captured into Sink, which is <code>atom(A)</code>, <code>string(A)</code>, <code>codes(C)</code> or <code>chars(C)</code>.</div></div><div class="pred" data-key="flush_output flushes the current output stream."><code class="sig">flush_output</code><div class="pdesc">Flushes the current output stream.</div></div><div class="pred" data-key="write(+stream, ?term) the stream versions of the writing predicates: write/2, print/2, writeq/2, write_canonical/2, write_term/3, writeln/2, nl/1, tab/2, read/2, read_term/3."><code class="sig">write(<span class="mode">+</span>Stream, <span class="mode">?</span>Term)</code><div class="pdesc">The stream versions of the writing predicates: write/2, print/2, writeq/2, write_canonical/2, write_term/3, writeln/2, nl/1, tab/2, read/2, read_term/3.</div></div><h4 class="pred-group" id="g-loading-flags-and-the-system">Loading, flags and the system</h4><div class="pred" data-key="consult(+file) loads a file, adding its clauses to the database. `[file]` and `ensure_loaded/1` do the same; the `.pl` extension may be left off."><code class="sig">consult(<span class="mode">+</span>File)</code><div class="pdesc">Loads a file, adding its clauses to the database. <code>[file]</code> and <code>ensure_loaded/1</code> do the same; the <code>.pl</code> extension may be left off.</div></div><div class="pred" data-key="initialization(:goal) runs goal once all the files named on the command line have been loaded."><code class="sig">initialization(<span class="mode">:</span>Goal)</code><div class="pdesc">Runs Goal once all the files named on the command line have been loaded.</div></div><div class="pred" data-key="listing writes every user predicate; listing/1 takes a name or name/arity."><code class="sig">listing</code><div class="pdesc">Writes every user predicate; listing/1 takes a Name or Name/Arity.</div></div><div class="pred" data-key="halt leaves the interpreter; halt/1 sets the exit status."><code class="sig">halt</code><div class="pdesc">Leaves the interpreter; halt/1 sets the exit status.</div></div><div class="pred" data-key="statistics(+key, -value) key is runtime, cputime, process_cputime or walltime, giving `[total, sincelast]` in milliseconds; inferences, giving a count; or memory, giving `[inuse, 0]` in bytes."><code class="sig">statistics(<span class="mode">+</span>Key, <span class="mode">-</span>Value)</code><div class="pdesc">Key is runtime, cputime, process_cputime or walltime, giving <code>[Total, SinceLast]</code> in milliseconds; inferences, giving a count; or memory, giving <code>[InUse, 0]</code> in bytes.</div></div><div class="pred" data-key="set_prolog_flag(+flag, +value) sets `double_quotes` or `unknown`."><code class="sig">set_prolog_flag(<span class="mode">+</span>Flag, <span class="mode">+</span>Value)</code><div class="pdesc">Sets <code>double_quotes</code> or <code>unknown</code>.</div></div><div class="pred" data-key="current_prolog_flag(?flag, ?value) reads a flag; enumerates when unbound."><code class="sig">current_prolog_flag(<span class="mode">?</span>Flag, <span class="mode">?</span>Value)</code><div class="pdesc">Reads a flag; enumerates when unbound.</div></div><div class="pred" data-key="garbage_collect accepted; collection is automatic, so this does nothing."><code class="sig">garbage_collect</code><div class="pdesc">Accepted; collection is automatic, so this does nothing.</div></div><div class="pred" data-key="help prints a short summary at the toplevel."><code class="sig">help</code><div class="pdesc">Prints a short summary at the toplevel.</div></div></div><h3 id="format-directives">Format directives</h3><p>These are understood by format/1,2,3. A directive may take a numeric argument, written between the tilde and the letter.</p><div class="scroll"><table class="mono1"><thead><tr><th>Directive</th><th>Effect</th></tr></thead><tbody><tr><td>~w</td><td>Write the next argument, unquoted.</td></tr><tr><td>~p</td><td>Write it quoted, like print/1.</td></tr><tr><td>~q</td><td>Write it quoted, like writeq/1.</td></tr><tr><td>~a</td><td>Write an atomic argument as text, without quotes.</td></tr><tr><td>~s</td><td>Write a code or character list as text.</td></tr><tr><td>~d</td><td>Write an integer. <code>~Nd</code> inserts a decimal point N digits from the right.</td></tr><tr><td>~D</td><td>Write an integer with a comma between each group of three digits.</td></tr><tr><td>~f  ~e  ~g</td><td>Write a float in fixed, exponential or shortest form. <code>~Nf</code> sets the number of digits, six by default.</td></tr><tr><td>~c</td><td>Write the character whose code is the argument; <code>~Nc</code> repeats it N times.</td></tr><tr><td>~r  ~R</td><td>Write an integer in base N (<code>~16r</code>), in lower or upper case.</td></tr><tr><td>~n</td><td>Write a newline; <code>~Nn</code> writes N of them.</td></tr><tr><td>~i</td><td>Skip an argument.</td></tr><tr><td>~t</td><td>Mark a fill point for the next column stop.</td></tr><tr><td>~N|</td><td>Pad to column N, distributing the padding over the fill points, or at the end of the segment when there are none.</td></tr><tr><td>~N+</td><td>Pad to N columns past the previous column stop.</td></tr><tr><td>~*c</td><td>Take the count from the argument list, as in <code>format("~*c", [3, 0'x])</code>.</td></tr><tr><td>~`Xt</td><td>Use X as the fill character rather than a space.</td></tr><tr><td>~~</td><td>Write a tilde.</td></tr></tbody></table></div><pre><code>?- format("~w and ~q~n", ['a b', 'a b']).
+a b and 'a b'
+
+?- format("~a~t~15|~2f~n", [total, 12.5]).
+total          12.50</code></pre></section><section id="dcg"><h2>Grammars</h2><p>A grammar rule <code>Head --&gt; Body</code> is translated into an ordinary clause when the file is loaded, by adding two arguments that thread the input list through the body: the list before, and the list after.</p><pre><code>greeting --&gt; [hello], subject.
+subject  --&gt; [world].
+subject  --&gt; [prolog].
+
+?- phrase(greeting, [hello, prolog]).
+true.</code></pre><p>A rule may also carry a pushback list, written <code>Head, PushBack --&gt; Body</code>, which puts items back onto the input after the body has run.</p><h3>How bodies translate</h3><div class="scroll"><table class="mono1 mono2"><thead><tr><th>In the body</th><th>Becomes</th></tr></thead><tbody><tr><td>Variable</td><td>phrase(Var, S0, S)</td></tr><tr><td>(A, B)</td><td>A then B, threading the list through</td></tr><tr><td>(A ; B)</td><td>either branch, both spanning the same part of the list</td></tr><tr><td>(A -&gt; B)</td><td>if-then, threading the list through</td></tr><tr><td>\+ A</td><td>(\+ A', S = S0) — matches nothing</td></tr><tr><td>!</td><td>(!, S = S0)</td></tr><tr><td>{Goal}</td><td>(Goal, S = S0) — an ordinary goal, consuming nothing</td></tr><tr><td>[]</td><td>S = S0</td></tr><tr><td>[a,b,c]</td><td>matches those items at the front of the list</td></tr><tr><td>"abc"</td><td>the same, for the codes or chars the flag produces</td></tr><tr><td>call(G)</td><td>call(G, S0, S)</td></tr><tr><td>Other callable</td><td>the same goal with two extra arguments</td></tr></tbody></table></div><h3>Calling a grammar</h3><div class="preds"><div class="pred" data-key="phrase(:rule, ?list) list matches rule exactly."><code class="sig">phrase(<span class="mode">:</span>Rule, <span class="mode">?</span>List)</code><div class="pdesc">List matches Rule exactly.</div></div><div class="pred" data-key="phrase(:rule, ?list, ?rest) rule matches a prefix of list, leaving rest. rule may be any grammar body, not just a non-terminal."><code class="sig">phrase(<span class="mode">:</span>Rule, <span class="mode">?</span>List, <span class="mode">?</span>Rest)</code><div class="pdesc">Rule matches a prefix of List, leaving Rest. Rule may be any grammar body, not just a non-terminal.</div></div></div><pre><code>digits([D|T]) --&gt; digit(D), digits(T).
+digits([D])   --&gt; digit(D).
+digit(D)      --&gt; [D], { D &gt;= 0'0, D =&lt; 0'9 }.
+
+?- phrase(digits(Ds), "42", Rest).
+Ds = [52,50],
+Rest = [].</code></pre></section><section id="errors"><h2>Exceptions and errors</h2><p>Builtin predicates report problems by throwing a term of the form <code>error(Formal, Context)</code>, where Formal describes what went wrong and Context is currently an unbound variable. Programs may throw anything at all with <code>throw/1</code>.</p><div class="scroll"><table class="mono1"><thead><tr><th>Formal</th><th>Raised when</th></tr></thead><tbody><tr><td>instantiation_error</td><td>An argument was an unbound variable where a value was needed.</td></tr><tr><td>type_error(Type, Culprit)</td><td>Culprit is not of the expected Type, as in <code>atom_length(1.0e10, X)</code> asking for an integer.</td></tr><tr><td>domain_error(Domain, Culprit)</td><td>Culprit has the right type but a value outside the allowed set, such as an unknown option or sort order.</td></tr><tr><td>existence_error(procedure, Name/Arity)</td><td>An undefined predicate was called, unless the unknown flag says fail.</td></tr><tr><td>existence_error(source_sink, File)</td><td>A file could not be opened.</td></tr><tr><td>evaluation_error(zero_divisor)</td><td>Division or remainder by zero.</td></tr><tr><td>evaluation_error(int_overflow)</td><td>An integer result does not fit in 64 bits.</td></tr><tr><td>evaluation_error(undefined)</td><td>An arithmetic function has no value there, such as sqrt of a negative number.</td></tr><tr><td>representation_error(max_arity)</td><td>A term of more than 256 arguments.</td></tr><tr><td>representation_error(character_code)</td><td>A character code outside Unicode.</td></tr><tr><td>permission_error(modify, static_procedure, PI)</td><td>An attempt to assert to, retract from or inspect a predicate written in C.</td></tr><tr><td>syntax_error(Message)</td><td>The reader could not parse the text. Message names the file and line.</td></tr></tbody></table></div><pre><code>?- catch(X is foo + 1, error(type_error(T, C), _), true).
+T = evaluable,
+C = foo/0.</code></pre><p>An exception that no <code>catch/3</code> handles unwinds to the toplevel, which prints it as a readable message on standard error and abandons the query. In a directive it is printed the same way and loading continues with the next clause; from a <code>-g</code> goal it is printed and the interpreter exits with status 1.</p><aside class="note note-impl"><span class="note-tag">Errors and backtracking</span><div>The ball is copied before the stack is unwound, so it keeps its bindings even though the bindings made inside the goal are undone before Recovery runs.</div></aside></section><section id="flags"><h2>Flags</h2><p>Flags are read with <code>current_prolog_flag/2</code> and changed, where they are settable, with <code>set_prolog_flag/2</code>.</p><div class="scroll"><table class="mono1 mono2"><thead><tr><th>Flag</th><th>Default</th><th>Access</th><th>Meaning</th></tr></thead><tbody><tr><td>bounded</td><td>true</td><td>read-only</td><td>Integers are bounded — there are no bignums.</td></tr><tr><td>max_integer</td><td>9223372036854775807</td><td>read-only</td><td>The largest integer.</td></tr><tr><td>min_integer</td><td>-9223372036854775808</td><td>read-only</td><td>The smallest integer.</td></tr><tr><td>double_quotes</td><td>codes</td><td>settable</td><td>How "text" is read: codes, chars or atom.</td></tr><tr><td>unknown</td><td>error</td><td>settable</td><td>What calling an undefined predicate does: error or fail.</td></tr><tr><td>dialect</td><td>cprolog</td><td>read-only</td><td>Identifies this implementation.</td></tr><tr><td>version</td><td>10000</td><td>read-only</td><td>Version as a single integer.</td></tr><tr><td>max_arity</td><td>unbounded</td><td>read-only</td><td>Reported as unbounded; the reader stops at 256 arguments.</td></tr></tbody></table></div></section><section id="limits"><h2>Deviations and limits</h2><p>This is a compact interpreter, and the following are the places where it knowingly differs from a full ISO system. Each is a deliberate omission rather than an oversight.</p><h3>Numbers</h3><ul><li>Integers are 64-bit; overflow raises <code>evaluation_error(int_overflow)</code> instead of growing without bound. There are no rationals.</li><li><code>2 ** 3</code> gives the integer 8 rather than a float, matching common practice rather than the ISO standard.</li></ul><h3>Terms and text</h3><ul><li>There is no distinct string type; double-quoted text is a code list, a char list or an atom according to the <code>double_quotes</code> flag, and <code>sub_string/5</code> and <code>term_string/2</code> are synonyms of their atom counterparts.</li><li>The maximum arity of a term is 256.</li><li>Unification has no occurs check by default, so a cyclic term can be built; printing or copying one will not terminate.</li></ul><h3>Predicates that are absent</h3><ul><li>No modules, tabling, constraints, attributed variables, coroutining or threads.</li><li>No yall lambdas, so <code>maplist([X]&gt;&gt;Goal, L)</code> is not available — write a named helper predicate instead.</li><li>The character predicates <code>get_char/1,2</code>, <code>peek_char/1,2</code> and <code>at_end_of_stream/0,1</code> are not implemented, and <code>put_char/2</code> exists only in its one-argument form.</li><li><code>read_term/2,3</code> accepts <code>singletons(L)</code> but always reports <code>[]</code>.</li><li><code>open/4</code> accepts an options list and ignores it.</li><li><code>discontiguous/1</code> is recorded but never enforced; clauses may be spread through a file regardless.</li></ul><h3>Behaviour worth knowing</h3><ul><li>After <code>abolish/1</code> a predicate that was dynamic stays known, so calls to it fail rather than raising an existence error.</li><li>A retracted clause is held until its predicate is abolished, so a program that retracts millions of clauses from one predicate keeps them in memory.</li><li>A <code>-g</code> goal that fails prints a warning but still exits with status 0; only an uncaught exception exits with 1.</li><li>Memory is reclaimed on backtracking, and otherwise by a collector that can only run when the computation is deterministic. The heap is released to the newest choice point's mark, so a loop driven by <code>between/3</code>, <code>repeat/0</code> or backtracking into facts runs in constant space, while one driven by a generator written as a recursive predicate costs about a kilobyte an iteration: a million iterations peak at 754 MB against 2.8 MB for the same loop over <code>between/3</code>. Writing such a generator as a builtin in C is the way round it.</li></ul></section>
+    <footer>Generated from the interpreter's own tables and checked against the
+    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
+    for the library written in Prolog.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

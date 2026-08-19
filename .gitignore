@@ -1,0 +1,4 @@
+*.o
+/prolog
+src/boot_pl.c
+__pycache__/

@@ -1,0 +1,520 @@
+<title>C Prolog Internals</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--ochre);
+  white-space: nowrap;
+  padding-top: 0.28rem;
+  flex: 0 0 auto;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  .note-tag { width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>C Prolog Internals</h1>
+    <span class="prompt">?- engine design</span>
+    <p>How the interpreter is built: terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — and the places the design costs something.</p>
+    <nav class="docnav" aria-label="Documents"><a href="reference.html">Language reference</a><a href="internals.html" aria-current="page">Engine internals</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Contents</p>
+    <ol><li><a href="#shape">The shape of the interpreter</a></li><li><a href="#terms">Terms in memory</a></li><li><a href="#unify">Unification and the trail</a></li><li><a href="#loop">The solver loop</a></li><li><a href="#choice">Choice points and backtracking</a></li><li><a href="#cut">Cut</a></li><li><a href="#exceptions">Exceptions</a></li><li><a href="#clauses">Clauses and indexing</a></li><li><a href="#memory">Memory</a></li><li><a href="#gc">Garbage collection</a></li><li><a href="#reader">Reader and writer</a></li><li><a href="#performance">Measured behaviour</a></li><li><a href="#bugs">Five bugs this design produced</a></li><li><a href="#weaknesses">Where the design is weak</a></li><li><a href="#extending">Extending the interpreter</a></li></ol>
+  </nav>
+  <main>
+    <section id="shape"><h2>The shape of the interpreter</h2><p>C Prolog resolves goals by copying structures, not by compiling to an abstract machine. There is no WAM, no register allocation and no clause compiler: a clause is stored as a term, and calling it copies that term with fresh variables. That costs some speed against a compiling system and buys an engine small enough to hold in your head — the whole solver is one 606-line file.</p><p>Two decisions shape everything else. The solver is a flat loop over an explicit goal list rather than a recursive C function, so the depth of a Prolog computation costs heap rather than C stack. And memory is reclaimed primarily by backtracking rather than by collection, so a choice point records where the heap stood and failing rewinds to it.</p><div class="scroll"><table class="mono1"><thead><tr><th>File</th><th>Lines</th><th>What lives there</th></tr></thead><tbody><tr><td>src/prolog.h</td><td>341</td><td>the shared declarations: terms, marks, frames, choice points</td></tr><tr><td>src/term.c</td><td>824</td><td>heap and arenas, atom table, unification, standard order, copying, the collector</td></tr><tr><td>src/parser.c</td><td>914</td><td>tokeniser, operator table, operator-precedence reader</td></tr><tr><td>src/write.c</td><td>328</td><td>the term writer</td></tr><tr><td>src/arith.c</td><td>401</td><td>arithmetic evaluation</td></tr><tr><td>src/db.c</td><td>148</td><td>predicate table, clause lists, first-argument indexing</td></tr><tr><td>src/machine.c</td><td>606</td><td>the solver: goal frames, choice points, cut, exceptions</td></tr><tr><td>src/builtins.c</td><td>2304</td><td>the builtin predicates and their dispatch table</td></tr><tr><td>src/stream.c</td><td>152</td><td>streams, including in-memory sinks</td></tr><tr><td>src/consult.c</td><td>227</td><td>loading programs, error messages</td></tr><tr><td>src/main.c</td><td>269</td><td>command line and the interactive toplevel</td></tr><tr><td>lib/boot.pl</td><td>633</td><td>the library written in Prolog, compiled into the binary</td></tr></tbody></table></div><p><code>lib/boot.pl</code> is turned into a C string by <code>tools/pl2c.awk</code> at build time and consulted at start-up, so predicates that are easier to write in Prolog — <code>bagof/3</code>, the list library, the grammar translator, <code>listing/1</code> — are written in Prolog.</p></section><section id="terms"><h2>Terms in memory</h2><p>A term is a 24-byte cell: a one-byte tag and a union.</p><pre><code>struct Term {
+    unsigned char tag;              /* VAR ATOM INT FLT STR FWD */
+    union {
+        struct { Term *ref; unsigned long serial; } v;
+        int atom;                   /* index into the atom table */
+        long long i;
+        double f;
+        struct { int functor; int arity; Term **args; } s;
+    } u;
+};</code></pre><p>A compound term is allocated as one block — the cell followed by its argument pointers — and <code>args</code> points just past the header, so reaching an argument is one indirection and a compound term is one allocation rather than two.</p><p>Atoms are interned in a hash table and a term holds the index, so comparing atoms is comparing integers; the text is only needed for printing and for the standard order. An unbound variable is a cell whose <code>ref</code> is null, and binding it writes that pointer. A variable also carries a serial number, which gives the standard order on variables a stable answer and lets unification always bind the younger variable to the older.</p><aside class="note note-impl"><span class="note-tag">Allocation granularity</span><div>The heap rounds every allocation up to 16 bytes, so a 24-byte cell actually occupies 32 and a two-argument compound 48. Eight-byte alignment would be enough for every member of the union on the platforms this targets, and would cut a quarter off the heap; it is the cheapest unclaimed saving in the system.</div></aside></section><section id="unify"><h2>Unification and the trail</h2><p>Unification is the ordinary recursive walk, with two details that matter.</p><p>It recurses into the first n-1 arguments and loops on the last, so a list — which is nested entirely in its tails — is unified iteratively. Without that, unifying two 100,000-element lists would need 100,000 C frames. Comparison and both copying routines use the same shape.</p><p>Every binding is pushed on the trail, an array of entries recording the variable that was bound. Undoing is a loop that walks the trail back to a mark, writing null into each variable. There is no attempt to avoid trailing bindings that could not need undoing — the check costs about as much as the push.</p><p>A trail entry can also record an integer slot and its old value. Exactly one thing uses that: the flag that marks a <code>catch/3</code> frame inactive once its goal has succeeded, which has to come back if the goal is re-entered on backtracking.</p><aside class="note note-impl"><span class="note-tag">No occurs check</span><div>Unification binds without checking whether the variable occurs in the term, so <code>X = f(X)</code> builds a cycle. Copying and printing a cyclic term do not terminate. The collector, by contrast, is cycle-safe: it forwards a cell before it copies the children.</div></aside></section><section id="loop"><h2>The solver loop</h2><p>The continuation is a linked list of goal frames, each holding a goal, the next frame, and one integer — the cut barrier.</p><pre><code>struct Goal { Term *goal; Goal *next; size_t cutb; };</code></pre><p>The loop takes the first frame, executes its goal, and repeats. Executing a goal never calls the loop recursively; it rewrites the goal list instead. Conjunction pushes two frames, <code>call/1</code> pushes one with a fresh barrier, and a user predicate pushes the body of the clause it selected. A Prolog recursion a million deep is a million heap allocations and a C stack that never grows.</p><pre><code>for (;;) {
+    if (!m_goals) return PL_OK;             /* nothing left to prove */
+    rc = execute(deref(m_goals-&gt;goal), m_goals);
+    if (rc == PL_FAIL  &amp;&amp; !backtrack(base))   return PL_FAIL;
+    if (rc == PL_ERROR &amp;&amp; !handle_throw(base)) return PL_ERROR;
+}</code></pre><p><code>execute</code> dispatches in three steps. First the control constructs, which are recognised structurally — <code>,/2</code>, <code>;/2</code>, <code>-&gt;/2</code>, <code>*-&gt;/2</code>, <code>\+/1</code>, <code>!</code>, <code>call/N</code>, <code>catch/3</code>, <code>throw/1</code> — because they have to manipulate the goal list and the choice point stack directly. Then the builtin table, a hash on functor and arity. Only then the predicate table, and if nothing is found, an existence error.</p><p>That order is also the precedence rule of the language: a control construct cannot be redefined, a builtin written in C cannot be redefined, and everything else can.</p><aside class="note note-impl"><span class="note-tag">Re-entering the solver</span><div><code>findall/3</code>, <code>forall/2</code> and <code>with_output_to/2</code> do call the loop again, from inside a builtin. A nesting counter records that, because a builtin holding C pointers into the heap must not have the collector run underneath it.</div></aside></section><section id="choice"><h2>Choice points and backtracking</h2><p>A choice point is 120 bytes recording everything needed to resume: the goal list to restore, the cut barrier to hand out, marks into the trail and the heap, and whatever the particular kind of alternative needs.</p><figure><div class="svg-frame"><svg viewBox="0 0 700 195" role="img" aria-label="A choice point stores marks into the trail and the heap; backtracking rewinds both to those marks." xmlns="http://www.w3.org/2000/svg"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs><text x="0" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">GOAL CONTINUATION</text><rect x="0" y="30" width="150" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="10" y="45" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">q(X), r(X)</text><text x="10" y="58" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">cut barrier 2</text><line x1="75" y1="64" x2="75" y2="74" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><rect x="0" y="78" width="150" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="10" y="93" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">s(X)</text><text x="10" y="106" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">cut barrier 1</text><line x1="75" y1="112" x2="75" y2="122" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><rect x="0" y="126" width="150" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="10" y="141" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">true</text><text x="10" y="154" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">cut barrier 0</text><text x="215" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">CHOICE POINTS</text><rect x="215" y="110" width="170" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="225" y="128" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">CP_CLAUSES  p/1</text><text x="225" y="143" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">clause 2 of 3</text><rect x="215" y="30" width="170" height="72" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.4"/><text x="225" y="48" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">CP_CLAUSES  q/1</text><text x="225" y="64" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">next clause</text><text x="225" y="79" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">trail mark</text><text x="225" y="94" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">heap mark</text><text x="455" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">TRAIL</text><rect x="455" y="30" width="44" height="130" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><rect x="455" y="30" width="44" height="42" fill="var(--accent-bg)"/><line x1="455" y1="72" x2="499" y2="72" stroke="var(--accent)" stroke-width="1.6"/><text x="578" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">HEAP</text><rect x="578" y="30" width="44" height="130" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><rect x="578" y="30" width="44" height="42" fill="var(--accent-bg)"/><line x1="578" y1="72" x2="622" y2="72" stroke="var(--accent)" stroke-width="1.6"/><line x1="390" y1="82" x2="452" y2="72" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><line x1="390" y1="96" x2="575" y2="72" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><text x="505" y="56" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">undone</text><text x="505" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">kept</text><text x="628" y="56" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">released</text><text x="628" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">kept</text><text x="455" y="178" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">the mark is where backtracking puts each one back</text></svg></div><figcaption>A choice point stores marks into the trail and the heap. Backtracking undoes the trail to its mark, releases the heap to its mark, restores the saved goal list, and resumes — so undoing a computation costs about what making it did.</figcaption></figure><div class="scroll"><table class="mono1"><thead><tr><th>Kind</th><th>Created by</th><th>Retry does</th></tr></thead><tbody><tr><td>CP_CLAUSES</td><td>a call with more than one matching clause</td><td>try the next matching clause</td></tr><tr><td>CP_ALT</td><td>disjunction, if-then-else, soft cut, negation</td><td>run the stored alternative goal</td></tr><tr><td>CP_ITER</td><td>clause/2 and retract/1</td><td>move to the next matching clause</td></tr><tr><td>CP_REDO</td><td>between/3 and repeat/0</td><td>produce the next solution from state held in the frame itself</td></tr><tr><td>CP_CATCH</td><td>catch/3</td><td>nothing — it is a marker for the exception unwinder</td></tr></tbody></table></div><p>The stack is an array that doubles as it grows, which is why choice points are referred to by index rather than by pointer: a cut is an assignment to the stack height, and an index survives the array being moved.</p><aside class="note note-impl"><span class="note-tag">Retrying in place</span><div><code>CP_REDO</code> is the one kind whose frame is updated rather than replaced. Its retry reads a counter out of the frame, writes the next one back, and returns to the same heap mark it took when it was created — which is what makes a generator cost nothing per iteration.</div></aside></section><section id="cut"><h2>Cut</h2><p>Cut is the part of Prolog that most often turns into a special case. Here it is one integer. Every goal frame carries the height of the choice point stack at the moment its clause was entered; <code>!</code> assigns that height back to the top.</p><figure><div class="svg-frame"><svg viewBox="0 0 700 230" role="img" aria-label="Cut restores the choice point stack to the height recorded in the goal frame when its clause was entered." xmlns="http://www.w3.org/2000/svg"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs><text x="0" y="16" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.75" letter-spacing="0.06em">on entry to p/1</text><rect x="0" y="170" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="10" y="185" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 1</text><rect x="0" y="144" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="10" y="159" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 2</text><rect x="0" y="118" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.22"/><rect x="0" y="92" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.22"/><rect x="0" y="66" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.22"/><text x="240" y="16" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.75" letter-spacing="0.06em">inside the body</text><rect x="240" y="170" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="250" y="185" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 1</text><rect x="240" y="144" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="250" y="159" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 2</text><rect x="240" y="118" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="250" y="133" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 3</text><rect x="240" y="92" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="250" y="107" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 4</text><rect x="240" y="66" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="250" y="81" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 5</text><text x="480" y="16" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.75" letter-spacing="0.06em">after the !</text><rect x="480" y="170" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="490" y="185" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 1</text><rect x="480" y="144" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="490" y="159" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8">choice point 2</text><rect x="480" y="118" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.22"/><rect x="480" y="92" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.22"/><rect x="480" y="66" width="130" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.22"/><line x1="0" y1="142" x2="610" y2="142" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3"/><text x="620" y="146" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.9" letter-spacing="0.06em">barrier</text><line x1="425" y1="74" x2="425" y2="138" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><text x="433" y="104" font-family="IBM Plex Mono, monospace" font-size="13" fill="currentColor" text-anchor="start" opacity="0.95">!</text><text x="0" y="214" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8" letter-spacing="0.06em">the frame records the stack height its clause was entered at; ! assigns the top back to it</text></svg></div><figcaption>The barrier is recorded when the clause is entered and never recomputed, so cut is a single assignment no matter how many alternatives were created in between.</figcaption></figure><p>Because the barrier travels in the frame rather than in a global, cut lands correctly in nested control structures for free. The two branches of a disjunction are pushed with the enclosing clause's barrier, so a cut inside either one cuts the clause — cut is transparent to <code>;</code>. <code>call/1</code> pushes its goal with the current stack height instead, so a cut inside is local to the call — cut is opaque to <code>call/1</code>.</p><p>If-then-else, negation and soft cut are all assembled from a choice point and an internal goal. <code>(C -&gt; T ; E)</code> pushes a <code>CP_ALT</code> holding <code>E</code>, then runs <code>C</code> with the continuation <code>'$cut'(N), T</code>, where N is the index of that choice point. If <code>C</code> succeeds, <code>'$cut'(N)</code> drops the alternative and everything <code>C</code> left behind; if it fails, backtracking finds the alternative and runs <code>E</code>. Negation is the same shape with <code>E = true</code> and a <code>fail</code> after the cut.</p><p>Soft cut differs by one line: instead of cutting back, <code>'$softcut'(N)</code> marks the alternative dead, so the alternatives inside <code>C</code> survive and <code>T</code> runs for each of them.</p><aside class="note note-impl"><span class="note-tag">A bug worth keeping in mind</span><div>That mark must not be trailed. Trailing it looked right — it is a mutation, and mutations are undone on backtracking — but backtracking into the condition then restored the alternative, and <code>(member(X,[1,2]) *-&gt; true ; none)</code> produced a third answer, <code>none</code>. Once the condition has succeeded the alternative is gone for good, including on re-entry.</div></aside></section><section id="exceptions"><h2>Exceptions</h2><p><code>throw/1</code> has a lifetime problem: the ball is a term on the heap, and the unwinding that follows releases the heap the ball lives in. So the ball is copied out into an arena of its own before anything is unwound, and rebuilt on the heap once a catcher matches.</p><p><code>catch/3</code> pushes a <code>CP_CATCH</code> frame and runs its goal with the continuation <code>'$exit_catch'(N)</code>. The unwinder walks the choice point stack downward, undoing the trail and releasing the heap at each frame, and stops at the first live <code>CP_CATCH</code> whose catcher unifies with the ball — bindings undone first, so the recovery goal starts from the state the catch was entered in.</p><p><code>'$exit_catch'(N)</code> is what makes an exception thrown *after* the guarded goal succeeded pass over this frame instead of being caught by it. If the frame is on top it is simply popped; otherwise it is marked inactive, and that mark is trailed, because backtracking into the guarded goal has to make the frame live again. It is the one place in the system where a trail entry records something other than a variable binding.</p><pre><code>?- catch(( catch(true, e, true), throw(e2) ), e2, true).
+true.                        % the inner catch is exited, so e2 passes it by</code></pre></section><section id="clauses"><h2>Clauses and indexing</h2><p>A clause is stored in a form halfway to being compiled. Head and body are copied into a private arena with the variables replaced by cells whose serial number is an index — variable 0, variable 1, and so on — and the count is kept with the clause.</p><p>Calling it allocates an array of that many null pointers and rebuilds the term on the heap, filling variables in as it meets them. Head arguments are instantiated one at a time and unified as they are built, so a call that fails on the first argument never builds the rest of the head.</p><p>Freeing is the reason for the private arena: one <code>arena_free</code> releases the whole clause. <code>retract/1</code> unlinks the clause from the predicate but does not free it — a choice point may still hold a pointer to it — and puts it on a garbage list that is released when the predicate is abolished.</p><h3>First-argument indexing</h3><p>Each clause records a tag and a key derived from the principal functor of its first head argument: the atom index for an atom, the value for an integer, the functor and arity packed together for a compound. A clause whose first argument is a variable or a float is not indexed and always matches.</p><p>The filter is deliberately approximate. Packing a functor and arity into one integer, or truncating a 64-bit value to fit, can make two different keys collide — but only ever in the direction of trying a clause that then fails to unify, never of skipping one that would have matched.</p><p>The real gain is not the skipping, it is the lookahead. The next matching clause is found *before* the current one is tried, so a call that matches only one clause pushes no choice point at all and the predicate is deterministic:</p><pre><code>p(a).  p(b).  p(c).  p(d).
+
+?- p(c).
+true.                        % no choice point, no prompt for more solutions</code></pre><aside class="note note-impl"><span class="note-tag">The lookahead has to come first</span><div>Both <code>clause/2</code> and <code>retract/1</code> originally looked for the next candidate after unifying the head. By then the head arguments were bound, so indexing rejected every remaining clause and both predicates silently returned only their first solution. Finding the next candidate while the arguments are still unbound is what makes them enumerate.</div></aside></section><section id="memory"><h2>Memory</h2><p>There are three kinds of storage, and which one a term lives in is decided by how long it needs to survive.</p><div class="scroll"><table class=""><thead><tr><th>Region</th><th>Holds</th><th>Released by</th></tr></thead><tbody><tr><td>The heap</td><td>everything a computation builds</td><td>backtracking, and the collector</td></tr><tr><td>Arenas</td><td>clauses, global variables, exception balls, findall buffers</td><td>one call, when the owner dies</td></tr><tr><td>malloc</td><td>the atom table, the choice point stack, the trail</td><td>never, or on resize</td></tr></tbody></table></div><p>The heap is a list of chunks, at least 256 KB each. Allocation bumps a pointer; a mark is a chunk, an offset and an epoch; releasing sets the current chunk and offset back and leaves the chunks after it in place to be used again. Nothing is walked, so both marking and releasing are constant time.</p><p>This is what makes backtracking cheap, and it is also the limit of the scheme. The heap can only be released to a mark, and the only marks are the ones choice points hold. So the space a loop needs depends on where its newest choice point is.</p><figure><div class="svg-frame"><svg viewBox="0 0 700 250" role="img" aria-label="A generator that retries one choice point reuses a single heap mark and runs in constant space; one written as a recursive predicate pushes the mark forward each iteration, so nothing older can be released." xmlns="http://www.w3.org/2000/svg"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs><text x="0" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">ONE CHOICE POINT, RETRIED IN PLACE</text><text x="40" y="40" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">HEAP</text><rect x="40" y="150" width="54" height="46" fill="var(--accent-bg)" stroke="currentColor" stroke-width="1.2" opacity="0.9"/><rect x="40" y="126" width="54" height="24" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.45"/><line x1="34" y1="150" x2="100" y2="150" stroke="var(--accent)" stroke-width="1.8"/><text x="106" y="154" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">the one mark</text><text x="106" y="134" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">one iteration</text><line x1="196" y1="132" x2="130" y2="147" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><text x="200" y="128" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">released</text><text x="200" y="140" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">every retry</text><text x="0" y="224" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8" letter-spacing="0.06em">between/3, repeat/0, or backtracking into facts</text><text x="0" y="240" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95" letter-spacing="0.06em">1M iterations, 2.8 MB peak</text><text x="380" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">A GENERATOR WRITTEN AS A RECURSIVE PREDICATE</text><text x="420" y="40" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">HEAP</text><rect x="420" y="76" width="54" height="120" fill="var(--accent-bg)" stroke="currentColor" stroke-width="1.2" opacity="0.9"/><rect x="420" y="52" width="54" height="24" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.45"/><line x1="414" y1="166" x2="480" y2="166" stroke="var(--accent)" stroke-width="1.4"/><text x="488" y="170" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">mark 1</text><line x1="414" y1="136" x2="480" y2="136" stroke="var(--accent)" stroke-width="1.4"/><text x="488" y="140" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">mark 2</text><line x1="414" y1="106" x2="480" y2="106" stroke="var(--accent)" stroke-width="1.4"/><text x="488" y="110" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">mark 3</text><line x1="414" y1="76" x2="480" y2="76" stroke="var(--accent)" stroke-width="1.4"/><text x="488" y="80" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">mark 4</text><line x1="596" y1="58" x2="530" y2="68" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><text x="600" y="54" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">released</text><text x="600" y="66" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">every retry</text><text x="488" y="196" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">kept: nothing below the</text><text x="488" y="208" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">newest mark can go</text><text x="380" y="224" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.8" letter-spacing="0.06em">each iteration leaves its mark higher up the heap</text><text x="380" y="240" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95" letter-spacing="0.06em">1M iterations, 754 MB peak</text></svg></div><figcaption>Both loops run a million iterations and neither builds a lasting result. The difference is the generator: backtracking into a set of facts returns to the same mark every time, while a recursive generator leaves its newest mark further up the heap on every iteration, so everything below it has to stay.</figcaption></figure><p>The measured difference is stark. A million iterations driven by <code>between/3</code> peak at 2.8 MB. The same million iterations driven by a generator written as an ordinary recursive predicate peak at 754 MB — about a kilobyte an iteration, exactly linear — because each recursive call leaves its choice point, and therefore its heap mark, higher than the last.</p><p>The collector cannot help there either: it only runs when the choice point stack is empty, and a generator is a choice point.</p><p>This is why <code>between/3</code> and <code>repeat/0</code> are written in C rather than in the Prolog library, where both began. Each pushes one <code>CP_REDO</code> frame holding its own state — the next integer to try, and the bound — and the retry updates that state in place instead of calling anything. The heap mark the frame took when it was created is the mark every iteration returns to, so the loop runs flat. Rewriting them this way took a million-iteration loop from 1.0 GB to 2.8 MB.</p><aside class="note note-impl"><span class="note-tag">The same trick for your own generator</span><div>Anything that enumerates can be written this way: push a <code>CP_REDO</code> frame with <code>redo_push</code>, keep the cursor in the frame's two integer fields, and let the retry advance it. A generator written in Prolog cannot do this, because each recursive call necessarily leaves a new choice point behind.</div></aside></section><section id="gc"><h2>Garbage collection</h2><p>Backtracking reclaims nothing in a deterministic recursion, because there is nothing to backtrack to. Before the collector existed, a million iterations of <code>count(N) :- N1 is N-1, count(N1)</code> held 453 MB, and five million would not finish on a small machine. The collector is what makes ordinary recursive Prolog viable: the same five million iterations now peak at 25 MB.</p><h3>When it runs</h3><p>The collector is a copying collector, and copying is only sound here if nothing outside the goal list can be holding a heap pointer. Three conditions have to hold, checked every 1024 inferences:</p><ul><li>The choice point stack is empty. A choice point holds a heap mark, and marks cannot survive the heap being rebuilt.</li><li>No enclosing run of the solver is in progress, because a builtin that called back into the solver is holding C pointers into the heap.</li><li>The heap in use exceeds the threshold — 16 MB, or three times what survived the last collection, whichever is larger.</li></ul><h3>What it does</h3><p>A fresh chunk list is started, everything reachable is copied into it, and the old chunks are freed. The roots are the goal list and a small table of C variables that callers register — the toplevel registers the variable-name list it is about to print bindings from, and the loader registers the clause it is about to assert.</p><figure><div class="svg-frame"><svg viewBox="0 0 700 190" role="img" aria-label="Copying a term leaves a forwarding pointer in the old cell, so the second reference to a shared subterm finds the copy that already exists." xmlns="http://www.w3.org/2000/svg"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs><text x="0" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">BEFORE</text><rect x="0" y="26" width="250" height="130" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><rect x="20" y="44" width="100" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="30" y="63" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">f/2</text><rect x="20" y="106" width="100" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><text x="30" y="125" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">g(1)</text><line x1="60" y1="74" x2="60" y2="102" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><line x1="110" y1="74" x2="78" y2="102" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><text x="130" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">both arguments</text><text x="130" y="108" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">point at one cell</text><line x1="262" y1="96" x2="302" y2="96" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><text x="258" y="84" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">copy</text><text x="330" y="14" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">AFTER</text><rect x="330" y="26" width="330" height="130" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><rect x="350" y="44" width="100" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/><text x="360" y="63" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.55">FWD</text><rect x="350" y="106" width="100" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/><text x="360" y="125" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.55">FWD</text><rect x="530" y="44" width="100" height="30" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.4"/><text x="540" y="63" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">f/2</text><rect x="530" y="106" width="100" height="30" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.4"/><text x="540" y="125" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="start" opacity="0.95">g(1)</text><line x1="452" y1="59" x2="526" y2="59" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><line x1="452" y1="121" x2="526" y2="121" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><line x1="570" y1="74" x2="570" y2="102" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><line x1="618" y1="74" x2="588" y2="102" stroke="var(--accent)" stroke-width="1.2" marker-end="url(#ara)"/><text x="350" y="176" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">old cells, forwarded</text><text x="530" y="176" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6" letter-spacing="0.06em">the copy</text></svg></div><figcaption>Each copied cell is overwritten with a forwarding pointer to its copy, so a term reachable by two paths is copied once and stays shared. Forwarding before the children are copied is also what makes a cyclic term terminate.</figcaption></figure><p>A compound cell is forwarded by overwriting the tag and the union — which destroys the functor, the arity and the argument pointer, so those are read into locals first. The argument array itself sits after the header in the old chunk and is left alone until the whole copy is finished.</p><p>Two things then have to be admitted about the old world. The trail is emptied, which is sound because with no choice points there is nothing left to undo. And every outstanding heap mark now points into freed memory, which is what the epoch in a mark is for: the epoch counter moves on, and releasing a mark from an older epoch does nothing at all.</p><aside class="note note-impl"><span class="note-tag">How it is tested</span><div>The environment variable <code>PROLOG_GC_THRESHOLD=1</code> makes the collector run at every opportunity — every 1024 inferences. <code>make test-gc</code> runs the whole suite that way, and <code>make test-asan</code> runs it again under the address and undefined behaviour sanitizers. A collector that only runs under memory pressure would otherwise be tested by almost nothing.</div></aside></section><section id="reader"><h2>Reader and writer</h2><p>The reader is a hand-written tokeniser and an operator-precedence parser. The parser is the standard two-part shape: read a primary term, then repeatedly look for an infix or postfix operator whose priority fits under the current maximum and whose left argument fits the associativity.</p><p>Two details do most of the work. The tokeniser marks whether layout preceded a token, which is what separates <code>f(a)</code> from <code>f (a)</code> and what makes <code>- 1</code> a prefix operator applied to 1 while <code>-1</code> is a negative literal. And a lone <code>.</code> ends a clause only when layout or end of file follows it, which is why <code>X = a.b</code> reads as one term but <code>X = a. b</code> does not.</p><p>The writer inverts the same table. It carries a maximum priority down the term, parenthesises any operator whose priority exceeds it, and remembers the last character it emitted so it can insert a space where two tokens would otherwise merge into one — which is what turns <code>1-(-1)</code> into <code>1- -1</code> rather than the unreadable <code>1--1</code>.</p><aside class="note note-impl"><span class="note-tag">Round-tripping is a test, not a hope</span><div>The suite writes terms with <code>writeq/1</code>, reads them back with <code>atom_to_term/3</code> and requires the result to be a variant of the original. That is what caught the writer printing the atom <code>.</code> unquoted, which read back as an end of clause.</div></aside></section><section id="performance"><h2>Measured behaviour</h2><p>Measured on an Apple M-series laptop, clang -O2. The inference counter counts goal executions, so these figures are comparable with the usual LIPS numbers only loosely.</p><div class="scroll"><table class=""><thead><tr><th>Benchmark</th><th>Result</th></tr></thead><tbody><tr><td>nrev on a 30-element list, 5000 times</td><td>2,680,152 inferences in 183 ms, about 14.6M inferences/second</td></tr><tr><td>All 92 solutions to 8 queens</td><td>129,382 inferences in 9 ms</td></tr><tr><td>The zebra puzzle</td><td>1,917 inferences, under a millisecond</td></tr><tr><td>Loading the bootstrap library</td><td>3 ms</td></tr><tr><td>5M iterations of a deterministic recursion</td><td>0.40 s, peak 25 MB</td></tr><tr><td>2M iterations of the same, collector disabled</td><td>peak 967 MB</td></tr><tr><td>1M-iteration failure-driven loop over between/3</td><td>peak 2.8 MB</td></tr><tr><td>1M iterations of a repeat/0 loop</td><td>peak 2.9 MB</td></tr><tr><td>1M-iteration loop over facts</td><td>peak 13.1 MB</td></tr><tr><td>1M-iteration loop over a recursive generator</td><td>peak 754 MB</td></tr></tbody></table></div><p>Where the time goes is not mysterious: every call copies a clause. The instantiation of head and body dominates, and the first-argument lookahead is what keeps that from being paid on clauses that cannot match. A compiling system avoids the copy entirely, which is the factor of a few this design gives away.</p></section><section id="bugs"><h2>Five bugs this design produced</h2><p>Every one of these was a mistake about lifetime or about when a value is read, which is what a structure-copying engine with manual memory is prone to. They are listed because the shape of the mistakes says more about the design than a clean description would.</p><div class="scroll"><table class=""><thead><tr><th>Symptom</th><th>Cause</th><th>What it says</th></tr></thead><tbody><tr><td>A nested findall read freed memory</td><td>Instantiating a clause shared the constant cells rather than copying them, and a findall buffer is freed while its results are still live.</td><td>Sharing across two regions with different lifetimes is only safe if the shorter one is the reader. Copying constants cost about 10% and removed the whole class.</td></tr><tr><td>clause/2 and retract/1 returned only their first solution</td><td>The next candidate clause was chosen after head unification had bound the arguments, so indexing rejected everything that remained.</td><td>Indexing reads state that unification is about to change. Anything derived from the call has to be derived before the call binds it.</td></tr><tr><td>A soft cut produced an extra answer</td><td>The flag marking the alternative dead was trailed, so backtracking into the condition brought the alternative back.</td><td>Not every mutation should be undone on backtracking. Committing is exactly the operation that must survive it.</td></tr><tr><td>Retrying a choice point read freed memory</td><td>The alternative goal for if-then-else was built after the choice point took its heap mark, so retrying released the memory holding it.</td><td>Anything a choice point refers to must be older than the mark it holds. The constants involved now live outside the heap entirely.</td></tr><tr><td>write_canonical output would not read back</td><td>The atom <code>.</code> was written unquoted, and atom_codes returned bytes rather than character codes.</td><td>A writer is only correct against a reader. Round-tripping through both is the test that finds this; inspection does not.</td></tr></tbody></table></div><p>One of the five was found by the address sanitizer, three by the test suite — a round-trip through the writer and the reader, a test that asked a predicate for all its solutions rather than its first, and a soft cut asked for both of its answers — and one by reading the code before it had ever run. None was found by using the interpreter, which is the argument for both the sanitizer run and for tests that ask for every solution rather than the first.</p></section><section id="weaknesses"><h2>Where the design is weak</h2><p>In rough order of how much they would bother someone using it:</p><ul><li>A generator written in Prolog still grows the heap linearly. <code>between/3</code> and <code>repeat/0</code> no longer do, but a user-written one does, and there is no way to write a constant-space generator in Prolog alone.</li><li>The collector runs only when the choice point stack is empty. A long computation that keeps one choice point open never collects at all.</li><li>Retracted clauses are held until the predicate is abolished, so a long-running program that retracts millions of clauses from one predicate accumulates them.</li><li>Every heap allocation is rounded to 16 bytes where 8 would do, which costs about a quarter of the heap.</li><li>Integers are 64-bit with overflow raised as an error rather than promoted to bignums, and there are no modules, tabling or constraints.</li></ul><p>The first two are the same problem seen from two sides, and the second is the deep one: collecting with choice points live means keeping the segment-ordering that heap marks depend on, which is the point where this design would have to become a mark-and-slide collector over a cell heap — and at that point it is most of a WAM.</p></section><section id="extending"><h2>Extending the interpreter</h2><h3>Adding a builtin predicate in C</h3><p>A builtin takes the argument array, the continuation and the cut barrier, and returns success, failure or error. Arguments are not dereferenced for you.</p><pre><code>BI(bi_atom_reverse)                      /* atom_reverse(+Atom, -Reversed) */
+{
+    UNUSED;
+    char *s;
+    size_t n, i;
+    int rc = get_text(A[0], &amp;s, &amp;n, "atom");
+
+    if (rc != PL_OK) return rc;
+    for (i = 0; i &lt; n / 2; i++) {
+        char c = s[i];
+        s[i] = s[n - 1 - i];
+        s[n - 1 - i] = c;
+    }
+    rc = unify(A[1], mk_atom(intern_n(s, n)));
+    free(s);
+    RET(rc);
+}</code></pre><p>Then one line in the table in <code>src/builtins.c</code>, which is what makes it visible and also what makes it un-redefinable from Prolog:</p><pre><code>{ "atom_reverse", 2, bi_atom_reverse },</code></pre><p>Two rules matter. Anything the builtin allocates on the heap is fine — the collector cannot run while a builtin is executing. But a builtin that calls back into the solver, through <code>solve_sub</code> or <code>solve_once</code>, must assume everything it holds may move, which is why <code>findall/3</code> copies its template into an arena rather than keeping a pointer.</p><h3>Adding a builtin that has more than one solution</h3><p>A builtin that enumerates pushes a <code>CP_REDO</code> frame carrying its own state, and the retry in <code>backtrack</code> advances that state. <code>between/3</code> is the whole pattern: it binds the first value, and leaves behind a frame holding the next value and the bound.</p><pre><code>if (lo &lt; hi) redo_push(REDO_BETWEEN, lo + 1, hi, x, cont, cutb);
+RET(unify(A[2], mk_int(lo)));</code></pre><p>The frame is pushed before the first solution is bound, so backtracking undoes that binding; and because the frame is only ever updated, never replaced, every iteration returns to the same heap mark. A generator that instead recurses in Prolog cannot do either of those things.</p><h3>Adding an arithmetic function</h3><p>Arithmetic is dispatched on name and arity in <code>src/arith.c</code>; a unary function is a clause in <code>eval_unary</code>, a binary one in <code>eval_binary</code>. Both receive already-evaluated operands tagged as integer or float, and set the same on the result.</p><h3>Adding a library predicate</h3><p>If it can be written in Prolog, write it in <code>lib/boot.pl</code>. It is compiled into the binary at build time and consulted at start-up, and it can be redefined by a user program, which a builtin written in C cannot.</p><aside class="note note-impl"><span class="note-tag">After any change</span><div><code>make check</code> runs the suite normally and again with the collector firing every 1024 inferences; <code>make test-asan</code> runs both under the sanitizers. A change to memory handling that passes only the first is not tested.</div></aside></section>
+    <footer>Generated from the interpreter's own tables and checked against the
+    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
+    for the library written in Prolog.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

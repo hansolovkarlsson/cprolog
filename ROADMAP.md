@@ -7,14 +7,6 @@ document; nothing is speculative.
 
 ## Near term
 
-- **Continuous integration.** No CI runs today: the suite is only ever run by
-  hand. A workflow should build and test on every push and pull request, on
-  Linux and macOS, with both clang and gcc, running `make check` (the suite
-  normally and with the collector forced) and `make test-asan` (the suite under
-  the address and undefined behaviour sanitizers). It should also run
-  `make doc` and fail if the working tree changes, because the documentation is
-  generated and can silently drift from its generators. Tracked in #1.
-
 - **The missing character predicates.** `get_char/1,2`, `peek_char/1,2`,
   `at_end_of_stream/0,1` and `put_char/2` are ISO and are not implemented. The
   stream layer already has the pushback needed for `peek_char`.

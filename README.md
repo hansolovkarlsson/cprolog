@@ -1,5 +1,7 @@
 # C Prolog
 
+[![CI](https://github.com/hansolovkarlsson/cprolog/actions/workflows/ci.yml/badge.svg)](https://github.com/hansolovkarlsson/cprolog/actions/workflows/ci.yml)
+
 A Prolog interpreter written from scratch in C99 — reader, engine, garbage
 collector and library. No dependencies beyond libc and libm.
 
@@ -39,7 +41,9 @@ make examples   # run the example programs
 make install    # install to $(PREFIX)/bin, default /usr/local
 ```
 
-Builds clean with `-Wall -Wextra` under both clang and gcc.
+Builds clean with `-Wall -Wextra` under both clang and gcc. Every push runs the
+suite on Linux and macOS, with both compilers, under the sanitizers, and checks
+that `docs/` still matches its generators.
 
 ## Using it
 

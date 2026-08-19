@@ -35,9 +35,12 @@ test-gc: $(BIN)
 	PROLOG_GC_THRESHOLD=1 ./$(BIN) -q tests/test.pl -g run_tests
 
 # The suite under the address and undefined behaviour sanitizers.
+# -fno-sanitize-recover makes undefined behaviour abort rather than print and
+# carry on, so a finding fails the run instead of scrolling past.
 test-asan:
 	$(MAKE) clean
-	$(MAKE) CFLAGS="-std=c99 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+	$(MAKE) CFLAGS="-std=c99 -O1 -g -fsanitize=address,undefined \
+	                -fno-sanitize-recover=undefined -fno-omit-frame-pointer"
 	./$(BIN) -q tests/test.pl -g run_tests
 	PROLOG_GC_THRESHOLD=1 ./$(BIN) -q tests/test.pl -g run_tests
 	$(MAKE) clean

@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch makes an in-flight run pointless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / ${{ matrix.cc }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cc: [clang, gcc]
+        exclude:
+          # gcc on the macOS runner is a clang shim, so it would repeat the
+          # job above it without testing anything new.
+          - os: macos-latest
+            cc: gcc
+    env:
+      CC: ${{ matrix.cc }}
+      # The atom table, the predicate table and the clause arenas are never
+      # freed: they live until the process exits. LeakSanitizer would report
+      # every one of them, so leak detection is off and the sanitizers do what
+      # they are here for -- use after free, and undefined behaviour.
+      ASAN_OPTIONS: detect_leaks=0
+      UBSAN_OPTIONS: print_stacktrace=1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build, warnings are errors
+        run: make CC=$CC CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror"
+
+      - name: Test suite, twice -- normally, and with the collector forced
+        run: make CC=$CC check
+
+      - name: Examples
+        run: make CC=$CC examples
+
+      # Left until last: this target rebuilds from clean and then cleans up
+      # after itself, so anything above it would have to be built again.
+      - name: Test suite under the address and undefined behaviour sanitizers
+        run: make CC=$CC test-asan
+
+  docs:
+    name: documentation is in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # docs/ is generated from tools/. Regenerating must not change anything,
+      # or the published pages have drifted from their generators.
+      - name: Regenerate and compare
+        run: |
+          make doc
+          git diff --exit-code -- docs/ \
+            || { echo "::error::docs/ is out of date -- run 'make doc' and commit the result"; exit 1; }

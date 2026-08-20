@@ -357,6 +357,24 @@ a:focus-visible, .rail a:focus-visible {
   border-radius: 2px;
 }
 /* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
 .note-try {
   background: var(--accent-bg);
   border-left-color: var(--accent);

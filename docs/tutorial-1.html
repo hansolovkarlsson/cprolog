@@ -357,6 +357,24 @@ a:focus-visible, .rail a:focus-visible {
   border-radius: 2px;
 }
 /* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
 .note-try {
   background: var(--accent-bg);
   border-left-color: var(--accent);
@@ -482,7 +500,7 @@ footer {
 </header>
 <div class="shell">
   <nav class="rail" aria-label="Contents">
-    <p class="rail-title">Contents</p>
+    <p class="rail-title">Levels</p><div class="levels"><a href="tutorial-1.html" aria-current="page">Level 1</a><a href="tutorial-2.html">Level 2</a></div><p class="rail-title">Contents</p>
     <ol><li><a href="#start">Before you begin</a></li><li><a href="#idea">The idea in one page</a></li><li><a href="#facts">Facts</a></li><li><a href="#asking">Asking questions</a></li><li><a href="#unification">Variables and unification</a></li><li><a href="#rules">Rules</a></li><li><a href="#search">How Prolog answers</a></li><li><a href="#recursion">Recursion</a></li><li><a href="#arithmetic">Arithmetic</a></li><li><a href="#errors">When things go wrong</a></li><li><a href="#exercises">Exercises</a></li><li><a href="#next">Where this goes next</a></li></ol>
   </nav>
   <main>
@@ -571,7 +589,7 @@ Y = lars </code></pre><p>Each answer binds two variables, and the toplevel print
 % correct only if you check every candidate yourself
 older_child(P, C, Other) :-
     parent(P, C), parent(P, Other), C \== Other,
-    born(C, Y1), born(Other, Y2), Y1 &lt; Y2.</code></pre></div></details></section><section id="next"><h2>Where this goes next</h2><p>You now have the whole model: facts, rules, unification, and a search that backtracks. Everything else in Prolog is built from those four things.</p><p>Level 2 takes on the parts that make it practical:</p><ul><li><strong>Lists</strong> — the workhorse structure, and the recursion patterns that go with them.</li><li><strong>Collecting answers</strong> — <code>findall/3</code> and friends, for the questions that ask about *all* the solutions at once, like the eldest-child exercise above.</li><li><strong>Controlling the search</strong> — <code>\\+</code> for negation, and the cut for committing to a choice.</li><li><strong>Building your own data</strong> — terms as structures, and the operators that make them readable.</li></ul><p>Until then, the <a href="reference.html">language reference</a> lists every predicate this interpreter provides, with the modes each argument takes.</p></section>
+    born(C, Y1), born(Other, Y2), Y1 &lt; Y2.</code></pre></div></details></section><section id="next"><h2>Where this goes next</h2><p>You now have the whole model: facts, rules, unification, and a search that backtracks. Everything else in Prolog is built from those four things.</p><p><a href="tutorial-2.html">Level 2</a> takes on the parts that make it practical:</p><ul><li><strong>Lists</strong> — what they really are, and the patterns for walking and building them.</li><li><strong>Collecting answers</strong> — <code>findall/3</code>, <code>setof/3</code> and <code>aggregate_all/3</code>, for the questions that ask about *all* the solutions at once. That includes the eldest-child exercise above, which is solved there.</li></ul><p>Level 3 will turn to controlling the search — negation, the cut, your own data structures and the grammar notation.</p><p>The <a href="reference.html">language reference</a> lists every predicate this interpreter provides, with the modes each argument takes.</p></section>
     <footer>Generated from the interpreter's own tables and checked against the
     running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
     for the library written in Prolog.</footer>

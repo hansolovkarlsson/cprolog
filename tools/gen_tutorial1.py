@@ -8,15 +8,7 @@
     that file, re-check the transcripts.
 """
 from docpage import (esc, inline, para, ul, pre, table, note, section, figure,
-                     render)
-
-def ex(title, body):
-    """An exercise with its solution folded away."""
-    return ('<details class="ex"><summary>%s</summary><div class="ex-body">%s</div>'
-            '</details>' % (esc(title), body))
-
-def tasks(items):
-    return '<ol class="task">%s</ol>' % ''.join('<li>%s</li>' % i for i in items)
+                     render, ex, tasks, LEVELS)
 
 # ---------------------------------------------------------------- figure
 
@@ -544,21 +536,18 @@ section('next', 'Where this goes next', ''.join([
     para("You now have the whole model: facts, rules, unification, and a search "
          "that backtracks. Everything else in Prolog is built from those four "
          "things."),
-    para("Level 2 takes on the parts that make it practical:"),
+    para("[Level 2](tutorial-2.html) takes on the parts that make it practical:"),
     ul([
-        "**Lists** — the workhorse structure, and the recursion patterns that go "
-        "with them.",
-        "**Collecting answers** — `findall/3` and friends, for the questions "
-        "that ask about *all* the solutions at once, like the eldest-child "
-        "exercise above.",
-        "**Controlling the search** — `\\\\+` for negation, and the cut for "
-        "committing to a choice.",
-        "**Building your own data** — terms as structures, and the operators "
-        "that make them readable.",
+        "**Lists** — what they really are, and the patterns for walking and "
+        "building them.",
+        "**Collecting answers** — `findall/3`, `setof/3` and `aggregate_all/3`, "
+        "for the questions that ask about *all* the solutions at once. That "
+        "includes the eldest-child exercise above, which is solved there.",
     ]),
-    para("Until then, the [language reference](reference.html) lists every "
-         "predicate this interpreter provides, with the modes each argument "
-         "takes."),
+    para("Level 3 will turn to controlling the search — negation, the cut, your "
+         "own data structures and the grammar notation."),
+    para("The [language reference](reference.html) lists every predicate this "
+         "interpreter provides, with the modes each argument takes."),
 ]))
 
 render(title='Prolog Tutorial, Level 1',
@@ -566,4 +555,5 @@ render(title='Prolog Tutorial, Level 1',
        subtitle="Facts, rules, unification and the search — the whole model, "
                 "using the interpreter in this repository. Every query on this "
                 "page was run against it.",
-       outfile='tutorial-1.html')
+       outfile='tutorial-1.html',
+       levels=LEVELS)

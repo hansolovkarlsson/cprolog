@@ -85,6 +85,15 @@ SECTIONS = []
 def section(sid, title, body):
     SECTIONS.append((sid, title, body))
 
+def ex(title, body):
+    """An exercise solution, folded away until the reader wants it."""
+    return ('<details class="ex"><summary>%s</summary><div class="ex-body">%s</div>'
+            '</details>' % (esc(title), body))
+
+def tasks(items):
+    """A numbered list of things for the reader to do."""
+    return '<ol class="task">%s</ol>' % ''.join('<li>%s</li>' % i for i in items)
+
 def figure(svg, caption):
     return '<figure>%s<figcaption>%s</figcaption></figure>' % (svg, inline(caption))
 # ---------------------------------------------------------------- page shell
@@ -442,6 +451,24 @@ a:focus-visible, .rail a:focus-visible {
   border-radius: 2px;
 }
 /* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
 .note-try {
   background: var(--accent-bg);
   border-left-color: var(--accent);
@@ -624,12 +651,15 @@ JS = """
 # The tab icon, kept out of the format strings: it is percent-encoded.
 FAVICON = ('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'26\' font-size=\'26\'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">')
 
+LEVELS = [('tutorial-1.html', 'Level 1', 'DOC_URL_TUTORIAL1'),
+          ('tutorial-2.html', 'Level 2', 'DOC_URL_TUTORIAL2')]
+
 DOCS = [('index.html',      'Overview',           'DOC_URL_INDEX'),
         ('tutorial-1.html', 'Tutorial',           'DOC_URL_TUTORIAL1'),
         ('reference.html',  'Language reference', 'DOC_URL_REFERENCE'),
         ('internals.html',  'Engine internals',   'DOC_URL_INTERNALS')]
 
-def render(title, prompt, subtitle, outfile, sub_under=None):
+def render(title, prompt, subtitle, outfile, sub_under=None, levels=None):
     """Writes one document. sub_under names the section whose predicate groups
        are listed as sub-entries in the contents rail."""
     toc = []
@@ -651,6 +681,15 @@ def render(title, prompt, subtitle, outfile, sub_under=None):
            ' aria-current="page"' if fname == outfile else '', esc(name))
         for fname, name, env in DOCS)
 
+    strip = ''
+    if levels:
+        strip = ('<p class="rail-title">Levels</p><div class="levels">%s</div>'
+                 % ''.join('<a href="%s"%s>%s</a>'
+                           % (os.environ.get(env) or fname,
+                              ' aria-current="page"' if fname == outfile else '',
+                              esc(name))
+                           for fname, name, env in levels))
+
     page = """<title>%s</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!--FAVICON-->
@@ -668,7 +707,7 @@ def render(title, prompt, subtitle, outfile, sub_under=None):
 </header>
 <div class="shell">
   <nav class="rail" aria-label="Contents">
-    <p class="rail-title">Contents</p>
+    %s<p class="rail-title">Contents</p>
     <ol>%s</ol>
   </nav>
   <main>
@@ -680,7 +719,7 @@ def render(title, prompt, subtitle, outfile, sub_under=None):
 </div>
 <script>%s</script>
 """ % (esc(title), CSS, esc(title), esc(prompt), inline(subtitle), nav,
-       ''.join(toc), ''.join(body), JS)
+       strip, ''.join(toc), ''.join(body), JS)
 
     page = page.replace('<!--FAVICON-->', FAVICON)
 

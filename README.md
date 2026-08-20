@@ -24,8 +24,9 @@ false.
 
 Documentation is published at
 **[hansolovkarlsson.github.io/cprolog](https://hansolovkarlsson.github.io/cprolog/)**:
-a [tutorial](https://hansolovkarlsson.github.io/cprolog/tutorial-1.html) that
-teaches Prolog from the beginning using this interpreter,
+a two-part tutorial that teaches Prolog from the beginning using this
+interpreter ([level 1](https://hansolovkarlsson.github.io/cprolog/tutorial-1.html),
+[level 2](https://hansolovkarlsson.github.io/cprolog/tutorial-2.html)),
 a [language reference](https://hansolovkarlsson.github.io/cprolog/reference.html)
 covering syntax, control, arithmetic, every builtin predicate, grammars and
 errors, and an [engine internals](https://hansolovkarlsson.github.io/cprolog/internals.html)

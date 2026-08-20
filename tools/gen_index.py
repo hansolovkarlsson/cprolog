@@ -219,9 +219,10 @@ def render():
         % (esc(t), inline(b), esc(f)) for t, b, f in HIGHLIGHTS)
 
     cards = ''.join([
-        '<a class="card" href="%s"><h3>Tutorial, level 1</h3><p>New to Prolog, or '
-        'returning to it? Facts, rules, unification and the search, taught with '
-        'queries you run against this interpreter.</p></a>'
+        '<a class="card" href="%s"><h3>Tutorial</h3><p>New to Prolog, or returning to '
+        'it? Level 1 covers facts, rules, unification and the search; level 2 '
+        'covers lists and collecting answers. Every query is one you run against '
+        'this interpreter.</p></a>'
         % (os.environ.get('DOC_URL_TUTORIAL1') or 'tutorial-1.html'),
         '<a class="card" href="%s"><h3>Language reference</h3><p>Syntax, control, '
         'arithmetic, every builtin predicate, grammars, errors, and where it parts '

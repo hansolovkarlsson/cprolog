@@ -1,0 +1,709 @@
+<title>Prolog Tutorial, Level 2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--ochre);
+  white-space: nowrap;
+  padding-top: 0.28rem;
+  flex: 0 0 auto;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  .note-tag { width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "B8 A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "BE A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>Prolog Tutorial, Level 2</h1>
+    <span class="prompt">?- level 2</span>
+    <p>Lists — what they really are, the patterns for walking and building them — and how to ask about every solution at once. Every query on this page was run against the interpreter here.</p>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Levels</p><div class="levels"><a href="tutorial-1.html">Level 1</a><a href="tutorial-2.html" aria-current="page">Level 2</a></div><p class="rail-title">Contents</p>
+    <ol><li><a href="#start">Where we left off</a></li><li><a href="#what">What a list actually is</a></li><li><a href="#apart">Taking a list apart</a></li><li><a href="#walking">Walking a list</a></li><li><a href="#building">Building a list</a></li><li><a href="#member-append">The two that do the most work</a></li><li><a href="#accumulators">Accumulators</a></li><li><a href="#library">The library already has these</a></li><li><a href="#collecting">Collecting all the answers</a></li><li><a href="#errors">When list programs go wrong</a></li><li><a href="#exercises">Exercises</a></li><li><a href="#next">Where this goes next</a></li></ol>
+  </nav>
+  <main>
+    <section id="start"><h2>Where we left off</h2><p>Level 1 covered the whole model: facts, rules, unification, and a search that backtracks. This page puts it to work on the structure Prolog programs are mostly made of — lists — and then answers the question Level 1 could not: how to ask about *all* the solutions at once.</p><pre><code>$ ./prolog tutorial/level2.pl</code></pre><aside class="note note-impl"><span class="note-tag">Why everything here is called my_something</span><div>The library already defines <code>length/2</code>, <code>member/2</code> and <code>append/3</code>. If you define them again in your own file, your clauses are <strong>added</strong> to the library's rather than replacing them, and every answer comes back twice. So the versions we write are <code>my_length</code>, <code>my_member</code>, <code>my_append</code>. There is more on this below.</div></aside></section><section id="what"><h2>What a list actually is</h2><p>A list looks like special syntax, and it is — but only syntax. Underneath, <code>[a,b,c]</code> is an ordinary term built from two things you already know: the atom <code>[]</code>, and a two-argument term holding an element and the rest of the list.</p><pre><code>?- write_canonical([a,b,c]), nl.
+'.'(a,'.'(b,'.'(c,[])))
+true.</code></pre><figure><div class="svg-frame"><svg viewBox="0 0 620 180" role="img" aria-label="The list [a,b,c] drawn as three nested terms, each with an element and the rest of the list, ending in the empty list." xmlns="http://www.w3.org/2000/svg"><circle cx="80" cy="60" r="18" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="80" y="64" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">'.'</text><line x1="80" y1="78" x2="80" y2="104" stroke="currentColor" stroke-width="1.1" opacity="0.6"/><rect x="56" y="104" width="48" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="80" y="122" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">a</text><text x="88" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6">head</text><line x1="99" y1="60" x2="211" y2="60" stroke="currentColor" stroke-width="1.1" opacity="0.6"/><text x="155" y="50" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">tail</text><circle cx="230" cy="60" r="18" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="230" y="64" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">'.'</text><line x1="230" y1="78" x2="230" y2="104" stroke="currentColor" stroke-width="1.1" opacity="0.6"/><rect x="206" y="104" width="48" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="230" y="122" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">b</text><text x="238" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6">head</text><line x1="249" y1="60" x2="361" y2="60" stroke="currentColor" stroke-width="1.1" opacity="0.6"/><text x="305" y="50" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">tail</text><circle cx="380" cy="60" r="18" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="380" y="64" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">'.'</text><line x1="380" y1="78" x2="380" y2="104" stroke="currentColor" stroke-width="1.1" opacity="0.6"/><rect x="356" y="104" width="48" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="380" y="122" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">c</text><text x="388" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="start" opacity="0.6">head</text><line x1="399" y1="60" x2="501" y2="60" stroke="currentColor" stroke-width="1.1" opacity="0.6"/><text x="450" y="50" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">tail</text><rect x="520" y="46" width="48" height="28" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="544" y="64" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" text-anchor="middle">[]</text><text x="544" y="96" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">ends the list</text><text x="300" y="160" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">[a,b,c] is three '.'/2 terms, each holding one element and the rest of the list</text></svg></div><figcaption>Every list is this shape. The square brackets are a convenience the reader and the writer provide; unification sees the nested terms.</figcaption></figure><p>This matters because it explains the notation you will use constantly. <code>[H|T]</code> means a list whose first element is H and whose rest is T — the two arguments of that term. The bar separates the front from the rest.</p><pre><code>?- [a,b,c] = [H|T].
+H = a,
+T = [b,c].</code></pre><p>The rest is itself a list, all the way down to <code>[]</code>, which is where the structure stops. The empty list has no head and no tail, so it matches no <code>[H|T]</code> pattern at all:</p><pre><code>?- [] = [X|Rest].
+false.</code></pre><p>That failure is not a nuisance — it is how every list program knows when to stop.</p></section><section id="apart"><h2>Taking a list apart</h2><p>Because <code>[H|T]</code> is just a term, you take a list apart by unifying it with a pattern. Ask for as many elements as you want by name:</p><pre><code>?- [a,b,c] = [X,Y|Rest].
+X = a,
+Y = b,
+Rest = [c].
+
+?- [a] = [X|Rest].
+X = a,
+Rest = [].</code></pre><p>A pattern with no bar matches a list of exactly that length. <code>[X,Y,Z]</code> will match a three-element list and nothing else — useful when your data has a fixed shape.</p><aside class="note note-try"><span class="note-tag">Feel where it fails</span><div>Try <code>[a,b] = [X,Y,Z]</code>, then <code>[a,b,c] = [X,Y]</code>, then <code>[a,b,c] = [a|T]</code>. The third one succeeds: patterns may contain constants as well as variables.</div></aside></section><section id="walking"><h2>Walking a list</h2><p>Almost every list predicate has the same two-clause shape: one clause for the empty list, one for a list with a head and a tail. The second does something with the head and calls itself on the tail.</p><pre><code>my_length([], 0).
+my_length([_|T], N) :-
+    my_length(T, N0),
+    N is N0 + 1.</code></pre><p>Read the second clause as a claim rather than as instructions: the length of a list with a head is one more than the length of its tail. The recursion terminates because each call gets a shorter list, and <code>[]</code> matches the first clause.</p><pre><code>?- shopping(L), my_length(L, N).
+L = [milk,bread,eggs,coffee],
+N = 4.</code></pre><p>Summing works the same way, with the same shape:</p><pre><code>total([], 0).
+total([H|T], Sum) :-
+    total(T, Rest),
+    Sum is H + Rest.
+
+?- primes(P), total(P, Sum).
+P = [2,3,5,7,11],
+Sum = 28.</code></pre><aside class="note note-impl"><span class="note-tag">Where the work happens</span><div>Notice that <code>is</code> comes <strong>after</strong> the recursive call in both. Prolog walks all the way down to <code>[]</code> first, and the additions happen on the way back up. That is fine for ordinary lists; the section on accumulators below shows the other way round, and why you might want it.</div></aside></section><section id="building"><h2>Building a list</h2><p>So far the list was input. To produce one, put the pattern in the head of the rule and let unification build it:</p><pre><code>double_all([], []).
+double_all([H|T], [D|DT]) :-
+    D is H * 2,
+    double_all(T, DT).
+
+?- primes(P), double_all(P, D).
+P = [2,3,5,7,11],
+D = [4,6,10,14,22].</code></pre><p>The second argument of the head, <code>[D|DT]</code>, is not a value being returned. It is a pattern the caller's variable unifies with, leaving <code>D</code> and <code>DT</code> to be filled in as the proof proceeds. Prolog builds the answer as it goes.</p><h3>Keeping only some elements</h3><p>A filter needs a decision, and the plainest way to write one is two clauses whose bodies begin with the test that tells them apart:</p><pre><code>only_even([], []).
+only_even([H|T], [H|R]) :- 0 is H mod 2, only_even(T, R).
+only_even([H|T], R)     :- 1 is H mod 2, only_even(T, R).
+
+?- primes(P), only_even(P, E).
+P = [2,3,5,7,11],
+E = [2] ;
+false.</code></pre><p>Clause two keeps the head; clause three drops it. The tests exclude each other, so exactly one clause applies to each element and there is exactly one answer.</p><p>But look at what happened when we asked for a second one. Prolog had to go and check: after clause two succeeded for an even element, clause three was still sitting there untried, and only failing it proved there was nothing more. The answer was never in doubt — the work of confirming it was.</p><p>The same filter written with if-then-else has no such loose ends:</p><pre><code>only_even2([], []).
+only_even2([H|T], Out) :-
+    (   0 is H mod 2
+    -&gt;  Out = [H|Rest]
+    ;   Out = Rest
+    ),
+    only_even2(T, Rest).</code></pre><pre><code>?- primes(P), only_even2(P, E).
+P = [2,3,5,7,11],
+E = [2].</code></pre><p>Same answer, and this time it ends in a full stop: nothing was left to reconsider. <code>( Condition -&gt; Then ; Else )</code> proves Condition, and if it succeeds <strong>commits</strong> to that first solution and runs Then; otherwise it runs Else. Prolog will not go back and try the condition another way.</p><p>That is the first taste of controlling the search rather than only describing the problem, and it is the subject of Level 3. Both definitions are in the file, so you can compare them yourself.</p></section><section id="member-append"><h2>The two that do the most work</h2><p>Two predicates turn up in nearly every Prolog program. Both are three lines, and both are more useful than they look because they run in several directions.</p><h3>member</h3><pre><code>my_member(X, [X|_]).
+my_member(X, [_|T]) :- my_member(X, T).</code></pre><p>X is a member of a list if it is the head, or if it is a member of the tail. With X bound it is a test; with X unbound it is a generator, handing out the elements one at a time on backtracking:</p><pre><code>?- my_member(X, [a,b,c]).
+X = a ;
+X = b ;
+X = c ;
+false.</code></pre><h3>append</h3><pre><code>my_append([], L, L).
+my_append([H|T], L, [H|R]) :- my_append(T, L, R).</code></pre><p>Appending the empty list to L gives L; otherwise the head comes along for the ride and the tails are appended. Forwards it joins two lists:</p><pre><code>?- my_append([1,2], [3], R).
+R = [1,2,3].</code></pre><p>Backwards it takes a list apart — every way of splitting it in two, on backtracking. This is the relational pay-off, and it is worth staring at for a moment:</p><pre><code>?- my_append(X, Y, [1,2]).
+X = [],
+Y = [1,2] ;
+X = [1],
+Y = [2] ;
+X = [1,2],
+Y = [] ;
+false.</code></pre><p>With one argument fixed it answers a different question again — here, "what comes before this ending?":</p><pre><code>?- my_append(X, [3], [1,2,3]).
+X = [1,2] </code></pre><aside class="note note-try"><span class="note-tag">One definition, four questions</span><div>Join, split, take a prefix, take a suffix. You wrote none of those cases: they fall out of describing what appending *is* and letting the search do the rest.</div></aside></section><section id="accumulators"><h2>Accumulators</h2><p>Reversing a list is the classic example of why the shape of a recursion matters. The obvious version reverses the tail and puts the head on the end:</p><pre><code>rev_naive([], []).
+rev_naive([H|T], R) :-
+    rev_naive(T, RT),
+    my_append(RT, [H], R).</code></pre><p>It works, but <code>my_append</code> walks the whole reversed tail every time, so reversing an n-element list does about n²/2 steps. The alternative carries a second list along — an <strong>accumulator</strong> — that holds the answer so far:</p><pre><code>rev(List, Reversed) :- rev_(List, [], Reversed).
+
+rev_([], Acc, Acc).
+rev_([H|T], Acc, R) :- rev_(T, [H|Acc], R).</code></pre><p>Each step moves one element from the front of the input to the front of the accumulator — which is exactly what reverses it. When the input runs out, the accumulator *is* the answer, and the first clause hands it back. One pass, n steps.</p><pre><code>?- rev([1,2,3], R).
+R = [3,2,1].</code></pre><p>The pattern generalises. Summing with an accumulator adds on the way <strong>down</strong> rather than on the way back up:</p><pre><code>total_acc(List, Sum) :- total_acc(List, 0, Sum).
+
+total_acc([], Sum, Sum).
+total_acc([H|T], Acc, Sum) :-
+    Acc1 is Acc + H,
+    total_acc(T, Acc1, Sum).
+
+?- primes(P), total_acc(P, S).
+P = [2,3,5,7,11],
+S = 28.</code></pre><p>Two things are worth noticing. The helper takes one more argument than the predicate you call, which is why it has its own name and a wrapper that supplies the starting value. And the base clause <code>total_acc([], Sum, Sum)</code> says "when there is nothing left, the answer is what I have accumulated" — the same variable twice, which is unification doing the returning.</p></section><section id="library"><h2>The library already has these</h2><p>Everything above is worth writing once, to see how it works. In real programs you use the versions that come with the system:</p><div class="scroll"><table class="mono1"><thead><tr><th>Predicate</th><th>What it does</th></tr></thead><tbody><tr><td>length(?List, ?N)</td><td>Length, and it also builds a list of N fresh variables when the list is unbound.</td></tr><tr><td>member(?X, ?List)</td><td>As above, and <code>memberchk/2</code> for the first solution only.</td></tr><tr><td>append(?A, ?B, ?C)</td><td>As above, plus <code>append/2</code> to flatten a list of lists.</td></tr><tr><td>nth0/3, nth1/3, last/2</td><td>Index into a list, from 0 or from 1, and take the final element.</td></tr><tr><td>reverse/2</td><td>With the accumulator already written.</td></tr><tr><td>msort/2, sort/2</td><td>Sort; <code>sort/2</code> also removes duplicates.</td></tr><tr><td>keysort/2</td><td>Sort a list of <code>Key-Value</code> pairs by key, keeping the order of equal keys.</td></tr><tr><td>sum_list/2, max_list/2, min_list/2</td><td>Arithmetic over a list of numbers.</td></tr><tr><td>numlist(+L, +H, -List)</td><td>The list of integers from L to H.</td></tr><tr><td>maplist(:G, ?L)</td><td>Call a goal on every element; also maplist/3 and /4 for lists walked in step.</td></tr><tr><td>exclude/3, include/3</td><td>Filter by a goal, without writing the recursion.</td></tr></tbody></table></div><p>The library version of <code>length/2</code> is better than ours in a way worth seeing. Ask both for a list of a given length:</p><pre><code>?- length(L, 3).
+L = [_G703,_G702,_G701].
+
+?- my_length(L, 3).
+L = [_G696,_G700,_G704] </code></pre><p>Both produce a three-element list of fresh variables. But the library one is finished — the full stop says so — while ours is still holding a choice open. Ask <code>my_length</code> for another answer and it will search for ever, because there is always a longer list to try.</p><h3>The trap with these names</h3><p>If you define <code>member/2</code> in your own file, Prolog does not replace the library's definition. It appends your clauses to it, and you get every answer from both:</p><pre><code>% in your own file
+member(X, [X|_]).
+member(X, [_|T]) :- member(X, T).
+
+?- findall(X, member(X, [a,b]), L).
+L = [a,b,b,a,b,b].</code></pre><p>Six answers where there should be two. Predicates written in C are protected and refuse outright — <code>atom_length(_, 42).</code> in a file gives <code>No permission to modify static_procedure</code>— but the library predicates written in Prolog are ordinary, and quietly accept the extra clauses. Give your own versions your own names.</p></section><section id="collecting"><h2>Collecting all the answers</h2><p>Backtracking hands you solutions one at a time. Some questions are about the whole set of them: how many, which is largest, are they all such-and-such. Level 1's last exercise — the eldest child — got stuck exactly there.</p><p><code>findall/3</code> runs a goal, collects one copy of a template per solution, and gives you the list:</p><pre><code>?- findall(C, parent(esther, C), L).
+L = [hannah,isaac].
+
+?- findall(D, ancestor(esther, D), L).
+L = [hannah,isaac,lars,maja,nils].</code></pre><p>The template can be any term, which is how you collect more than one thing per solution:</p><pre><code>?- findall(Y-P, born(P, Y), L).
+L = [1948-esther,1972-hannah,1975-isaac,1998-lars,2001-maja,2003-nils].</code></pre><p><code>findall/3</code> always succeeds — with <code>[]</code> when the goal has no solutions at all — and it keeps duplicates and the original order.</p><h3>setof and bagof</h3><p><code>setof/3</code> sorts the results and removes duplicates:</p><pre><code>?- setof(X, my_member(X, [c,a,b,a]), S).
+S = [a,b,c].</code></pre><p><code>bagof/3</code> and <code>setof/3</code> differ from <code>findall/3</code> in one further way: a variable in the goal that is not in the template is treated as a grouping key, and you get one answer per value of it, on backtracking:</p><pre><code>?- bagof(C, parent(P, C), L).
+P = esther,
+L = [hannah,isaac] ;
+P = hannah,
+L = [lars,maja] ;
+P = isaac,
+L = [nils] </code></pre><p>That is often exactly what you want — the children of each parent, grouped. When it is not, write <code>P^</code> in front of the goal to say the variable is not a key, or use <code>findall/3</code>, which never groups.</p><h3>Counting, summing, the largest</h3><p><code>aggregate_all/3</code> wraps the common cases so you do not have to collect a list and then walk it:</p><pre><code>?- aggregate_all(count, parent(esther, _), N).
+N = 2.
+
+?- aggregate_all(sum(Y), born(_, Y), Total).
+Total = 11897.
+
+?- aggregate_all(min(Y), born(_, Y), Y0).
+Y0 = 1948.</code></pre><h3>The eldest child, finally</h3><p>Now the Level 1 problem can be stated directly: collect every child with their year of birth, sort by year, and take the first.</p><pre><code>eldest_child(P, C) :-
+    findall(Y-K, (parent(P, K), born(K, Y)), Pairs),
+    Pairs \== [],
+    keysort(Pairs, [_-C|_]).
+
+?- eldest_child(hannah, C).
+C = lars.
+
+?- eldest_child(esther, C).
+C = hannah.</code></pre><p>It is in <code>tutorial/level2.pl</code>, so you can try it as it stands. Three things are doing work here. The goal inside <code>findall/3</code> is a conjunction in brackets, so both parts run for each solution. <code>keysort/2</code> sorts <code>Key-Value</code> pairs by key, which is why the year comes first in the template. And the pattern <code>[_-C|_]</code> takes the value out of the first pair without any further predicate.</p><aside class="note note-impl"><span class="note-tag">findall gives you copies</span><div>The solutions <code>findall/3</code> collects are copies, with fresh variables. If your template contains an unbound variable, each element of the list gets its own — they are not shared with anything in the goal, and not with each other.</div></aside></section><section id="errors"><h2>When list programs go wrong</h2><div class="scroll"><table class=""><thead><tr><th>Symptom</th><th>Usual cause</th></tr></thead><tbody><tr><td>It runs for ever and eats memory</td><td>A missing base case, or a recursive clause that does not make the list shorter. Check that <code>[]</code> is handled and that you recurse on the tail, not the whole list.</td></tr><tr><td>Arguments are not sufficiently instantiated</td><td><code>is</code> reached an unbound variable — often because the recursion was written to compute on the way down while the value only arrives on the way back up.</td></tr><tr><td>Answers come back twice</td><td>Two clauses both match the same case. Filters written as guarded clauses need tests that exclude each other, as <code>only_even</code> does.</td></tr><tr><td>false, when you expected an answer</td><td>A pattern that does not match: <code>[X]</code> is a list of exactly one element, while <code>X</code> is anything at all, and <code>[X|Y]</code> needs at least one element.</td></tr></tbody></table></div><aside class="note note-try"><span class="note-tag">The quickest way to find it</span><div>Run the predicate on the smallest input that should work — <code>[]</code>, then <code>[a]</code>, then <code>[a,b]</code>. The first size that misbehaves tells you which clause is wrong.</div></aside></section><section id="exercises"><h2>Exercises</h2><p>All of these use <code>tutorial/level2.pl</code>. Write them with your own names, and remember that the library already has <code>last/2</code>, <code>nth0/3</code> and friends — the point is to write them once yourself.</p><ol class="task"><li><p><code>my_last(?List, ?X)</code>: X is the final element of List.</p></li><li><p><code>count_of(@X, +List, -N)</code>: how many times X occurs in List.</p></li><li><p><code>sum_evens(+List, -Sum)</code>: the sum of the even numbers in a list. You can do this in one line using what is already in the file.</p></li><li><p><code>take(+N, +List, -Front)</code>: the first N elements, or the whole list if it is shorter. Write it without if-then-else.</p></li><li><p><code>children_of(+P, -List)</code> and <code>ancestors_sorted(+D, -List)</code>: use <code>findall/3</code> for the first and <code>setof/3</code> for the second. What happens to the order?</p></li><li><p><code>youngest_child(+P, -C)</code>: the mirror of <code>eldest_child/2</code>. There is more than one way — try it with <code>keysort/2</code> and again with <code>aggregate_all/3</code>.</p></li><li><p>Predict the answers to <code>my_append(X, Y, [1,2,3])</code> and their order before running it. How many are there, and why that many?</p></li></ol><details class="ex"><summary>Solutions</summary><div class="ex-body"><pre><code>% 1
+my_last([X], X).
+my_last([_|T], X) :- my_last(T, X).
+
+% 2
+count_of(_, [], 0).
+count_of(X, [H|T], N) :-
+    count_of(X, T, N0),
+    ( X == H -&gt; N is N0 + 1 ; N = N0 ).
+
+% 3
+sum_evens(L, S) :- only_even(L, E), total(E, S).
+
+% 4
+take(0, _, []).
+take(N, [H|T], [H|R]) :- N &gt; 0, N1 is N - 1, take(N1, T, R).
+take(N, [], []) :- N &gt; 0.
+
+% 5
+children_of(P, Cs) :- findall(C, parent(P, C), Cs).
+ancestors_sorted(D, As) :- setof(A, ancestor(A, D), As).
+
+% 6
+youngest_child(P, C) :-
+    findall(Y-K, (parent(P, K), born(K, Y)), Pairs),
+    Pairs \== [],
+    keysort(Pairs, Sorted),
+    my_last(Sorted, _-C).</code></pre><p><strong>2</strong> uses <code>==</code> rather than <code>=</code>, because we are asking whether the element *is* X, not whether it can be made equal to it. With <code>=</code> an unbound element would be bound to X and counted.</p><p><strong>4</strong> needs the third clause for the short-list case, and the <code>N &gt; 0</code> guard keeps it from overlapping the first clause.</p><p><strong>5</strong> <code>findall/3</code> gives <code>[lars,maja]</code> in file order; <code>setof/3</code> gives <code>[esther,hannah]</code> sorted and without duplicates — a different order from the search's.</p><p><strong>7</strong> Four answers: the split can happen before the first element, between any two, or after the last. A list of n elements has n+1 places to cut it.</p></div></details></section><section id="next"><h2>Where this goes next</h2><p>You can now write most of what day-to-day Prolog consists of: walk a structure, build one, and ask about all the answers at once.</p><p>Level 3 turns to control — the parts that decide <strong>which</strong> proofs Prolog looks for:</p><ul><li><strong>Negation</strong> — <code>\\+</code>, what "not" can and cannot mean when your program only knows what you told it.</li><li><strong>The cut</strong> — committing to a choice, what it saves, and the ways it changes a program's meaning behind your back.</li><li><strong>Your own structures</strong> — terms as records, and <code>op/3</code> for making them read like the problem instead of like data.</li><li><strong>Grammars</strong> — the <code>--&gt;</code> notation, for taking apart sequences without writing the list plumbing by hand.</li></ul><p>The <a href="reference.html">language reference</a> has every predicate this interpreter provides, and <a href="tutorial-1.html">Level 1</a> is there if any of the groundwork needs another look.</p></section>
+    <footer>Generated from the interpreter's own tables and checked against the
+    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
+    for the library written in Prolog.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

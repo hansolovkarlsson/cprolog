@@ -332,7 +332,7 @@ false.
 ]))
 
 section('packaged', 'The cut, already wrapped up for you', ''.join([
-    para("Three predicates you will use constantly are all cuts underneath. "
+    para("Four predicates you will use constantly are all cuts underneath. "
          "Reaching for them instead of writing `!` keeps the commitment visible "
          "and confined to one goal."),
     table(['Predicate', 'Means', 'Roughly'], [

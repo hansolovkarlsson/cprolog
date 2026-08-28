@@ -5,6 +5,10 @@ consequence of decisions described in the
 [engine internals](https://hansolovkarlsson.github.io/cprolog/internals.html)
 document; nothing is speculative.
 
+Finished work moves to [CHANGELOG.md](CHANGELOG.md). [POSTMORTEM.md](POSTMORTEM.md)
+covers the defects the project has found in itself, including the ones that
+produced some of the entries below.
+
 ## Near term
 
 - **The missing character predicates.** `get_char/1,2`, `peek_char/1,2`,
@@ -22,6 +26,12 @@ document; nothing is speculative.
 - **`open/4` options.** The options list is accepted and ignored; at least
   `alias/1` and `eof_action/1` should be honoured or rejected rather than
   silently dropped.
+
+- **The reader's arity limit raises the wrong thing.** `=../2` and `functor/3`
+  raise `representation_error(max_arity)` past 256 arguments, but the reader
+  reports it as a syntax error. ISO asks for the representation error. The fix
+  means giving the parser a way to raise a non-syntax exception, which its error
+  path does not currently have.
 
 ## Medium term
 

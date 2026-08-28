@@ -198,7 +198,7 @@ These are deliberate, and each would be a substantial piece of work:
 
 ## Testing
 
-`tests/test.pl` holds 240 tests as `test(Name, Goal)` facts covering
+`tests/test.pl` holds 256 tests as `test(Name, Goal)` facts covering
 unification and the standard order, arithmetic and its errors, control and cut,
 exceptions, all-solutions predicates, term inspection, atoms and UTF-8 text,
 sorting, the list library, the database, the reader and writer (including
@@ -206,9 +206,14 @@ round-tripping), `format/2`, grammars, streams, and deep recursion under the
 collector. `make check` runs them both normally and with the collector
 running constantly; `make test-asan` runs both under the sanitizers.
 
-## Roadmap
+## Project documents
 
-Known work and deliberate non-goals are listed in [ROADMAP.md](ROADMAP.md).
+- [ROADMAP.md](ROADMAP.md) — known work and deliberate non-goals.
+- [CHANGELOG.md](CHANGELOG.md) — what has shipped, newest first.
+- [JOURNAL.md](JOURNAL.md) — how the interpreter was built and why it is shaped
+  this way.
+- [POSTMORTEM.md](POSTMORTEM.md) — every defect the project has found in itself,
+  and, more usefully, what found it.
 
 ## Licence
 

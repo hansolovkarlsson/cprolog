@@ -173,7 +173,7 @@ HIGHLIGHTS = [
      "No abstract machine and no clause compiler: goals live in an explicit list, "
      "alternatives on a choice point stack, and cut is one integer carried in each "
      "goal frame. The whole solver is one file.",
-     "5,300 lines of C99, no dependencies beyond libc"),
+     "6,600 lines of C99, no dependencies beyond libc"),
     ("Memory that behaves",
      "Backtracking rewinds the heap to a choice point's mark, a copying collector "
      "handles what backtracking cannot, and generators retry a single choice point "
@@ -188,7 +188,7 @@ HIGHLIGHTS = [
      "The suite runs three times: normally, with the collector forced every 1024 "
      "inferences, and under the address and undefined behaviour sanitizers. It "
      "builds warning-free under both clang and gcc.",
-     "248 tests · make check · make test-asan"),
+     "256 tests · make check · make test-asan"),
 ]
 
 EXAMPLES = [
@@ -232,6 +232,14 @@ def render():
         'solver loop, choice points and cut, the three memory regions and the '
         'collector — with the measurements and the bugs the design produced.</p></a>'
         % (os.environ.get('DOC_URL_INTERNALS') or 'internals.html'),
+        '<a class="card" href="%s"><h3>Journal</h3><p>How the interpreter got its '
+        'shape: the one design decision everything followed from, and what four '
+        'tutorial levels cost to write.</p></a>'
+        % (os.environ.get('DOC_URL_JOURNAL') or 'journal.html'),
+        '<a class="card" href="%s"><h3>Postmortem</h3><p>Every defect the project '
+        'has found in itself and, more usefully, what found it. The test suite '
+        'found three of sixteen.</p></a>'
+        % (os.environ.get('DOC_URL_POSTMORTEM') or 'postmortem.html'),
     ])
 
     examples = ''.join('<tr><td>%s</td><td>%s</td></tr>' % (esc(f), inline(d))
@@ -277,7 +285,7 @@ def render():
   <div class="cards" style="grid-template-columns: minmax(0,1fr);">
     <div class="card">
       <p style="font-family: var(--mono); font-size: 0.82rem; color: var(--ink); line-height: 1.8;">
-make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 tests, twice</span><br>make examples</p>
+make<br>./prolog<br>make check<span style="color: var(--muted)">      # 256 tests, twice</span><br>make examples</p>
     </div>
   </div>
   <p style="margin-top: 1rem; color: var(--muted); font-size: 0.92rem; max-width: 68ch;">

@@ -187,6 +187,14 @@ h3 {
 }
 p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
 ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
 li { margin-bottom: 0.45rem; }
 a { color: var(--accent); }
 
@@ -496,7 +504,7 @@ footer {
     <h1>Prolog Tutorial, Level 3</h1>
     <span class="prompt">?- level 3</span>
     <p>Negation, the cut, terms and operators of your own, and the grammar notation — the parts of Prolog that control the search rather than describe the problem. Every query on this page was run against the interpreter here.</p>
-    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a><a href="journal.html">Journal</a><a href="postmortem.html">Postmortem</a></nav>
   </div>
 </header>
 <div class="shell">
@@ -730,9 +738,7 @@ S = [15-bob,96-alice,202-cara].
 
 ?- total_of_text("3 hammer, 2 rope", T).
 T = 96.</code></pre><p><strong>1</strong> The single <code>\+</code> around a conjunction gives one solution per item, which is what keeps the duplicates away. Writing it as <code>out_of_stock(I) ; discontinued(I)</code> would report the tent twice.</p><p><strong>3</strong> "No item costs less" is a <code>\+</code> over a generator, and it is safe because <code>I costs P</code> bound <code>P</code> first. Swap the two goals and it fails for everything.</p><p><strong>4</strong> The second clause needs its own test, <code>X &lt; Y</code>. Once it has one, the cut in the first clause is only saving work — it has become green, and you could delete it without changing a single answer.</p><p><strong>5</strong> Both give <code>30-30</code>, <code>96-91</code> and <code>202-181</code>. The cut version is shorter; the arrow version says out loud that the three cases are alternatives, and cannot be broken by someone calling it with <code>Final</code> already bound. Most people keep the second.</p><p><strong>7</strong> 288. A noun phrase is now <code>2 determiners × (2 adjectives + nothing) × 2 nouns = 12</code>, and a sentence is two noun phrases with a verb between them: <code>12 × 2 × 12</code>.</p></div></details></section><section id="next"><h2>Where this goes next</h2><p>Between the three levels you now have the whole working language: facts and rules, unification and backtracking, lists and aggregation, and — as of this page — control over which proofs get attempted and notation of your own for the data.</p><p><a href="tutorial-4.html">Level 4</a> turns that into a program. It covers the parts that reach outside the proof: exceptions with <code>catch/3</code> and <code>throw/1</code>, the database predicates <code>assertz/1</code> and <code>retract/1</code>, <code>format/2</code>, and reading and writing files.</p><p>If you would rather know how any of this works underneath, the <a href="internals.html">engine internals</a> page describes the machine that runs it — and the cut in particular turns out to be exactly what the figure above suggests: one integer, remembered per goal, holding the height the choice point stack must be cut back to.</p><ul><li>Level 1 — <a href="tutorial-1.html">facts, rules and the search</a>.</li><li>Level 2 — <a href="tutorial-2.html">lists and collecting answers</a>.</li><li>Level 4 — <a href="tutorial-4.html">exceptions, the database and I/O</a>.</li><li>The examples in <code>examples/</code> are worth reading too: the eight queens, the zebra puzzle and a calculator built on the grammar notation from this page.</li></ul></section>
-    <footer>Generated from the interpreter's own tables and checked against the
-    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
-    for the library written in Prolog.</footer>
+    <footer>Generated from the interpreter's own tables and checked against the running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code> for the library written in Prolog.</footer>
   </main>
 </div>
 <script>

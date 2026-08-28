@@ -187,6 +187,14 @@ h3 {
 }
 p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
 ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
 li { margin-bottom: 0.45rem; }
 a { color: var(--accent); }
 
@@ -496,7 +504,7 @@ footer {
     <h1>Prolog Tutorial, Level 2</h1>
     <span class="prompt">?- level 2</span>
     <p>Lists — what they really are, the patterns for walking and building them — and how to ask about every solution at once. Every query on this page was run against the interpreter here.</p>
-    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a><a href="journal.html">Journal</a><a href="postmortem.html">Postmortem</a></nav>
   </div>
 </header>
 <div class="shell">
@@ -647,9 +655,7 @@ youngest_child(P, C) :-
     Pairs \== [],
     keysort(Pairs, Sorted),
     my_last(Sorted, _-C).</code></pre><p><strong>2</strong> uses <code>==</code> rather than <code>=</code>, because we are asking whether the element <em>is</em> X, not whether it can be made equal to it. With <code>=</code> an unbound element would be bound to X and counted.</p><p><strong>4</strong> needs the third clause for the short-list case, and the <code>N &gt; 0</code> guard keeps it from overlapping the first clause.</p><p><strong>5</strong> <code>findall/3</code> gives <code>[lars,maja]</code> in file order; <code>setof/3</code> gives <code>[esther,hannah]</code> sorted and without duplicates — a different order from the search's.</p><p><strong>7</strong> Four answers: the split can happen before the first element, between any two, or after the last. A list of n elements has n+1 places to cut it.</p></div></details></section><section id="next"><h2>Where this goes next</h2><p>You can now write most of what day-to-day Prolog consists of: walk a structure, build one, and ask about all the answers at once.</p><p><a href="tutorial-3.html">Level 3</a> turns to control — the parts that decide <strong>which</strong> proofs Prolog looks for:</p><ul><li><strong>Negation</strong> — <code>\\+</code>, what "not" can and cannot mean when your program only knows what you told it.</li><li><strong>The cut</strong> — committing to a choice, what it saves, and the ways it changes a program's meaning behind your back.</li><li><strong>Your own structures</strong> — terms as records, and <code>op/3</code> for making them read like the problem instead of like data.</li><li><strong>Grammars</strong> — the <code>--&gt;</code> notation, for taking apart sequences without writing the list plumbing by hand.</li></ul><p>The <a href="reference.html">language reference</a> has every predicate this interpreter provides, and <a href="tutorial-1.html">Level 1</a> is there if any of the groundwork needs another look.</p></section>
-    <footer>Generated from the interpreter's own tables and checked against the
-    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
-    for the library written in Prolog.</footer>
+    <footer>Generated from the interpreter's own tables and checked against the running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code> for the library written in Prolog.</footer>
   </main>
 </div>
 <script>

@@ -1,0 +1,575 @@
+<title>Postmortem</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ochre);
+  padding-top: 0.28rem;
+  flex: 0 0 7.5rem;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  /* Stacked, the basis above would become a height, so it has to go back. */
+  .note-tag { flex: 0 0 auto; width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "\25B8\00A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "\25BE\00A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>Postmortem</h1>
+    <span class="prompt">?- postmortem</span>
+    <p>Every defect this project has found in itself, what caused it, and — the part worth the paper — what found it. A 256-test suite found three of sixteen; writing the documentation found five.</p>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a><a href="journal.html">Journal</a><a href="postmortem.html" aria-current="page">Postmortem</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Contents</p>
+    <ol><li><a href="#scope">Scope</a></li><li><a href="#cohort-a-the-design-era">Cohort A — the design era</a></li><li><a href="#cohort-b-portability">Cohort B — portability</a></li><li><a href="#cohort-c-consistency">Cohort C — consistency</a></li><li><a href="#what-found-what">What found what</a></li><li><a href="#what-changed-as-a-result">What changed as a result</a></li><li><a href="#what-is-probably-still-wrong">What is probably still wrong</a></li></ol>
+  </nav>
+  <main>
+    <div class="lead"><p>Every defect this project has found in itself, what caused it, and — the part worth the paper — <strong>what found it</strong>. The tally at the end is the only real argument for the checks the project now runs on every push.</p><p><a href="journal.html">The journal</a> is the narrative; <a href="https://github.com/hansolovkarlsson/cprolog/blob/main/CHANGELOG.md">the changelog</a> is what shipped. This is the failures.</p></div><section id="scope"><h2>Scope</h2><p>Sixteen defects, in three cohorts that failed for three different reasons:</p><ul><li><strong>Design era</strong> — five bugs about memory lifetime and ordering, produced by the choice to copy structures and manage memory by hand. Fixed before the first commit; documented in full in the <a href="https://hansolovkarlsson.github.io/cprolog/internals.html">engine internals</a> under <em>Five bugs this design produced</em>, and summarised here.</li><li><strong>Portability</strong> — three bugs that existed from the first commit and were invisible on the machine the interpreter was written on. All three fell out of CI's first run.</li><li><strong>Consistency</strong> — eight defects in which the code, the documentation and the flag reporting the behaviour did not agree with each other. All found while writing the tutorials.</li></ul></section><section id="cohort-a-the-design-era"><h2>Cohort A — the design era</h2><p>Five bugs, every one a mistake about <strong>lifetime</strong> or about <strong>when a value is read</strong>. That is not a coincidence: it is the specific failure mode of a structure-copying engine with three memory regions and no compiler checking which is which.</p><div class="scroll"><table class=""><thead><tr><th>Symptom</th><th>Cause</th><th>Found by</th></tr></thead><tbody><tr><td>A nested <code>findall</code> read freed memory</td><td>Instantiating a clause shared constant cells instead of copying them; a <code>findall</code> buffer is freed while its results are live</td><td>Address sanitizer</td></tr><tr><td><code>clause/2</code> and <code>retract/1</code> returned only their first solution</td><td>The next candidate clause was chosen <em>after</em> head unification had bound the arguments, so indexing rejected everything remaining</td><td>Test suite</td></tr><tr><td>A soft cut produced an extra answer</td><td>The flag marking the alternative dead was trailed, so backtracking brought it back</td><td>Test suite</td></tr><tr><td>Retrying a choice point read freed memory</td><td>The if-then-else alternative was built <em>after</em> the choice point took its heap mark</td><td>Reading the code</td></tr><tr><td><code>write_canonical</code> output would not read back</td><td>The atom <code>.</code> was written unquoted, and <code>atom_codes</code> returned bytes rather than character codes</td><td>Test suite</td></tr></tbody></table></div><p>Two of these are worth restating as rules, because both are easy to reintroduce:</p><ul><li><strong>Anything a choice point refers to must be older than the mark it holds.</strong> The fix was to move the constants involved outside the heap entirely.</li><li><strong>Anything derived from a call must be derived before the call binds anything.</strong> Indexing that reads state unification is about to change is indexing that is always one step stale.</li></ul><p>The internals page adds the observation that none of the five was found by <em>using</em> the interpreter — only by the sanitizer, by tests that asked for every solution rather than the first, and by reading. That is the argument for <code>make test-asan</code> and for writing <code>\+ more_solutions</code> style tests.</p></section><section id="cohort-b-portability"><h2>Cohort B — portability</h2><p>Three bugs, all present from the first commit, none reproducible on the development machine, all found by CI's first run. Adding the matrix was the roadmap's first item; it paid for itself immediately.</p><h3><code>strdup</code> is POSIX, not C99</h3><p>Under <code>-std=c99</code>, glibc does not declare <code>strdup</code>. The call therefore compiled as an implicit declaration returning <code>int</code>, and <strong>the pointer was truncated to 32 bits before being stored</strong>. On Linux this corrupted the stream name in <code>open/3</code> and the text buffer that <code>atom_length/2</code>, <code>atom_codes/2</code> and <code>format/2</code> use for numbers.</p><p>macOS headers declare <code>strdup</code> whatever the standard setting, which is exactly why it was never seen locally. The fix is <code>pl_strdup</code>, four lines of C99. (<code>c486ab3</code>)</p><p><em>What this says:</em> a warning suppressed by one platform's headers is not a warning that has been dealt with. <code>-std=c99</code> means the standard library is smaller than habit assumes.</p><h3>Seventeen gcc warnings clang never mentioned</h3><p><code>-Wmaybe-uninitialized</code> fired seventeen times, all on one shape: a local passed by address to one of four accessor functions, which gcc cannot prove is written on the success path.</p><p>The tempting fix — initialise seventeen call sites — was rejected in favour of fixing the four accessors so they write their outputs before doing anything else. That is what every caller already assumed, so the warnings were pointing at a real (if latent) contract that had never been written down. (<code>8fbcf05</code>)</p><p><em>What this says:</em> when a warning fires seventeen times in one shape, the warning is describing an interface, not seventeen accidents. Fix the interface.</p><h3><code>X is -1 &lt;&lt; 2</code> was undefined behaviour</h3><p>Shifting a negative value left is undefined in C. It produced the expected <code>-4</code> on both compilers, every time, which is the worst way for undefined behaviour to behave. It surfaced when the sanitizer build was tightened to <strong>abort</strong> on undefined behaviour rather than print and continue — at which point it would have failed the build the moment any program exercised the path. Doing the shift unsigned gives the same two's complement answer with defined behaviour, and two tests now exercise it under the sanitizer. (<code>f81293b</code>)</p><p><em>What this says:</em> <code>-fsanitize=undefined</code> without <code>-fno-sanitize-recover</code> is a log file, not a test. A finding has to fail the run or it scrolls past.</p></section><section id="cohort-c-consistency"><h2>Cohort C — consistency</h2><p>Eight defects in which two parts of the project disagreed. All were found while writing the four tutorial levels, which is the interesting part: writing documentation is a different test from writing tests, and it found things the 256-test suite never would have.</p><h3><code>max_arity</code> was three different numbers</h3><p><code>current_prolog_flag(max_arity, V)</code> answered <code>unbounded</code>. <code>=../2</code> stopped at 255 — its buffer held the functor name and 255 arguments, and the bound was checked against the list length rather than the arity. The reader stopped at 256. And <code>functor/3</code> <strong>had no check at all</strong>: <code>functor(T, f, 100000)</code> built the term, and a large enough arity would have overflowed the <code>int</code> the arity is stored in.</p><p>Found by writing a sentence in the reference and then testing whether it was true. <code>MAX_ARITY</code> in <code>src/prolog.h</code> is now the single definition; all three paths use it, and the flag reports the integer. (<code>8831038</code>)</p><p><em>What this says:</em> a limit that appears in more than one place is not a limit, it is a coincidence waiting to be discovered. And a flag that reports a policy the code does not enforce is worse than no flag.</p><h3>The disclosure marker rendered as <code>B8?A0Solutions</code></h3><p>The shared CSS block was a plain Python string. <code>content: "\25B8\00A0"</code> — a perfectly good CSS escape for <code>▸</code> plus a non-breaking space — was read by <strong>Python</strong> first, where <code>\25</code> is an octal escape. The browser received a control character, <code>B8</code>, a NUL and <code>A0</code>.</p><p>Live on every published page since the site went up. Found by rendering a page and looking at it. The block is a raw string now. (<code>afbc1cb</code>)</p><p><em>What this says:</em> generated markup passes through two languages' escaping rules, and the first one wins silently.</p><h3>Note titles overlapped their own body text</h3><p><code>.note-tag</code> was <code>white-space: nowrap</code> at a fixed <code>7.5rem</code>, so any title longer than that overflowed into the prose beside it. Also live since the site went up, on pages that had been reviewed. Found by rendering. (<code>afbc1cb</code>)</p><h3><code>*emphasis*</code> reached six pages as literal asterisks</h3><p>The shared <code>inline()</code> handled <code>**bold**</code> and nothing else, so every author's single-asterisk emphasis was published verbatim. Found by grepping the rendered output for asterisks that had survived. (<code>afbc1cb</code>)</p><p><em>What the last three say together:</em> the pages are generated, so they were checked by regenerating them — which proves only that the generator is deterministic. Three defects sat in the output for nine days because nobody had <strong>looked at</strong> it.</p><h3>Two deviations from ISO that nothing recorded</h3><p>Writing Level 4 turned up two behaviours the reference did not mention:</p><ul><li><strong>There is no logical update view.</strong> A goal backtracking through a predicate sees clauses asserted after it started, and skips clauses retracted ahead of it. This announced itself by <strong>hanging</strong>: a transcript query that asserted to the predicate it was walking ran forever. Retracting the clause the goal is currently on is safe; nothing else is.</li><li>**There is no <code>setup_call_cleanup/3</code>**, and <code>dynamic/1</code> is a predicate rather than a prefix operator, so <code>:- dynamic foo/1.</code> is a syntax error.</li></ul><p>Neither is a bug — both are consequences of a small implementation — but the reference claims to list <em>anything the interpreter does not provide</em>, and it did not list these. Both are in <em>Deviations and limits</em> now. (<code>78d43c4</code>)</p><p><em>What this says:</em> the deviations list decays silently, because nothing tests a list of absences. The only thing that finds a missing entry is somebody trying to do the thing.</p><h3>Two worked exercise solutions were wrong</h3><p>Both in a draft of Level 4, both caught by running them:</p><ul><li>A solution that handled some exceptions and let others through by letting the recovery <strong>fail</strong>. A failing recovery does not re-throw — <code>catch/3</code> simply fails and the ball is gone. The correct form has to <code>throw/1</code> it again explicitly.</li><li>A cleanup predicate written as <code>catch(Goal, E, true)</code> followed by the cleanup goals. That handles success and exceptions but not <strong>failure</strong>: a failing Goal makes <code>catch/3</code> fail and the cleanup never runs.</li></ul><p>Both were plausible enough to write down and wrong enough to teach the reader a bug. Neither would have been caught by re-reading.</p><p><em>What this says:</em> worked solutions are code. The fact that they live in a document does not change what they are.</p></section><section id="what-found-what"><h2>What found what</h2><div class="scroll"><table class=""><thead><tr><th>Found by</th><th>Count</th></tr></thead><tbody><tr><td>Writing the documentation, then testing the claim</td><td>5</td></tr><tr><td>CI's first run (matrix, <code>-Werror</code>, sanitizer configuration)</td><td>3</td></tr><tr><td>The test suite</td><td>3</td></tr><tr><td>Rendering the pages and looking at them</td><td>3</td></tr><tr><td>Address sanitizer</td><td>1</td></tr><tr><td>Reading the code</td><td>1</td></tr></tbody></table></div><p>Two things stand out.</p><p><strong>The test suite found three of sixteen.</strong> It is a good suite — 256 tests, run twice per leg, run again under two sanitizers — and it found under a fifth of the defects. Everything it found was a wrong <em>answer</em>. Everything it missed was a wrong <em>limit</em>, a wrong <em>platform assumption</em>, or a wrong <em>claim in the documentation</em>, and no realistic number of additional tests would have changed that.</p><p><strong>Writing the documentation found the most.</strong> Five defects, and they were the ones nothing else could have reached, because the question a document asks is "is this sentence true?" — which is a different question from "does this goal succeed?". The most productive single activity in the project was writing a tutorial for a beginner, because a beginner's questions have no respect for which parts were carefully implemented.</p></section><section id="what-changed-as-a-result"><h2>What changed as a result</h2><p>Each standing check exists because of something above:</p><div class="scroll"><table class=""><thead><tr><th>Check</th><th>Added because of</th></tr></thead><tbody><tr><td>The build matrix, Linux and macOS, clang and gcc, <code>-Werror</code></td><td><code>strdup</code>, the seventeen gcc warnings</td></tr><tr><td><code>-fno-sanitize-recover=undefined</code></td><td>the shift, which the sanitizer had been printing and continuing past</td></tr><tr><td><code>make test-asan</code> on every leg</td><td>the use-after-free class; it found one of the two directly</td></tr><tr><td><code>make check</code> running the suite with the collector forced</td><td>the collector, which only runs when the computation is deterministic and so is never exercised by an ordinary run</td></tr><tr><td><code>make doc</code> + <code>git diff --exit-code</code></td><td>pages drifting from their generators</td></tr><tr><td><code>make tutorials</code></td><td>four tutorial programs that nothing was loading</td></tr><tr><td>Tests written against <code>current_prolog_flag(max_arity, N)</code> rather than <code>256</code></td><td><code>max_arity</code>, so the tests stay honest if the limit moves</td></tr></tbody></table></div></section><section id="what-is-probably-still-wrong"><h2>What is probably still wrong</h2><p>Stated plainly, since the pattern above is that the unlisted things are the expensive ones:</p><ul><li><strong>The deviations list is still incomplete.</strong> Two entries were added by accident, in the course of writing one tutorial level. There is no reason to think that was the last of them.</li><li><strong>Nothing systematically checks the reference against the interpreter.</strong> Every signature in it was verified by hand once. A predicate whose behaviour changes will not update its own entry.</li><li><strong>The error-context argument is always unbound</strong>, so every <code>error/2</code> term the interpreter raises is missing the information that would say where it came from. That is on the roadmap, and until it is done, debugging anything non-trivial is harder than it should be.</li><li><strong>The reader reports the arity limit as a syntax error</strong>, not <code>representation_error(max_arity)</code>. Documented rather than fixed, because fixing it means reworking the parser's error path.</li></ul></section>
+    <footer>Rendered from <code>POSTMORTEM.md</code> at the top of the source tree, which is the source of truth; <code>make doc</code> rebuilds this page and CI fails if the two no longer match.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

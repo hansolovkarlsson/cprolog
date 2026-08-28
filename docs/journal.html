@@ -1,111 +1,10 @@
-# -*- coding: utf-8 -*-
-"""Shared page furniture for the generated documentation.
-
-    Every page under docs/ is built from this module: it owns the escaping
-    helpers, the block builders, the design tokens and the page shell, so the
-    overview, the three tutorial levels, the reference and the internals
-    document all stay a matched set.
-"""
-
-import html, re, io, os
-
-def esc(s):
-    return html.escape(s, quote=False)
-
-MODE_RE = re.compile(r'(?<=[(,\s])([+\-?:@])(?=[A-Z])')
-
-def code(s):
-    """Escaped inline code with mode letters marked up."""
-    return MODE_RE.sub(r'<span class="mode">\1</span>', esc(s))
-
-def lit(s):
-    """Marks text that contains literal backticks, so it is not read as code."""
-    return '\x01' + s
-
-def inline(s):
-    """Escapes text, then turns `x` into inline code."""
-    if s.startswith('\x01'):
-        return esc(s[1:])
-    if s.count('`') % 2:
-        raise SystemExit('unbalanced backtick in: %r' % s)
-    out = []
-    for i, part in enumerate(esc(s).split('`')):
-        if i % 2:
-            out.append('<code>%s</code>' % part)
-            continue
-        # **bold**, *emphasis* and [text](target), outside code spans only.
-        # Bold first, so that its asterisks are gone before emphasis is tried;
-        # emphasis needs non-space on both sides, which keeps a multiplication
-        # sign written in prose from being mistaken for it.
-        part = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', part)
-        part = re.sub(r'\*(?!\s)([^*]+?)(?<!\s)\*', r'<em>\1</em>', part)
-        part = re.sub(r'\[([^\]]+)\]\(([^)\s]+)\)', r'<a href="\2">\1</a>', part)
-        out.append(part)
-    return ''.join(out)
-
-def para(s):
-    return '<p>%s</p>' % inline(s)
-
-def ul(items):
-    return '<ul>%s</ul>' % ''.join('<li>%s</li>' % inline(i) for i in items)
-
-def pre(s):
-    return '<pre><code>%s</code></pre>' % esc(s.strip('\n'))
-
-def table(headers, rows, cls=''):
-    h = ''.join('<th>%s</th>' % inline(x) for x in headers)
-    body = []
-    for r in rows:
-        body.append('<tr>%s</tr>' % ''.join('<td>%s</td>' % inline(c) for c in r))
-    return ('<div class="scroll"><table class="%s"><thead><tr>%s</tr></thead>'
-            '<tbody>%s</tbody></table></div>' % (cls, h, ''.join(body)))
-
-def note(kind, title, body):
-    return ('<aside class="note note-%s"><span class="note-tag">%s</span>'
-            '<div>%s</div></aside>' % (kind, esc(title), inline(body)))
-
-GROUPS = []
-
-def preds(entries):
-    """entries: list of (signature, description) or ('##', 'Group name')."""
-    out = ['<div class="preds">']
-    for sig, desc in entries:
-        if sig == '##':
-            gid = 'g-' + re.sub(r'[^a-z0-9]+', '-', desc.lower()).strip('-')
-            GROUPS.append((gid, desc))
-            out.append('<h4 class="pred-group" id="%s">%s</h4>' % (gid, esc(desc)))
-            continue
-        key = esc((sig + ' ' + desc).lower().replace('"', ''))
-        out.append('<div class="pred" data-key="%s">'
-                   '<code class="sig">%s</code>'
-                   '<div class="pdesc">%s</div></div>' % (key, code(sig), inline(desc)))
-    out.append('</div>')
-    return ''.join(out)
-
-
-# ---------------------------------------------------------------- sections
-
-SECTIONS = []
-
-def section(sid, title, body):
-    SECTIONS.append((sid, title, body))
-
-def ex(title, body):
-    """An exercise solution, folded away until the reader wants it."""
-    return ('<details class="ex"><summary>%s</summary><div class="ex-body">%s</div>'
-            '</details>' % (esc(title), body))
-
-def tasks(items):
-    """A numbered list of things for the reader to do."""
-    return '<ol class="task">%s</ol>' % ''.join('<li>%s</li>' % i for i in items)
-
-def figure(svg, caption):
-    return '<figure>%s<figcaption>%s</figcaption></figure>' % (svg, inline(caption))
-# ---------------------------------------------------------------- page shell
-
-# A raw string: the CSS escapes below (\25B8) must reach the browser intact,
-# and Python would otherwise read \25 as an octal escape.
-CSS = r"""
+<title>Development Journal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
 :root {
   color-scheme: light;
   --paper:      #F6F7FA;
@@ -599,9 +498,26 @@ footer {
   font-size: 0.8rem;
   color: var(--muted);
 }
-"""
-
-JS = """
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>Development Journal</h1>
+    <span class="prompt">?- journal</span>
+    <p>How this interpreter got its shape: the one design decision everything else followed from, the three memory regions and the case they did not cover, documentation as a build product, and what four tutorial levels cost to write.</p>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a><a href="journal.html" aria-current="page">Journal</a><a href="postmortem.html">Postmortem</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Contents</p>
+    <ol><li><a href="#the-brief">The brief</a></li><li><a href="#day-one-the-interpreter">Day one — the interpreter</a></li><li><a href="#day-two-teaching-the-thing">Day two — teaching the thing</a></li><li><a href="#how-the-work-is-checked">How the work is checked</a></li><li><a href="#where-it-stands">Where it stands</a></li></ol>
+  </nav>
+  <main>
+    <div class="lead"><p>A record of how this project was built and why it is shaped the way it is. <a href="https://github.com/hansolovkarlsson/cprolog/blob/main/CHANGELOG.md">The changelog</a> says what shipped and when; this says what the work was actually like. <a href="postmortem.html">The postmortem</a> takes apart the things that went wrong.</p></div><section id="the-brief"><h2>The brief</h2><p>Write a Prolog interpreter in C. Nothing more specific than that — no target dialect, no performance goal, no deadline. Everything below is a consequence of choices made against a blank sheet, which is worth remembering when reading the parts that went badly.</p></section><section id="day-one-the-interpreter"><h2>Day one — the interpreter</h2><h3>The one decision that shaped everything</h3><p>The first real choice was between compiling clauses to an abstract machine — a WAM, which is what serious systems do — and copying the clause structure at every call. Structure copying was chosen, and the whole design follows from it:</p><ul><li>Calling a predicate copies its clause onto the heap. That is where the time goes, and it is the factor of a few this interpreter gives away against SWI.</li><li>Because there is no compiled code, there is no code area, no register allocation and no instruction set to get right. <code>src/machine.c</code> is 636 lines.</li><li>The continuation is an explicit list of goal frames rather than the C stack, so <code>ancestor/2</code> on a deep tree costs heap, not a segfault.</li><li>Cut is not a special instruction. It is an integer — the height the choice point stack must be cut back to — carried in every goal frame. If-then-else, negation, soft cut and <code>catch/3</code> are then all assembled from that one mechanism plus a kind tag on the choice point.</li></ul><p>The cost of the decision is visible in the measurements: about 14.6M inferences a second on <code>nrev</code>, which is respectable for a tree walker and slow for a compiler. The benefit is that the engine can be read in an afternoon, which was worth more here than the speed.</p><h3>Memory, and the part that was hardest</h3><p>Three regions, deliberately:</p><ul><li>a <strong>chunked heap</strong> that choice points mark and backtracking rewinds, which is free and handles everything a backtracking program produces;</li><li><strong>arenas</strong> for things that must outlive backtracking — clauses, exception balls, <code>findall/3</code> buffers;</li><li>plain <code>malloc</code> for the atom table, the choice point stack and the trail.</li></ul><p>That covers everything except one case: a deterministic recursion, which allocates and never backtracks, so nothing ever releases. A copying collector was added for exactly that case. The published measurements are the two ends of it: two million iterations of a deterministic recursion peak at 967 MB with the collector disabled, and five million peak at 25 MB with it running.</p><p>The collector has one hard restriction — it only runs when the choice point stack is empty — because heap marks are positions in an allocation order that a copying collector destroys. That restriction is the single biggest limitation in the design, and it is on the roadmap under <em>Collecting while choice points are live</em>, where it is honestly labelled as most of the way to a WAM.</p><p>Failure-driven loops were a separate problem with a separate answer. A loop over a recursive generator costs about a kilobyte an iteration, because each iteration's choice point pins the heap above it. <code>between/3</code> and <code>repeat/0</code> instead retry <strong>one</strong> choice point in place, keeping their state in the frame, so a million iterations peak at 2.8 MB rather than 754 MB. That is a real asymmetry between the two ways of writing the same loop, and rather than hide it the reference documents it with both numbers.</p><h3>Documentation as a build product</h3><p>The reference and the internals document are generated by Python in <code>tools/</code>, not written by hand. <code>tools/docpage.py</code> owns the escaping, the block builders, the design tokens and the page shell; each page has its own generator. Two things follow, and both turned out to matter more than expected:</p><ul><li>Every predicate signature and every transcript in the reference was checked against the running interpreter, because it was cheaper to run the query than to remember the answer.</li><li>CI regenerates <code>docs/</code> and fails if anything changed, so the published pages cannot drift from their generators — a page edited by hand, or a generator changed without rebuilding, fails the build rather than shipping.</li></ul><h3>CI, and what it immediately found</h3><p>Adding a build matrix — Linux and macOS, clang and gcc, warnings as errors, sanitizers on every leg — was the roadmap's first item. It found three genuine bugs on its <strong>first run</strong>, none of which reproduced on the development machine: a POSIX function used under <code>-std=c99</code> that silently truncated a pointer on Linux, seventeen gcc warnings clang had never mentioned, and an undefined shift that had been quietly producing the right answer. The postmortem goes into all three.</p><p>The lesson was cheap to learn and is now permanent: the matrix is not there to prove the code works on other people's machines. It is there because a single compiler on a single platform is a single opinion.</p></section><section id="day-two-teaching-the-thing"><h2>Day two — teaching the thing</h2><p>Four tutorial levels were written for a reader who had never used Prolog seriously, which turned out to be a much better test of the interpreter than writing more tests would have been.</p><h3>The method</h3><p>The same loop every time:</p><ol><li>Write the page.</li><li>Run every query in it against the real interpreter.</li><li>When the page and the interpreter disagree, work out which one is wrong.</li></ol><p>Step 3 is the whole value. It caught the page being wrong (a claim that <code>sibling/2</code> gives two answers when it gives four; a filter described as deterministic when its guarded clauses leave a choice point) and it caught the interpreter being wrong (a stray full stop printed when enumeration was stopped early; <code>max_arity</code>).</p><p>Transcripts are captured by driving the toplevel over a pty rather than a pipe, because a pipe does not reproduce the <code>;</code> prompts or the difference between an answer that ends in a full stop and one that leaves a choice point open. That distinction is pedagogically important — half of the Level 3 material about the cut is about exactly that full stop — so the transcripts have to show it honestly.</p><h3>What each level cost</h3><ul><li><strong>Levels 1 and 2</strong> (facts and rules; lists and aggregation) were mostly writing. The interpreter behaved.</li><li><strong>Level 3</strong> (negation, the cut, <code>op/3</code>, DCGs) needed a figure for the cut, and drawing it forced the question of what the cut <em>actually</em> discards. The answer — the remaining clauses of this predicate, plus the alternatives left by goals to the left of it in this body, and nothing older — is exactly what the engine stores as one integer, so the figure and the implementation ended up being the same picture.</li><li><strong>Level 4</strong> (exceptions, the database, I/O) was the expensive one, because it is where a tutorial stops asking questions and starts changing things. Two undocumented deviations fell out of writing it, and one of them announced itself by hanging: a transcript query that asserted to the predicate it was backtracking through looped forever. That is not a bug — it is the absence of ISO's logical update view — but nothing had said so anywhere.</li></ul><h3>Housekeeping the tutorials forced</h3><ul><li><code>make tutorials</code> loads each tutorial program and runs a query from its page. Nothing had been checking that these files still worked.</li><li>Three defects in the shared page shell surfaced only because the pages were rendered and looked at, not just generated. A CSS escape mangled by Python's octal escapes, note titles overlapping their own text, and <code>*emphasis*</code> reaching six pages as literal asterisks. All three had been live since the site went up.</li></ul></section><section id="how-the-work-is-checked"><h2>How the work is checked</h2><p>The standing discipline, in the order the checks run:</p><div class="scroll"><table class=""><thead><tr><th>Check</th><th>What it is for</th></tr></thead><tbody><tr><td><code>make check</code></td><td>The suite, twice: normally and with the collector forced every 1024 inferences.</td></tr><tr><td><code>make test-asan</code></td><td>The suite again under the address and undefined behaviour sanitizers, aborting on UB rather than printing it.</td></tr><tr><td><code>make examples</code></td><td>The five example programs still produce their answers.</td></tr><tr><td><code>make tutorials</code></td><td>The four tutorial programs still load and answer.</td></tr><tr><td><code>make doc</code> + <code>git diff --exit-code</code></td><td>The published pages match their generators.</td></tr><tr><td>The matrix</td><td>Linux and macOS, clang and gcc, <code>-Werror</code>.</td></tr></tbody></table></div><p>Every one of these was added in response to something it would have caught.</p></section><section id="where-it-stands"><h2>Where it stands</h2><p>About 6,600 lines of hand-written C, 616 lines of library written in Prolog, a 256-test suite, five examples, four tutorial levels, and a reference and internals document generated from the interpreter's own tables.</p><p>What it is not: fast, modular, tabled, constrained, or capable of integers larger than 64 bits. Those are on the roadmap or under <em>Not planned</em>, and the reference lists every deviation from ISO it knows about — a list that got two entries longer the week the tutorials were written, which is the honest summary of what writing documentation does for a project.</p></section>
+    <footer>Rendered from <code>JOURNAL.md</code> at the top of the source tree, which is the source of truth; <code>make doc</code> rebuilds this page and CI fails if the two no longer match.</footer>
+  </main>
+</div>
+<script>
 (function () {
   var input = document.getElementById('pfilter');
   var count = document.getElementById('pcount');
@@ -656,98 +572,4 @@ JS = """
   }, { rootMargin: '0px 0px -75% 0px' });
   Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
 })();
-"""
-
-# The two documents cross-link to each other. In a checkout they sit side by
-# side, so the links are relative; when they are published as separate pages,
-# each has its own URL, which is supplied through the environment:
-#
-#   DOC_URL_REFERENCE=... DOC_URL_INTERNALS=... make doc
-#
-# The tab icon, kept out of the format strings: it is percent-encoded.
-FAVICON = ('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'26\' font-size=\'26\'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">')
-
-LEVELS = [('tutorial-1.html', 'Level 1', 'DOC_URL_TUTORIAL1'),
-          ('tutorial-2.html', 'Level 2', 'DOC_URL_TUTORIAL2'),
-          ('tutorial-3.html', 'Level 3', 'DOC_URL_TUTORIAL3'),
-          ('tutorial-4.html', 'Level 4', 'DOC_URL_TUTORIAL4')]
-
-DOCS = [('index.html',      'Overview',           'DOC_URL_INDEX'),
-        ('tutorial-1.html', 'Tutorial',           'DOC_URL_TUTORIAL1'),
-        ('reference.html',  'Language reference', 'DOC_URL_REFERENCE'),
-        ('internals.html',  'Engine internals',   'DOC_URL_INTERNALS'),
-        ('journal.html',    'Journal',            'DOC_URL_JOURNAL'),
-        ('postmortem.html', 'Postmortem',         'DOC_URL_POSTMORTEM')]
-
-DEFAULT_FOOTER = ("Generated from the interpreter's own tables and checked against "
-                  "the running system. Source: `src/` for the engine, "
-                  "`lib/boot.pl` for the library written in Prolog.")
-
-def render(title, prompt, subtitle, outfile, sub_under=None, levels=None,
-           lead='', footer=DEFAULT_FOOTER):
-    """Writes one document. sub_under names the section whose predicate groups
-       are listed as sub-entries in the contents rail; lead is markup placed
-       above the first section, for a document that opens before its first
-       heading."""
-    toc = []
-    for sid, sec_title, _ in SECTIONS:
-        toc.append('<li><a href="#%s">%s</a></li>' % (sid, esc(sec_title)))
-        if sub_under and sid == sub_under:
-            subs = ''.join('<li><a href="#%s">%s</a></li>' % (gid, esc(name))
-                           for gid, name in GROUPS)
-            toc.append('<li><ol class="sub">%s</ol></li>' % subs)
-
-    body = [lead]
-    for sid, sec_title, content in SECTIONS:
-        body.append('<section id="%s"><h2>%s</h2>%s</section>'
-                    % (sid, esc(sec_title), content))
-
-    nav = ''.join(
-        '<a href="%s"%s>%s</a>'
-        % (os.environ.get(env) or fname,
-           ' aria-current="page"' if fname == outfile else '', esc(name))
-        for fname, name, env in DOCS)
-
-    strip = ''
-    if levels:
-        strip = ('<p class="rail-title">Levels</p><div class="levels">%s</div>'
-                 % ''.join('<a href="%s"%s>%s</a>'
-                           % (os.environ.get(env) or fname,
-                              ' aria-current="page"' if fname == outfile else '',
-                              esc(name))
-                           for fname, name, env in levels))
-
-    page = """<title>%s</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!--FAVICON-->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
-<style>%s</style>
-<header class="masthead">
-  <div class="masthead-inner">
-    <h1>%s</h1>
-    <span class="prompt">%s</span>
-    <p>%s</p>
-    <nav class="docnav" aria-label="Documents">%s</nav>
-  </div>
-</header>
-<div class="shell">
-  <nav class="rail" aria-label="Contents">
-    %s<p class="rail-title">Contents</p>
-    <ol>%s</ol>
-  </nav>
-  <main>
-    %s
-    <footer>%s</footer>
-  </main>
-</div>
-<script>%s</script>
-""" % (esc(title), CSS, esc(title), esc(prompt), inline(subtitle), nav,
-       strip, ''.join(toc), ''.join(body), inline(footer), JS)
-
-    page = page.replace('<!--FAVICON-->', FAVICON)
-
-    with io.open('docs/' + outfile, 'w', encoding='utf-8') as f:
-        f.write(page)
-    print('wrote docs/' + outfile)
+</script>

@@ -187,6 +187,14 @@ h3 {
 }
 p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
 ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
 li { margin-bottom: 0.45rem; }
 a { color: var(--accent); }
 
@@ -496,7 +504,7 @@ footer {
     <h1>Prolog Tutorial, Level 1</h1>
     <span class="prompt">?- level 1</span>
     <p>Facts, rules, unification and the search — the whole model, using the interpreter in this repository. Every query on this page was run against it.</p>
-    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html" aria-current="page">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html" aria-current="page">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a><a href="journal.html">Journal</a><a href="postmortem.html">Postmortem</a></nav>
   </div>
 </header>
 <div class="shell">
@@ -591,9 +599,7 @@ Y = lars </code></pre><p>Each answer binds two variables, and the toplevel print
 older_child(P, C, Other) :-
     parent(P, C), parent(P, Other), C \== Other,
     born(C, Y1), born(Other, Y2), Y1 &lt; Y2.</code></pre></div></details></section><section id="next"><h2>Where this goes next</h2><p>You now have the whole model: facts, rules, unification, and a search that backtracks. Everything else in Prolog is built from those four things.</p><p><a href="tutorial-2.html">Level 2</a> takes on the parts that make it practical:</p><ul><li><strong>Lists</strong> — what they really are, and the patterns for walking and building them.</li><li><strong>Collecting answers</strong> — <code>findall/3</code>, <code>setof/3</code> and <code>aggregate_all/3</code>, for the questions that ask about <em>all</em> the solutions at once. That includes the eldest-child exercise above, which is solved there.</li></ul><p>Level 3 will turn to controlling the search — negation, the cut, your own data structures and the grammar notation.</p><p>The <a href="reference.html">language reference</a> lists every predicate this interpreter provides, with the modes each argument takes.</p></section>
-    <footer>Generated from the interpreter's own tables and checked against the
-    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
-    for the library written in Prolog.</footer>
+    <footer>Generated from the interpreter's own tables and checked against the running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code> for the library written in Prolog.</footer>
   </main>
 </div>
 <script>

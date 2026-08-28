@@ -187,6 +187,14 @@ h3 {
 }
 p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
 ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
 li { margin-bottom: 0.45rem; }
 a { color: var(--accent); }
 
@@ -496,7 +504,7 @@ footer {
     <h1>Prolog Tutorial, Level 4</h1>
     <span class="prompt">?- level 4</span>
     <p>Exceptions, the database, and input and output — the parts of Prolog that reach outside the proof, and what it takes to turn a set of rules into a program. Every query on this page was run against the interpreter here.</p>
-    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a><a href="journal.html">Journal</a><a href="postmortem.html">Postmortem</a></nav>
   </div>
 </header>
 <div class="shell">
@@ -820,9 +828,7 @@ collatz(N, S) :-
     collatz(M, S0),
     S is S0 + 1,
     assertz(collatz_known(N, S)).</code></pre><p><strong>2</strong> <code>catch/3</code> cannot undo it, because the database is not part of what an exception rolls back. By the time the third line throws, the first two have already been sold. Checking every line before touching anything is the only way to get the all-or-nothing behaviour — or you undo it by hand, which is exercise 3.</p><p><strong>3</strong> Two things are easy to get wrong. Writing <code>catch(Goal, Error, true)</code> as a plain goal handles success and an exception but <strong>not</strong> failure — a failing Goal makes <code>catch/3</code> fail, so the restore never runs. Wrapping it in <code>( ... -&gt; ... ; ... )</code> catches the failure and records it, so the cleanup happens either way and the final line reproduces the outcome. And the explicit <code>throw(Error)</code> is what makes this a cleanup rather than a swallow.</p><p><strong>5</strong> The round trip works because <code>writeq/1</code> quotes whatever needs it and the full stop makes each line a term. Writing with <code>write/1</code> instead would produce a file that <code>read/1</code> cannot always read back.</p><p><strong>6</strong> The explicit <code>throw(Error)</code> in the else branch is the whole point. Letting the recovery just fail would <strong>not</strong> put the ball back — a recovery that fails makes <code>catch/3</code> fail, and the exception is gone. With the rethrow, a bug inside <code>sell/2</code> — an unbound variable reaching <code>atom_length/2</code>, say — comes back as <code>error(instantiation_error, _)</code> and tells you about itself, instead of being printed as "unexpected" and turned into a quiet <code>false</code>.</p></div></details></section><section id="next"><h2>Where this goes next</h2><p>That is the language. Across four levels: facts and rules and the search; lists and collecting answers; negation, the cut, your own notation and grammars; and now exceptions, the database and I/O. There is no fifth thing you need before writing real programs in it.</p><p>What is worth doing next is reading and writing rather than learning:</p><ul><li>The programs in <code>examples/</code> — the eight queens, the zebra puzzle, Hanoi, a calculator, a family tree. They are short, and each is one idea from these four levels used properly.</li><li>The <a href="reference.html">language reference</a> for everything this page skipped: every builtin, the full <code>format/2</code> table, arithmetic, flags, and the deviations from ISO.</li><li>The <a href="internals.html">engine internals</a> if you would rather know why any of it behaves as it does. The choice point for a call with more than one matching clause holds a pointer to the next clause in the live list, which is the whole reason the update view above is immediate rather than logical.</li></ul><p>And the levels are here if you want to go back over any of it: <a href="tutorial-1.html">Level 1</a>, <a href="tutorial-2.html">Level 2</a>, <a href="tutorial-3.html">Level 3</a>.</p></section>
-    <footer>Generated from the interpreter's own tables and checked against the
-    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
-    for the library written in Prolog.</footer>
+    <footer>Generated from the interpreter's own tables and checked against the running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code> for the library written in Prolog.</footer>
   </main>
 </div>
 <script>

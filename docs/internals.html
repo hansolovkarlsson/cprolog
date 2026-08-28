@@ -187,6 +187,14 @@ h3 {
 }
 p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
 ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
 li { margin-bottom: 0.45rem; }
 a { color: var(--accent); }
 
@@ -496,7 +504,7 @@ footer {
     <h1>C Prolog Internals</h1>
     <span class="prompt">?- engine design</span>
     <p>How the interpreter is built: terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — and the places the design costs something.</p>
-    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html" aria-current="page">Engine internals</a></nav>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html" aria-current="page">Engine internals</a><a href="journal.html">Journal</a><a href="postmortem.html">Postmortem</a></nav>
   </div>
 </header>
 <div class="shell">
@@ -541,9 +549,7 @@ true.                        % no choice point, no prompt for more solutions</co
     RET(rc);
 }</code></pre><p>Then one line in the table in <code>src/builtins.c</code>, which is what makes it visible and also what makes it un-redefinable from Prolog:</p><pre><code>{ "atom_reverse", 2, bi_atom_reverse },</code></pre><p>Two rules matter. Anything the builtin allocates on the heap is fine — the collector cannot run while a builtin is executing. But a builtin that calls back into the solver, through <code>solve_sub</code> or <code>solve_once</code>, must assume everything it holds may move, which is why <code>findall/3</code> copies its template into an arena rather than keeping a pointer.</p><h3>Adding a builtin that has more than one solution</h3><p>A builtin that enumerates pushes a <code>CP_REDO</code> frame carrying its own state, and the retry in <code>backtrack</code> advances that state. <code>between/3</code> is the whole pattern: it binds the first value, and leaves behind a frame holding the next value and the bound.</p><pre><code>if (lo &lt; hi) redo_push(REDO_BETWEEN, lo + 1, hi, x, cont, cutb);
 RET(unify(A[2], mk_int(lo)));</code></pre><p>The frame is pushed before the first solution is bound, so backtracking undoes that binding; and because the frame is only ever updated, never replaced, every iteration returns to the same heap mark. A generator that instead recurses in Prolog cannot do either of those things.</p><h3>Adding an arithmetic function</h3><p>Arithmetic is dispatched on name and arity in <code>src/arith.c</code>; a unary function is a clause in <code>eval_unary</code>, a binary one in <code>eval_binary</code>. Both receive already-evaluated operands tagged as integer or float, and set the same on the result.</p><h3>Adding a library predicate</h3><p>If it can be written in Prolog, write it in <code>lib/boot.pl</code>. It is compiled into the binary at build time and consulted at start-up, and it can be redefined by a user program, which a builtin written in C cannot.</p><aside class="note note-impl"><span class="note-tag">After any change</span><div><code>make check</code> runs the suite normally and again with the collector firing every 1024 inferences; <code>make test-asan</code> runs both under the sanitizers. A change to memory handling that passes only the first is not tested.</div></aside></section>
-    <footer>Generated from the interpreter's own tables and checked against the
-    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
-    for the library written in Prolog.</footer>
+    <footer>Generated from the interpreter's own tables and checked against the running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code> for the library written in Prolog.</footer>
   </main>
 </div>
 <script>

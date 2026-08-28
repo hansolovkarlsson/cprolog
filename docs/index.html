@@ -188,6 +188,14 @@ h3 {
 }
 p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
 ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+.lead { margin-bottom: 3rem; }
+.lead p { font-size: 1.04rem; }
+main ol:not(.task):not(.sub) {
+  margin: 0 0 1.2rem;
+  padding-left: 1.35rem;
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
 li { margin-bottom: 0.45rem; }
 a { color: var(--accent); }
 
@@ -665,7 +673,7 @@ Squares = [1,4,9,16,25].</div></div>
 
 <section class="band">
   <h2>What it is</h2>
-  <div class="grid"><div><h3>An engine you can read</h3><p>No abstract machine and no clause compiler: goals live in an explicit list, alternatives on a choice point stack, and cut is one integer carried in each goal frame. The whole solver is one file.</p><span class="fig">5,300 lines of C99, no dependencies beyond libc</span></div><div><h3>Memory that behaves</h3><p>Backtracking rewinds the heap to a choice point's mark, a copying collector handles what backtracking cannot, and generators retry a single choice point so failure-driven loops stay flat.</p><span class="fig">5M-iteration recursion: 25 MB · 1M-iteration loop: 2.8 MB</span></div><div><h3>The language, not a subset</h3><p>A full operator-precedence reader with user-defined operators, grammars, exceptions, bagof/setof, format/2,3, streams, first-argument indexing and UTF-8 text throughout.</p><span class="fig">162 builtin predicates</span></div><div><h3>Tested like a compiler</h3><p>The suite runs three times: normally, with the collector forced every 1024 inferences, and under the address and undefined behaviour sanitizers. It builds warning-free under both clang and gcc.</p><span class="fig">248 tests · make check · make test-asan</span></div></div>
+  <div class="grid"><div><h3>An engine you can read</h3><p>No abstract machine and no clause compiler: goals live in an explicit list, alternatives on a choice point stack, and cut is one integer carried in each goal frame. The whole solver is one file.</p><span class="fig">6,600 lines of C99, no dependencies beyond libc</span></div><div><h3>Memory that behaves</h3><p>Backtracking rewinds the heap to a choice point's mark, a copying collector handles what backtracking cannot, and generators retry a single choice point so failure-driven loops stay flat.</p><span class="fig">5M-iteration recursion: 25 MB · 1M-iteration loop: 2.8 MB</span></div><div><h3>The language, not a subset</h3><p>A full operator-precedence reader with user-defined operators, grammars, exceptions, bagof/setof, format/2,3, streams, first-argument indexing and UTF-8 text throughout.</p><span class="fig">162 builtin predicates</span></div><div><h3>Tested like a compiler</h3><p>The suite runs three times: normally, with the collector forced every 1024 inferences, and under the address and undefined behaviour sanitizers. It builds warning-free under both clang and gcc.</p><span class="fig">256 tests · make check · make test-asan</span></div></div>
 </section>
 
 <section class="band">
@@ -673,7 +681,7 @@ Squares = [1,4,9,16,25].</div></div>
   <div class="cards" style="grid-template-columns: minmax(0,1fr);">
     <div class="card">
       <p style="font-family: var(--mono); font-size: 0.82rem; color: var(--ink); line-height: 1.8;">
-make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 tests, twice</span><br>make examples</p>
+make<br>./prolog<br>make check<span style="color: var(--muted)">      # 256 tests, twice</span><br>make examples</p>
     </div>
   </div>
   <p style="margin-top: 1rem; color: var(--muted); font-size: 0.92rem; max-width: 68ch;">
@@ -684,7 +692,7 @@ make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 test
 
 <section class="band">
   <h2>Documentation</h2>
-  <div class="cards"><a class="card" href="tutorial-1.html"><h3>Tutorial</h3><p>New to Prolog, or returning to it? Four levels: facts, rules and the search; lists and collecting answers; negation, the cut, operators and grammars; and exceptions, the database and I/O. Every query is one you run against this interpreter.</p></a><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a></div>
+  <div class="cards"><a class="card" href="tutorial-1.html"><h3>Tutorial</h3><p>New to Prolog, or returning to it? Four levels: facts, rules and the search; lists and collecting answers; negation, the cut, operators and grammars; and exceptions, the database and I/O. Every query is one you run against this interpreter.</p></a><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a><a class="card" href="journal.html"><h3>Journal</h3><p>How the interpreter got its shape: the one design decision everything followed from, and what four tutorial levels cost to write.</p></a><a class="card" href="postmortem.html"><h3>Postmortem</h3><p>Every defect the project has found in itself and, more usefully, what found it. The test suite found three of sixteen.</p></a></div>
 </section>
 
 <section class="band">

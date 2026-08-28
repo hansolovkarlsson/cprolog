@@ -33,7 +33,10 @@ a [language reference](https://hansolovkarlsson.github.io/cprolog/reference.html
 covering syntax, control, arithmetic, every builtin predicate, grammars and
 errors, and an [engine internals](https://hansolovkarlsson.github.io/cprolog/internals.html)
 document describing how the interpreter is built and where the design costs
-something. All of it is generated into `docs/` by `make doc`.
+something. The [journal](https://hansolovkarlsson.github.io/cprolog/journal.html)
+and the [postmortem](https://hansolovkarlsson.github.io/cprolog/postmortem.html)
+are published there too, rendered from the Markdown below. All of it is
+generated into `docs/` by `make doc`.
 
 ## Building
 
@@ -211,9 +214,14 @@ running constantly; `make test-asan` runs both under the sanitizers.
 - [ROADMAP.md](ROADMAP.md) — known work and deliberate non-goals.
 - [CHANGELOG.md](CHANGELOG.md) — what has shipped, newest first.
 - [JOURNAL.md](JOURNAL.md) — how the interpreter was built and why it is shaped
-  this way.
+  this way. Also
+  [on the site](https://hansolovkarlsson.github.io/cprolog/journal.html).
 - [POSTMORTEM.md](POSTMORTEM.md) — every defect the project has found in itself,
-  and, more usefully, what found it.
+  and, more usefully, what found it. Also
+  [on the site](https://hansolovkarlsson.github.io/cprolog/postmortem.html).
+
+The last two are the source for their published pages: `tools/mdpage.py` renders
+the Markdown, and CI fails if `docs/` no longer matches it.
 
 ## Licence
 

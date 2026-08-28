@@ -54,6 +54,8 @@ tutorials: $(BIN)
 	./$(BIN) -q tutorial/level2.pl -g "eldest_child(esther,C), format('~w~n',[C])"
 	./$(BIN) -q tutorial/level3.pl -g "parse_order(\"3 hammer, 2 rope\", L), order_total(L,T), format('~w~n',[T])"
 	./$(BIN) -q tutorial/level3.pl -g "fillable(C), format('~w~n',[C])"
+	./$(BIN) -q tutorial/level4.pl -g "load_orders('tutorial/orders.txt'), report, halt"
+	./$(BIN) -q tutorial/restock.pl
 
 examples: $(BIN)
 	./$(BIN) -q examples/hanoi.pl -g "hanoi(3)"
@@ -64,7 +66,8 @@ examples: $(BIN)
 
 # The documentation is generated; tools/docpage.py holds the shared shell.
 doc: docs/index.html docs/tutorial-1.html docs/tutorial-2.html \
-     docs/tutorial-3.html docs/reference.html docs/internals.html
+     docs/tutorial-3.html docs/tutorial-4.html \
+     docs/reference.html docs/internals.html
 
 docs/index.html: tools/gen_index.py tools/docpage.py
 	python3 tools/gen_index.py
@@ -77,6 +80,9 @@ docs/tutorial-2.html: tools/gen_tutorial2.py tools/docpage.py tutorial/level2.pl
 
 docs/tutorial-3.html: tools/gen_tutorial3.py tools/docpage.py tutorial/level3.pl
 	python3 tools/gen_tutorial3.py
+
+docs/tutorial-4.html: tools/gen_tutorial4.py tools/docpage.py tutorial/level4.pl
+	python3 tools/gen_tutorial4.py
 
 docs/reference.html: tools/gen_reference.py tools/docpage.py
 	python3 tools/gen_reference.py

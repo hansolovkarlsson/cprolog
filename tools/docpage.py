@@ -661,7 +661,8 @@ FAVICON = ('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.
 
 LEVELS = [('tutorial-1.html', 'Level 1', 'DOC_URL_TUTORIAL1'),
           ('tutorial-2.html', 'Level 2', 'DOC_URL_TUTORIAL2'),
-          ('tutorial-3.html', 'Level 3', 'DOC_URL_TUTORIAL3')]
+          ('tutorial-3.html', 'Level 3', 'DOC_URL_TUTORIAL3'),
+          ('tutorial-4.html', 'Level 4', 'DOC_URL_TUTORIAL4')]
 
 DOCS = [('index.html',      'Overview',           'DOC_URL_INDEX'),
         ('tutorial-1.html', 'Tutorial',           'DOC_URL_TUTORIAL1'),

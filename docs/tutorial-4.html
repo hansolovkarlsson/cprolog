@@ -1,0 +1,883 @@
+<title>Prolog Tutorial, Level 4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ochre);
+  padding-top: 0.28rem;
+  flex: 0 0 7.5rem;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  /* Stacked, the basis above would become a height, so it has to go back. */
+  .note-tag { flex: 0 0 auto; width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "\25B8\00A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "\25BE\00A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>Prolog Tutorial, Level 4</h1>
+    <span class="prompt">?- level 4</span>
+    <p>Exceptions, the database, and input and output — the parts of Prolog that reach outside the proof, and what it takes to turn a set of rules into a program. Every query on this page was run against the interpreter here.</p>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Levels</p><div class="levels"><a href="tutorial-1.html">Level 1</a><a href="tutorial-2.html">Level 2</a><a href="tutorial-3.html">Level 3</a><a href="tutorial-4.html" aria-current="page">Level 4</a></div><p class="rail-title">Contents</p>
+    <ol><li><a href="#start">Where we left off</a></li><li><a href="#exceptions">Raising and catching</a></li><li><a href="#database">Changing the database</a></li><li><a href="#writing">Writing terms, and format</a></li><li><a href="#files">Streams and files</a></li><li><a href="#program">The whole thing</a></li><li><a href="#errors">When this goes wrong</a></li><li><a href="#exercises">Exercises</a></li><li><a href="#next">Where this goes next</a></li></ol>
+  </nav>
+  <main>
+    <section id="start"><h2>Where we left off</h2><p>The first three levels built up the language: facts and rules, lists and aggregation, control and notation. Everything so far has been a pure question — you asked, Prolog answered, and nothing outside the query changed.</p><p>Real programs are not like that. They read files, write reports, keep a record of what has happened, and have to cope when something goes wrong. This level is about the parts of Prolog that reach outside the proof: <strong>exceptions</strong>, the <strong>database</strong>, and <strong>input and output</strong>.</p><p>The running example is the stock room from Level 3, turned into something that runs. It has stock that goes down when you sell, errors that are raised and caught, and a report it can write to a file.</p><pre><code>$ ./prolog tutorial/level4.pl</code></pre><aside class="note note-impl"><span class="note-tag">Two files, not one</span><div><code>tutorial/level4.pl</code> is the program; <code>tutorial/orders.txt</code> is a handful of orders for it to read, including three that fail on purpose. Both are in the repository.</div></aside></section><section id="exceptions"><h2>Raising and catching</h2><p>A goal in Prolog has had two possible outcomes so far: it succeeds, or it fails. There is a third. <code>throw/1</code> abandons the computation and hands a term — traditionally called the <strong>ball</strong> — to the nearest enclosing <code>catch/3</code> whose catcher unifies with it.</p><pre><code>?- throw(too_hot).
+ERROR: Unhandled exception: too_hot
+
+?- catch(throw(too_hot), Ball, format("caught ~q~n", [Ball])).
+caught too_hot
+Ball = too_hot.</code></pre><p><code>catch(Goal, Catcher, Recovery)</code> runs Goal. If Goal throws a ball that unifies with Catcher, everything Goal did is undone, the bindings are rolled back, and Recovery runs instead. A ball that does not unify keeps going outward.</p><figure><div class="svg-frame"><svg viewBox="0 0 620 288" role="img" aria-label="Five stacked frames. A ball thrown in the innermost frame travels up past the frame that raised it and past a catch whose catcher does not unify, and is caught by the catch whose catcher does." xmlns="http://www.w3.org/2000/svg"><g><rect x="30" y="30" width="300" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="46" y="52" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">?- fill_orders.</text></g><text x="366" y="51" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.6">never hears about it</text><g><rect x="30" y="74" width="300" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="46" y="96" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">catch(_, network_error(E), retry)</text></g><text x="366" y="95" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.6">wrong shape — not this one</text><g><rect x="30" y="118" width="300" height="34" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="46" y="140" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">catch(_, short_of_stock(I,W,H), explain)</text></g><text x="366" y="139" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="var(--accent)" opacity="1">unifies — the ball lands here</text><g opacity="0.4"><rect x="30" y="162" width="300" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/><text x="46" y="184" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">sell/2</text></g><text x="366" y="183" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.6">unwound, bindings undone</text><g opacity="0.4"><rect x="30" y="206" width="300" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/><text x="46" y="228" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor">throw(short_of_stock(tent,1,0))</text></g><text x="366" y="227" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" opacity="0.6">the ball is thrown</text><line x1="348" y1="223" x2="348" y2="140" stroke="var(--accent)" stroke-width="1.4"/><path d="M348 133 l-4 8 l8 0 z" fill="var(--accent)"/><text x="310" y="272" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">older frames above, newer below</text></svg></div><figcaption>The ball rises until it finds a catcher that unifies with it. Frames it passes are unwound; frames above the one that catches it never learn that anything happened.</figcaption></figure><p>The rollback is worth seeing directly. Here <code>X</code> is bound and then the goal throws; by the time Recovery runs, the binding is gone:</p><pre><code>?- catch((X = 1, throw(oops)), E, true), var(X).
+E = oops.</code></pre><h3>The shape of an error</h3><p>Anything can be a ball, but errors raised by the system all have the same two-argument shape, <code>error(Formal, Context)</code>. The first argument says what went wrong in a form a program can match on; the second is left for context, and in this interpreter is always an unbound variable.</p><pre><code>?- catch(X is 1/0, E, true).
+E = error(evaluation_error(zero_divisor),_G726).
+
+?- catch(atom_length(f(x), _), error(Formal, _), true).
+Formal = type_error(atom,f(x)).</code></pre><p>The <a href="reference.html">language reference</a> lists every formal term the interpreter raises. The ones you will meet most are:</p><div class="scroll"><table class="mono1"><thead><tr><th>Formal</th><th>Means</th></tr></thead><tbody><tr><td>type_error(Type, Culprit)</td><td>Culprit is the wrong kind of thing altogether.</td></tr><tr><td>domain_error(Domain, Culprit)</td><td>Right kind, wrong value — an option that does not exist, say.</td></tr><tr><td>instantiation_error</td><td>A variable was unbound where a value was needed.</td></tr><tr><td>existence_error(Kind, What)</td><td>It is not there: an undefined predicate, a missing file.</td></tr><tr><td>evaluation_error(What)</td><td>Arithmetic could not produce an answer.</td></tr><tr><td>permission_error(Op, Kind, What)</td><td>Not allowed — modifying a builtin, writing to a read stream.</td></tr></tbody></table></div><p>Following the convention costs nothing and buys a lot: a caller can match on <code>error(type_error(_, _), _)</code> and treat every type error the same way, whether it came from your code or from the system's.</p><h3>Throwing your own</h3><p><code>sell/2</code> in the file raises three different things. Two of them use the standard shape because they are standard kinds of mistake; the third is a fact about the stock room, so it gets a term of its own:</p><pre><code>sell(Item, Count) :-
+    (   item(Item, _, _)
+    -&gt;  true
+    ;   throw(error(existence_error(item, Item), sell/2))
+    ),
+    (   integer(Count), Count &gt; 0
+    -&gt;  true
+    ;   throw(error(type_error(positive_integer, Count), sell/2))
+    ),
+    stock(Item, Have),
+    (   Have &gt;= Count
+    -&gt;  true
+    ;   throw(short_of_stock(Item, Count, Have))
+    ),
+    ...</code></pre><pre><code>?- sell(tent, 1).
+ERROR: Unhandled exception: short_of_stock(tent,1,0)
+
+?- catch(sell(tent, 1), Err, true).
+Err = short_of_stock(tent,1,0).</code></pre><h3>Catch only what you understand</h3><p>The catcher is a pattern, and choosing it carelessly is the most common way to turn a loud bug into a silent one. <code>_</code> catches everything, including the mistakes you have not made yet:</p><pre><code>?- catch(sell(hammr, 3), _, true).
+true.</code></pre><p>The item was misspelled, <code>sell/2</code> raised an existence error to say so, and the query answered <code>true</code> — the typo has been converted into a success. Name the ball you expect and let the rest through:</p><pre><code>?- catch(sell(tent, 1), error(_, _), true).
+ERROR: Unhandled exception: short_of_stock(tent,1,0)</code></pre><p>That catcher only matches system errors, so the stock-room ball sailed past it, exactly as it should. The version in the file catches everything but <strong>reports</strong> everything it did not expect, which is the other acceptable answer:</p><pre><code>try_sell(Item, Count) :-
+    catch(sell(Item, Count), Error, (explain(Error), fail)).
+
+explain(short_of_stock(Item, Want, Have)) :- !,
+    format("cannot sell ~w ~w: only ~w left~n", [Want, Item, Have]).
+explain(error(existence_error(item, Item), _)) :- !,
+    format("no such item: ~w~n", [Item]).
+explain(error(type_error(Type, Value), _)) :- !,
+    format("~q is not a ~w~n", [Value, Type]).
+explain(Error) :-
+    format("unexpected: ~q~n", [Error]).</code></pre><pre><code>?- try_sell(tent, 1).
+cannot sell 1 tent: only 0 left
+false.
+
+?- try_sell(unicorn, 1).
+no such item: unicorn
+false.
+
+?- try_sell(hammer, -1).
+-1 is not a positive_integer
+false.</code></pre><h3>Failure or an exception?</h3><p>Both stop a goal. The line between them is about whose problem it is:</p><ul><li><strong>Fail</strong> when the answer is a legitimate no. <code>in_stock(tent)</code> failing is not an error; it is the answer.</li><li><strong>Throw</strong> when the question itself was wrong, or when the caller cannot possibly have meant this. <code>sell(unicorn, 1)</code> is not a no — there is no such item, and silently failing would hide a typo.</li></ul><aside class="note note-impl"><span class="note-tag">A recovery that fails does not rethrow</span><div>If Recovery fails, <code>catch/3</code> fails and the ball is gone — it is <strong>not</strong> passed on to the next catcher out. To handle some balls and let the others through, test the ball and <code>throw/1</code> it again yourself: <code>( mine(E) -&gt; handle(E) ; throw(E) )</code>. Exercise 6 is this.</div></aside><aside class="note note-impl"><span class="note-tag">assertion/1 for the things that cannot happen</span><div><code>assertion(Goal)</code> succeeds quietly when Goal does and throws <code>assertion_failed(Goal)</code> when it does not. It is for invariants you believe rather than input you are checking — the failure is a bug report, not an error message.</div></aside></section><section id="database"><h2>Changing the database</h2><p>Everything in Levels 1 to 3 was written in a file and stayed there. Prolog also lets a program add and remove clauses while it runs, which is how it holds on to anything at all between goals.</p><div class="scroll"><table class="mono1"><thead><tr><th>Predicate</th><th>What it does</th></tr></thead><tbody><tr><td>assertz(+Clause)</td><td>Add Clause at the end. <code>assert/1</code> is a synonym.</td></tr><tr><td>asserta(+Clause)</td><td>Add it at the front.</td></tr><tr><td>retract(+Clause)</td><td>Remove the first clause that unifies; on backtracking, the next.</td></tr><tr><td>retractall(+Head)</td><td>Remove every clause whose head unifies, and make the predicate known.</td></tr><tr><td>abolish(+Name/+Arity)</td><td>Remove the predicate entirely.</td></tr><tr><td>clause(+Head, ?Body)</td><td>Enumerate the clauses; a fact has the body <code>true</code>.</td></tr></tbody></table></div><pre><code>?- assertz(counter(1)), assertz(counter(2)).
+true.
+
+?- findall(X, counter(X), L).
+L = [1,2].
+
+?- asserta(counter(0)), findall(X, counter(X), L).
+L = [0,1,2].
+
+?- retract(counter(0)), findall(X, counter(X), L).
+L = [1,2].
+
+?- retractall(counter(_)), findall(X, counter(X), L).
+L = [].</code></pre><p>Clauses, not just facts. The argument is a whole clause, so a rule needs the extra brackets that keep <code>:-</code> inside one argument:</p><pre><code>?- assertz((double(X, Y) :- Y is X * 2)), double(21, D).
+D = 42.
+
+?- listing(double/2).
+double(A,B) :-
+    B is A*2.
+
+true.</code></pre><h3>Declaring what changes</h3><p>Calling a predicate that has never been defined is an error, not a failure — which is the behaviour you want, because it catches typos. A predicate that starts empty and gets filled in later therefore has to be declared:</p><pre><code>:- dynamic(stock/2).
+:- dynamic(sale/2).</code></pre><pre><code>?- counter(X).
+ERROR: Unknown procedure: counter/1</code></pre><aside class="note note-impl"><span class="note-tag">dynamic is a predicate here, not an operator</span><div>Write <code>:- dynamic(stock/2).</code> with the brackets. Systems that declare <code>dynamic</code> as a prefix operator accept <code>:- dynamic stock/2.</code> as well; this one does not, and the bracketed form is what every system reads.</div></aside><h3>The clause is copied</h3><p><code>assertz/1</code> stores a copy of its argument with fresh variables. Nothing you do to the original afterwards reaches the stored clause:</p><pre><code>?- assertz(note(X)), X = bound, note(Y), var(Y).
+X = bound.</code></pre><p><code>Y</code> came back unbound: the clause in the database is <code>note(_)</code> with a variable of its own, and binding <code>X</code> afterwards had no effect on it. This is why <code>assertz/1</code> is a way of <strong>saving a value</strong>, not of sharing one.</p><h3>What a running goal sees</h3><p>If you change a predicate while a goal is still backtracking through it, what does that goal see? The ISO answer is the <strong>logical update view</strong>: a call sees the clauses that existed when it started, and nothing later. This interpreter does not do that — it walks the live clause list, so changes are visible immediately:</p><pre><code>?- assertz(c(1)), assertz(c(2)),
+   findall(X, ( c(X), ( X &lt; 6 -&gt; Y is X + 10, assertz(c(Y)) ; true ) ), Visited).
+Visited = [1,2,11,12].</code></pre><p>Under the logical view that would be <code>[1,2]</code>. Here the goal went on to visit the clauses it had just created, and only the <code>X &lt; 6</code> guard stopped it running for ever. Removing a clause the goal has not reached yet makes it disappear from under the walk in the same way:</p><pre><code>?- retractall(c(_)),
+   assertz(c(1)), assertz(c(2)), assertz(c(3)), assertz(c(4)),
+   findall(X, ( c(X), ( X =:= 1 -&gt; retract(c(3)) ; true ) ), Visited).
+Visited = [1,2,4].</code></pre><aside class="note note-impl"><span class="note-tag">What to do about it</span><div>Do not modify a predicate you are backtracking through. Collect first with <code>findall/3</code> and change the database afterwards, or write the loop over a <code>forall/2</code> whose generator is a list rather than the predicate itself. <code>retract/1</code> on the clause you are <strong>currently</strong> on is safe and is the normal idiom.</div></aside><h3>Bindings are undone; the database is not</h3><p>Backtracking and exceptions both roll back bindings. Neither rolls back the database. This is the single most important thing to know about <code>assertz/1</code>, and it is easy to see:</p><pre><code>?- stock(kettle, N).
+N = 3.
+
+?- catch(( retract(stock(kettle, 3)),
+           assertz(stock(kettle, 2)),
+           throw(oops) ), E, true).
+E = oops.
+
+?- stock(kettle, N).
+N = 2.</code></pre><p>The goal was abandoned and the stock stayed changed. A predicate that asserts halfway through and then throws leaves the world in the state it reached, which is why <code>sell/2</code> does all of its checking <strong>before</strong> the first <code>retract/1</code>. Get the failures out of the way while failing is still free.</p><h3>Remembering an answer</h3><p>The other everyday use of the database is memoisation: work out a value once, store it, and look it up ever after. Fibonacci is the usual illustration because the naive version recomputes so much:</p><pre><code>fib_slow(0, 0).
+fib_slow(1, 1).
+fib_slow(N, F) :-
+    N &gt; 1,
+    A is N - 1, B is N - 2,
+    fib_slow(A, FA), fib_slow(B, FB),
+    F is FA + FB.
+
+fib(N, F) :- fib_known(N, F), !.
+fib(0, 0).
+fib(1, 1).
+fib(N, F) :-
+    N &gt; 1,
+    A is N - 1, B is N - 2,
+    fib(A, FA), fib(B, FB),
+    F is FA + FB,
+    assertz(fib_known(N, F)).</code></pre><p>One extra first clause looks the answer up and cuts; one extra last goal records it. <code>count_inferences/2</code> in the file wraps <code>statistics(inferences, N)</code> around a goal so the difference is visible:</p><pre><code>?- count_inferences(fib_slow(24, _), N).
+N = 825273.
+
+?- count_inferences(fib(24, _), N).
+N = 423.
+
+?- count_inferences(fib(24, _), N).
+N = 12.
+
+?- aggregate_all(count, fib_known(_, _), N).
+N = 23.</code></pre><p>Two thousand times fewer inferences the first time, and seventy thousand times fewer after that, for two lines and twenty-three stored facts. The cut in the first clause matters: without it the later clauses would be tried as well and you would get the recomputation back, alongside the stored answer.</p><aside class="note note-impl"><span class="note-tag">Where the database is the wrong tool</span><div>A value that only one predicate needs and only for the length of one call belongs in an argument, not in the database — an accumulator, as in Level 2. Reach for <code>assertz/1</code> when something must outlive the goal that computed it. <code>nb_setval/2</code> and <code>nb_getval/2</code> are there for a single global value where a whole predicate would be overkill.</div></aside></section><section id="writing"><h2>Writing terms, and format</h2><p>There are five ways to write a term, and they differ in how much they care about being read back:</p><pre><code>?- write('a b'), nl.
+a b
+true.
+
+?- writeq('a b'), nl.
+'a b'
+true.
+
+?- print(f('a b', [1,2])), nl.
+f('a b',[1,2])
+true.
+
+?- write_canonical([1,2]), nl.
+'.'(1,'.'(2,[]))
+true.</code></pre><div class="scroll"><table class="mono1"><thead><tr><th>Predicate</th><th>Quotes</th><th>Operators</th><th>For</th></tr></thead><tbody><tr><td>write/1</td><td>no</td><td>yes</td><td>People. What you want in a message.</td></tr><tr><td>print/1</td><td>yes</td><td>yes</td><td>The toplevel's own format.</td></tr><tr><td>writeq/1</td><td>yes</td><td>yes</td><td>Anything that must be readable again.</td></tr><tr><td>write_canonical/1</td><td>yes</td><td>no</td><td>Seeing what a term really is.</td></tr><tr><td>portray_clause/1</td><td>yes</td><td>yes</td><td>A clause, laid out and with a full stop.</td></tr></tbody></table></div><pre><code>?- portray_clause((greet(X) :- format("hi ~w~n", [X]))).
+greet(A) :-
+    format([104,105,32,126,119,126,110],[A]).
+true.</code></pre><aside class="note note-impl"><span class="note-tag">Why the format string came out as numbers</span><div>The <code>double_quotes</code> flag is <code>codes</code>, so <code>"hi ~w~n"</code> <strong>is</strong> a list of character codes — <code>portray_clause/1</code> printed the term it was given, faithfully. <code>format/2</code> accepts either a code list or an atom, so writing <code>format('hi ~w~n', [X])</code> with single quotes gives the same output and a clause that reads back the way you wrote it.</div></aside><h3>format</h3><p><code>format/2</code> takes a control string and a list of arguments, and is what you will actually use. A directive begins with <code>~</code>:</p><pre><code>?- format("~w and ~q~n", ['a b', 'a b']).
+a b and 'a b'
+true.
+
+?- format("~a|~d|~2f|~e~n", [x, 42, 3.14159, 1.5]).
+x|42|3.14|1.500000e+00
+true.
+
+?- format("~D~n", [1234567]).
+1,234,567
+true.
+
+?- format("~s~n", ["codes as text"]).
+codes as text
+true.</code></pre><div class="scroll"><table class="mono1"><thead><tr><th>Directive</th><th>Effect</th></tr></thead><tbody><tr><td>~w  ~q  ~p</td><td>Write the next argument, as <code>write/1</code>, <code>writeq/1</code> or <code>print/1</code>.</td></tr><tr><td>~a</td><td>An atomic argument as text, unquoted.</td></tr><tr><td>~d  ~D</td><td>An integer; <code>~D</code> groups the digits with commas.</td></tr><tr><td>~Nf  ~e  ~g</td><td>A float: fixed with N digits, exponential, shortest.</td></tr><tr><td>~s</td><td>A code or character list, as text.</td></tr><tr><td>~n  ~Nn</td><td>A newline, or N of them.</td></tr><tr><td>~~</td><td>A literal tilde.</td></tr></tbody></table></div><p>The <a href="reference.html">reference</a> has the rest. The two that repay learning are <code>~t</code> and <code>~N|</code>, which are how you get columns: <code>~N|</code> says "pad to column N", and <code>~t</code> marks where the padding goes.</p><pre><code>?- format("[~w~t~10|]~n", [left]).
+[left     ]
+true.
+
+?- format("[~t~w~10|]~n", [right]).
+[    right]
+true.
+
+?- format("~`-t~24|~n").
+------------------------
+true.</code></pre><p>The last one sets the fill character to a dash rather than a space, which is how you draw a rule: a back-quote inside the directive names the character to pad with. Put the three together and that is the whole report:</p><pre><code>report :-
+    format("~w~t~14|~w~t~22|~w~t~30|~w~n", ['ITEM', 'PRICE', 'LEFT', 'SOLD']),
+    forall(item(Item, _, Price),
+           ( stock(Item, Left),
+             ( sale(Item, Sold) -&gt; true ; Sold = 0 ),
+             format("~w~t~14|~d~t~22|~d~t~30|~d~n", [Item, Price, Left, Sold]) )),
+    revenue(Total),
+    format("~t~22|~w~t~30|~d~n", [revenue, Total]).</code></pre><h3>Output that does not go anywhere</h3><p><code>format/3</code> takes a sink as its first argument, which may be a stream or a request to capture the text instead of printing it. <code>with_output_to/2</code> does the same for a whole goal:</p><pre><code>?- format(atom(A), "~w-~w", [a, b]).
+A = 'a-b'.
+
+?- with_output_to(atom(A), (write(x), write(y))).
+A = xy.</code></pre><p>Both accept <code>atom(A)</code>, <code>string(A)</code>, <code>codes(C)</code> and <code>chars(C)</code>. This is the tidy way to build a piece of text out of things that only know how to print themselves.</p></section><section id="files"><h2>Streams and files</h2><p>A stream is opened with <code>open/3</code>, used by the stream versions of the reading and writing predicates, and closed with <code>close/1</code>.</p><pre><code>?- open('tutorial/orders.txt', read, S), read(S, First), read(S, Second), close(S).
+S = '$stream'(3),
+First = sell(hammer,3),
+Second = sell(rope,2).</code></pre><p>Note what came back: not lines, but <strong>terms</strong>. <code>read/1</code> and <code>read/2</code> run the same reader that loads your programs, so an input file is a sequence of Prolog terms each ended by a full stop. That is why <code>tutorial/orders.txt</code> looks the way it does:</p><pre><code>sell(hammer, 3).
+sell(rope, 2).
+sell(tent, 1).
+sell(unicorn, 1).
+sell(kettle, 99).
+sell(screwdriver, 2).</code></pre><p>Reading stops at the end of the file, which arrives as the atom <code>end_of_file</code>. There is no <code>at_end_of_stream/0</code> in this interpreter, so that atom is the test:</p><pre><code>read_orders :-
+    read(Term),
+    (   Term == end_of_file
+    -&gt;  true
+    ;   apply_order(Term),
+        read_orders
+    ).
+
+apply_order(sell(Item, Count)) :- !,
+    ignore(try_sell(Item, Count)).
+apply_order(Other) :-
+    format("not an order, ignored: ~q~n", [Other]).</code></pre><aside class="note note-impl"><span class="note-tag">A file of terms is not a file of text</span><div>There are no character-reading predicates here — no <code>get_char/1</code>, no line reading — so a file this interpreter reads has to be Prolog terms. For text with its own shape, read it as one term (a quoted atom, or a code list) and take it apart with a grammar, exactly as Level 3 did with the order text.</div></aside><h3>Closing the stream whatever happens</h3><p>A stream must be closed even when the goal using it throws. Most systems have <code>setup_call_cleanup/3</code> for this; this one does not:</p><pre><code>?- setup_call_cleanup(true, true, true).
+ERROR: Unknown procedure: setup_call_cleanup/3</code></pre><p>So you write it out. Catch the ball, clean up, then re-throw it — the shape is the same every time:</p><pre><code>load_orders(File) :-
+    open(File, read, Stream),
+    current_input(Old),
+    set_input(Stream),
+    catch(read_orders, Error, true),
+    set_input(Old),
+    close(Stream),
+    (   var(Error)
+    -&gt;  true
+    ;   throw(Error)
+    ).</code></pre><p><code>catch/3</code> with <code>true</code> as the recovery consumes the ball like any other, but it also leaves it in <code>Error</code>, which is what makes this work: the cleanup runs, and then the last line throws the ball again so the caller still hears about it. <code>var(Error)</code> is the test for "nothing went wrong". <code>save_report/1</code> is the same shape around <code>current_output/1</code> and <code>set_output/1</code>.</p><aside class="note note-try"><span class="note-tag">The one thing to check</span><div>The idiom above is only correct because nothing between <code>set_input/1</code> and <code>close/1</code> can throw outside the <code>catch/3</code>. If you add a goal there, put it inside.</div></aside></section><section id="program"><h2>The whole thing</h2><p>With those pieces the stock room is a program. Load the orders, and the three that cannot be filled report themselves and are skipped:</p><pre><code>?- load_orders('tutorial/orders.txt').
+cannot sell 1 tent: only 0 left
+no such item: unicorn
+cannot sell 99 kettle: only 3 left
+true.
+
+?- report.
+ITEM          PRICE   LEFT    SOLD
+hammer        24      9       3
+screwdriver   9       2       2
+rope          12      3       2
+tent          95      0       0
+kettle        15      3       0
+                      revenue 114
+true.
+
+?- save_report('/tmp/report.txt').
+true.</code></pre><p><code>tutorial/restock.pl</code> is the same thing as a script. A directive runs as the file is read, which is too early to do any work; <code>initialization/1</code> defers a goal until everything named on the command line has been loaded, and that is where a program's <code>main</code> goes:</p><pre><code>:- ['tutorial/level4'].
+
+:- initialization(main).
+
+orders_file('tutorial/orders.txt').
+report_file('/tmp/stock-report.txt').
+
+main :-
+    orders_file(Orders),
+    report_file(Report),
+    catch(( load_orders(Orders),
+            save_report(Report),
+            report,
+            format("~nwritten to ~w~n", [Report])
+          ),
+          Error,
+          ( print_message(error, Error), halt(1) )),
+    halt.</code></pre><pre><code>$ ./prolog -q tutorial/restock.pl
+cannot sell 1 tent: only 0 left
+no such item: unicorn
+cannot sell 99 kettle: only 3 left
+ITEM          PRICE   LEFT    SOLD
+hammer        24      9       3
+screwdriver   9       2       2
+rope          12      3       2
+tent          95      0       0
+kettle        15      3       0
+                      revenue 114
+
+written to /tmp/stock-report.txt</code></pre><p>Three details make it a program rather than a query. <code>halt/0</code> at the end stops it dropping into the toplevel. <code>halt(1)</code> in the recovery gives the shell a non-zero status, so a script that calls this one can tell that it failed. And <code>print_message(error, Error)</code> prints the ball the way the toplevel would, on standard error, rather than inventing a message of its own:</p><pre><code>$ ./prolog -q tutorial/restock.pl        # with the orders file renamed away
+ERROR: Unknown source_sink: 'tutorial/orders.txt'
+$ echo $?
+1</code></pre><aside class="note note-impl"><span class="note-tag">There is no argv</span><div>This interpreter has no <code>argv</code> flag, so a script cannot take a file name from the command line. Name the files in the program, as <code>restock.pl</code> does, or pass them in with a second <code>-g</code> goal.</div></aside></section><section id="errors"><h2>When this goes wrong</h2><div class="scroll"><table class=""><thead><tr><th>Symptom</th><th>Usual cause</th></tr></thead><tbody><tr><td>A typo behaves like a failure instead of an error</td><td>A <code>catch/3</code> with <code>_</code> as the catcher somewhere above it. Name the balls you expect.</td></tr><tr><td>Half the change happened and then it threw</td><td>The database is not rolled back by an exception. Do the checking before the first <code>assertz/1</code> or <code>retract/1</code>.</td></tr><tr><td>A loop over a dynamic predicate never ends</td><td>It is asserting to the predicate it is walking, and this interpreter shows the new clauses to the running goal. Collect with <code>findall/3</code> first.</td></tr><tr><td>Unknown procedure for a predicate that starts empty</td><td>It needs <code>:- dynamic(name/arity).</code> — with the brackets.</td></tr><tr><td>assertz stored a variable instead of the value</td><td>The clause is copied at the moment you assert it. Bind first, assert second.</td></tr><tr><td>A file of text will not read</td><td><code>read/1</code> reads terms, not lines, and needs a full stop after each. A report written by <code>format/2</code> cannot be read back by <code>read/1</code>.</td></tr><tr><td>The stream is still open after an error</td><td>The goal threw past the <code>close/1</code>. Use the catch-clean-rethrow shape.</td></tr></tbody></table></div><aside class="note note-try"><span class="note-tag">The quickest way to see the database</span><div><code>listing/1</code> writes a predicate the way it would be read back, clauses, rules and all. <code>listing(stock/2).</code> after a few sales shows exactly what the program has done.</div></aside></section><section id="exercises"><h2>Exercises</h2><p>All of these use <code>tutorial/level4.pl</code>. <code>reset/0</code> puts the stock back to its opening values whenever you want to start again.</p><ol class="task"><li><p><code>restock(+Item, +Count)</code>: the opposite of <code>sell/2</code>. Raise the same errors for an unknown item and a count that is not a positive integer.</p></li><li><p><code>sell_all(+Lines)</code>: sell a list of <code>Count-Item</code> pairs, all or nothing — if any line cannot be filled, none of them happen. Why can you not simply wrap the whole thing in <code>catch/3</code>?</p></li><li><p><code>with_stock_restored(:Goal)</code>: run Goal and then put the stock back where it was, whether Goal succeeds, fails or throws. This is <code>setup_call_cleanup/3</code> for one particular case.</p></li><li><p><code>department_report/0</code>: total units in stock per department, in columns. <code>setof/3</code> from Level 2 and <code>~t~N|</code> from this page.</p></li><li><p><code>save_stock(+File)</code> and <code>load_stock(+File)</code>: write the current stock as terms and read it back. Check that a round trip through the file changes nothing.</p></li><li><p>Make <code>try_sell/2</code> catch only the three balls <code>explain/1</code> understands, and let anything else through. What do you have to write, and what happens now if <code>sell/2</code> has a bug in it?</p></li><li><p>Memoise something of your own. The Collatz sequence length is a good target: <code>collatz(N, Steps)</code> where even N halves, odd N goes to <code>3N + 1</code>, and <code>collatz(1, 0)</code>.</p></li></ol><details class="ex"><summary>Solutions</summary><div class="ex-body"><pre><code>% 1
+restock(Item, Count) :-
+    (   item(Item, _, _) -&gt; true
+    ;   throw(error(existence_error(item, Item), restock/2))
+    ),
+    (   integer(Count), Count &gt; 0 -&gt; true
+    ;   throw(error(type_error(positive_integer, Count), restock/2))
+    ),
+    retract(stock(Item, Have)),
+    Left is Have + Count,
+    assertz(stock(Item, Left)).
+
+% 2  check everything first, then do it
+sell_all(Lines) :-
+    forall(member(Count-Item, Lines),
+           ( item(Item, _, _), stock(Item, Have), Have &gt;= Count )),
+    forall(member(Count-Item, Lines), sell(Item, Count)).
+
+% 3
+with_stock_restored(Goal) :-
+    findall(Item-N, stock(Item, N), Saved),
+    (   catch(Goal, Error, true) -&gt; Outcome = true ; Outcome = fail ),
+    retractall(stock(_, _)),
+    forall(member(Item-N, Saved), assertz(stock(Item, N))),
+    (   nonvar(Error) -&gt; throw(Error) ; Outcome == true ).
+
+% 4
+department_report :-
+    setof(D, I^P^item(I, D, P), Ds),
+    forall(member(D, Ds),
+           ( aggregate_all(sum(N), (item(I, D, _), stock(I, N)), Units),
+             format("~w~t~14|~d~n", [D, Units]) )).
+
+% 5
+save_stock(File) :-
+    open(File, write, S),
+    forall(stock(I, N), ( writeq(S, stock(I, N)), write(S, '.'), nl(S) )),
+    close(S).
+
+load_stock(File) :-
+    retractall(stock(_, _)),
+    open(File, read, S),
+    read_all(S),
+    close(S).
+
+read_all(S) :-
+    read(S, T),
+    ( T == end_of_file -&gt; true ; assertz(T), read_all(S) ).
+
+% 6
+try_sell(Item, Count) :-
+    catch(sell(Item, Count), Error,
+          (   known(Error)
+          -&gt;  explain(Error), fail
+          ;   throw(Error)
+          )).
+
+known(short_of_stock(_, _, _)).
+known(error(existence_error(item, _), _)).
+known(error(type_error(positive_integer, _), _)).
+
+% 7
+:- dynamic(collatz_known/2).
+
+collatz(N, S) :- collatz_known(N, S), !.
+collatz(1, 0) :- !.
+collatz(N, S) :-
+    (   0 is N mod 2 -&gt; M is N // 2 ; M is 3 * N + 1 ),
+    collatz(M, S0),
+    S is S0 + 1,
+    assertz(collatz_known(N, S)).</code></pre><p><strong>2</strong> <code>catch/3</code> cannot undo it, because the database is not part of what an exception rolls back. By the time the third line throws, the first two have already been sold. Checking every line before touching anything is the only way to get the all-or-nothing behaviour — or you undo it by hand, which is exercise 3.</p><p><strong>3</strong> Two things are easy to get wrong. Writing <code>catch(Goal, Error, true)</code> as a plain goal handles success and an exception but <strong>not</strong> failure — a failing Goal makes <code>catch/3</code> fail, so the restore never runs. Wrapping it in <code>( ... -&gt; ... ; ... )</code> catches the failure and records it, so the cleanup happens either way and the final line reproduces the outcome. And the explicit <code>throw(Error)</code> is what makes this a cleanup rather than a swallow.</p><p><strong>5</strong> The round trip works because <code>writeq/1</code> quotes whatever needs it and the full stop makes each line a term. Writing with <code>write/1</code> instead would produce a file that <code>read/1</code> cannot always read back.</p><p><strong>6</strong> The explicit <code>throw(Error)</code> in the else branch is the whole point. Letting the recovery just fail would <strong>not</strong> put the ball back — a recovery that fails makes <code>catch/3</code> fail, and the exception is gone. With the rethrow, a bug inside <code>sell/2</code> — an unbound variable reaching <code>atom_length/2</code>, say — comes back as <code>error(instantiation_error, _)</code> and tells you about itself, instead of being printed as "unexpected" and turned into a quiet <code>false</code>.</p></div></details></section><section id="next"><h2>Where this goes next</h2><p>That is the language. Across four levels: facts and rules and the search; lists and collecting answers; negation, the cut, your own notation and grammars; and now exceptions, the database and I/O. There is no fifth thing you need before writing real programs in it.</p><p>What is worth doing next is reading and writing rather than learning:</p><ul><li>The programs in <code>examples/</code> — the eight queens, the zebra puzzle, Hanoi, a calculator, a family tree. They are short, and each is one idea from these four levels used properly.</li><li>The <a href="reference.html">language reference</a> for everything this page skipped: every builtin, the full <code>format/2</code> table, arithmetic, flags, and the deviations from ISO.</li><li>The <a href="internals.html">engine internals</a> if you would rather know why any of it behaves as it does. The choice point for a call with more than one matching clause holds a pointer to the next clause in the live list, which is the whole reason the update view above is immediate rather than logical.</li></ul><p>And the levels are here if you want to go back over any of it: <a href="tutorial-1.html">Level 1</a>, <a href="tutorial-2.html">Level 2</a>, <a href="tutorial-3.html">Level 3</a>.</p></section>
+    <footer>Generated from the interpreter's own tables and checked against the
+    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
+    for the library written in Prolog.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

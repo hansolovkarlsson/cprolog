@@ -1,0 +1,6 @@
+sell(hammer, 3).
+sell(rope, 2).
+sell(tent, 1).
+sell(unicorn, 1).
+sell(kettle, 99).
+sell(screwdriver, 2).

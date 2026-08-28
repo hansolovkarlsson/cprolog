@@ -862,11 +862,21 @@ section('limits', 'Deviations and limits', ''.join([
         "`open/4` accepts an options list and ignores it.",
         "`discontiguous/1` is recorded but never enforced; clauses may be spread "
         "through a file regardless.",
+        "No `setup_call_cleanup/3`. Write the cleanup out: catch the ball with "
+        "`catch(Goal, E, true)`, clean up, then re-throw `E` if it was bound.",
+        "`dynamic/1` and `discontiguous/1` are predicates, not prefix operators, so "
+        "a directive needs the brackets: `:- dynamic(counter/1).`",
     ]),
     '<h3>Behaviour worth knowing</h3>',
     ul([
         "After `abolish/1` a predicate that was dynamic stays known, so calls to it "
         "fail rather than raising an existence error.",
+        "There is no logical update view. A choice point over a predicate's clauses "
+        "holds a pointer into the live clause list, so a goal backtracking through a "
+        "predicate sees clauses asserted after it started, and skips ones retracted "
+        "ahead of it. Retracting the clause a goal is currently on is safe; for "
+        "anything else, collect with `findall/3` first and change the database "
+        "afterwards.",
         "A retracted clause is held until its predicate is abolished, so a program "
         "that retracts millions of clauses from one predicate keeps them in memory.",
         "A `-g` goal that fails prints a warning but still exits with status 0; only "

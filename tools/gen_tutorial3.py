@@ -767,11 +767,10 @@ section('next', 'Where this goes next', ''.join([
          "facts and rules, unification and backtracking, lists and aggregation, "
          "and — as of this page — control over which proofs get attempted and "
          "notation of your own for the data."),
-    para("What is left is mostly breadth, and the [language "
-         "reference](reference.html) is the place for it: exceptions with "
-         "`catch/3` and `throw/1`, the database predicates `assertz/1` and "
-         "`retract/1`, streams and file I/O, `format/2`, and the flags that "
-         "change how the reader behaves."),
+    para("[Level 4](tutorial-4.html) turns that into a program. It covers the "
+         "parts that reach outside the proof: exceptions with `catch/3` and "
+         "`throw/1`, the database predicates `assertz/1` and `retract/1`, "
+         "`format/2`, and reading and writing files."),
     para("If you would rather know how any of this works underneath, the "
          "[engine internals](internals.html) page describes the machine that "
          "runs it — and the cut in particular turns out to be exactly what the "
@@ -780,9 +779,10 @@ section('next', 'Where this goes next', ''.join([
     ul([
         "Level 1 — [facts, rules and the search](tutorial-1.html).",
         "Level 2 — [lists and collecting answers](tutorial-2.html).",
-        "The examples in `examples/` are the next thing to read: the eight "
-        "queens, the zebra puzzle and a calculator built on the grammar "
-        "notation from this page.",
+        "Level 4 — [exceptions, the database and I/O](tutorial-4.html).",
+        "The examples in `examples/` are worth reading too: the eight queens, "
+        "the zebra puzzle and a calculator built on the grammar notation from "
+        "this page.",
     ]),
 ]))
 

@@ -35,6 +35,12 @@ level_cut(_, high).
 
 /* ---- the cut that quietly changes the meaning ---- */
 
+/*  max_of/3 is wrong on purpose: max_of(7, 3, 3) succeeds, because the first
+    clause is rejected on its head before its cut is ever reached, and the
+    second has no test of its own. It is here to be compared with max_safe/3,
+    not to be copied. level_cut/2 above is wrong the same way.
+*/
+
 max_of(X, Y, X) :- X >= Y, !.
 max_of(_, Y, Y).
 

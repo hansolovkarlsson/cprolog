@@ -1,0 +1,793 @@
+<title>Prolog Tutorial, Level 3</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #F6F7FA;
+  --surface:    #FFFFFF;
+  --ink:        #151922;
+  --ink-soft:   #333C4E;
+  --muted:      #5C657A;
+  --rule:       #E0E4EE;
+  --rule-soft:  #EDF0F6;
+  --accent:     #2E3A8C;
+  --accent-bg:  #ECEEF9;
+  --ochre:      #8A5D0F;
+  --ochre-bg:   #F7F0E1;
+  --code-bg:    #F0F2F8;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #101319;
+    --surface:   #161A22;
+    --ink:       #DDE3EF;
+    --ink-soft:  #C2CADA;
+    --muted:     #8C96AC;
+    --rule:      #262C39;
+    --rule-soft: #1D222C;
+    --accent:    #9CAAFF;
+    --accent-bg: #1B2137;
+    --ochre:     #DBA649;
+    --ochre-bg:  #2A2317;
+    --code-bg:   #1C212B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #101319;
+  --surface:   #161A22;
+  --ink:       #DDE3EF;
+  --ink-soft:  #C2CADA;
+  --muted:     #8C96AC;
+  --rule:      #262C39;
+  --rule-soft: #1D222C;
+  --accent:    #9CAAFF;
+  --accent-bg: #1B2137;
+  --ochre:     #DBA649;
+  --ochre-bg:  #2A2317;
+  --code-bg:   #1C212B;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.masthead-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.4rem 2rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 1.4rem;
+}
+.masthead h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .prompt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.25rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+.masthead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  flex-basis: 100%;
+}
+
+/* ---- shell ---- */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+@media (max-width: 940px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ---- sidebar ---- */
+.rail {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2.2rem 0 3rem;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+}
+@media (max-width: 940px) {
+  .rail {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+  }
+}
+.rail-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.rail a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.rail a:hover { color: var(--accent); background: var(--rule-soft); }
+.rail a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+.rail .sub { margin-left: 0.6rem; }
+.rail .sub a { font-size: 0.8rem; color: var(--muted); padding-block: 0.2rem; }
+
+/* ---- main ---- */
+main { padding-top: 2.2rem; min-width: 0; }
+section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+section > h2 {
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--rule);
+  text-wrap: balance;
+}
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 2.2rem 0 0.7rem;
+  color: var(--ink);
+}
+p { margin: 0 0 1rem; max-width: 68ch; color: var(--ink-soft); }
+ul { margin: 0 0 1.2rem; padding-left: 1.2rem; max-width: 68ch; color: var(--ink-soft); }
+li { margin-bottom: 0.45rem; }
+a { color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.95rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.4rem;
+}
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---- tables ---- */
+.scroll { overflow-x: auto; margin: 0 0 1.5rem; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.87rem;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-soft);
+  vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+table.mono1 td:first-child,
+table.mono2 td:nth-child(2),
+table.ops td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.ops td:nth-child(3) { white-space: normal; }
+table.ops td:first-child { color: var(--muted); }
+
+/* ---- predicate entries ---- */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.filter input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.filter-count {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.preds { margin-bottom: 1rem; }
+.pred-group {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ochre);
+  font-weight: 600;
+  margin: 2.4rem 0 0.2rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  scroll-margin-top: 1.5rem;
+}
+.pred {
+  padding: 0.75rem 0 0.7rem;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.pred .sig {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.pred .mode { color: var(--ochre); }
+.pdesc { color: var(--muted); font-size: 0.95rem; max-width: 68ch; }
+.pdesc code { font-size: 0.82em; }
+.pred.hidden, .pred-group.hidden { display: none; }
+
+/* ---- notes ---- */
+.note {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--ochre-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ochre);
+  border-radius: 3px;
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  max-width: 72ch;
+}
+.note-tag {
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ochre);
+  padding-top: 0.28rem;
+  flex: 0 0 7.5rem;
+  width: 7.5rem;
+}
+@media (max-width: 620px) {
+  .note { flex-direction: column; gap: 0.3rem; }
+  /* Stacked, the basis above would become a height, so it has to go back. */
+  .note-tag { flex: 0 0 auto; width: auto; padding-top: 0; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+a:focus-visible, .rail a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* ---- tutorial furniture ---- */
+.levels { display: flex; gap: 0.35rem; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.levels a {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.2rem 0.55rem;
+}
+.levels a:hover { color: var(--accent); border-color: var(--accent); }
+.levels a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+.note-try {
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.note-try .note-tag { color: var(--accent); }
+
+details.ex {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--surface);
+}
+details.ex[open] { padding-bottom: 0.4rem; }
+details.ex > summary {
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+details.ex > summary::-webkit-details-marker { display: none; }
+details.ex > summary::before {
+  content: "\25B8\00A0";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+details.ex[open] > summary::before { content: "\25BE\00A0"; }
+details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  details.ex > summary::before { transition: none; }
+}
+.ex-body { margin-top: 0.7rem; }
+.ex-body p:last-child, .ex-body pre:last-child { margin-bottom: 0.4rem; }
+
+.task {
+  counter-reset: task;
+  list-style: none;
+  padding-left: 0;
+}
+.task > li {
+  position: relative;
+  padding-left: 2.2rem;
+  margin-bottom: 1.4rem;
+}
+.task > li::before {
+  counter-increment: task;
+  content: counter(task);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ochre);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- figures ---- */
+figure { margin: 0 0 1.7rem; }
+figure svg { max-width: 100%; height: auto; display: block; color: var(--ink-soft); }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.svg-frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1.1rem 1rem;
+  overflow-x: auto;
+}
+
+/* ---- document switcher ---- */
+.docnav {
+  display: flex;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.docnav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.docnav a:hover { color: var(--accent); border-color: var(--accent); }
+.docnav a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bg);
+  font-weight: 500;
+}
+
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>Prolog Tutorial, Level 3</h1>
+    <span class="prompt">?- level 3</span>
+    <p>Negation, the cut, terms and operators of your own, and the grammar notation — the parts of Prolog that control the search rather than describe the problem. Every query on this page was run against the interpreter here.</p>
+    <nav class="docnav" aria-label="Documents"><a href="index.html">Overview</a><a href="tutorial-1.html">Tutorial</a><a href="reference.html">Language reference</a><a href="internals.html">Engine internals</a></nav>
+  </div>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Contents">
+    <p class="rail-title">Levels</p><div class="levels"><a href="tutorial-1.html">Level 1</a><a href="tutorial-2.html">Level 2</a><a href="tutorial-3.html" aria-current="page">Level 3</a></div><p class="rail-title">Contents</p>
+    <ol><li><a href="#start">Where we left off</a></li><li><a href="#negation">Negation, and what it really means</a></li><li><a href="#cut">The cut</a></li><li><a href="#packaged">The cut, already wrapped up for you</a></li><li><a href="#structures">Terms as records</a></li><li><a href="#operators">Your own notation</a></li><li><a href="#dcg">Grammars</a></li><li><a href="#errors">When control goes wrong</a></li><li><a href="#exercises">Exercises</a></li><li><a href="#next">Where this goes next</a></li></ol>
+  </nav>
+  <main>
+    <section id="start"><h2>Where we left off</h2><p>Levels 1 and 2 were about <strong>describing</strong> things: facts, rules, lists, and letting the search find whatever follows. Everything you wrote was true or false regardless of how Prolog went looking for it.</p><p>This level is about the other half. Real programs need to say "stop here", "only the first one", "this is not the case". Those are statements about the <strong>search</strong>, not about the world, and they behave differently: the order of your goals starts to matter, and a program can be correct read one way and wrong read the other. That trade is the subject of this page.</p><pre><code>$ ./prolog tutorial/level3.pl</code></pre></section><section id="negation"><h2>Negation, and what it really means</h2><p>Prolog has no way to state that something is false. What it has is <code>\+</code>, pronounced "not provable": <code>\+ G</code> succeeds when the attempt to prove G <strong>fails</strong>, and fails when G succeeds.</p><pre><code>?- in_stock(rope).
+true.
+
+?- in_stock(tent).
+false.
+
+?- \+ in_stock(tent).
+true.</code></pre><p>That is enough for most of what you want. The stock room in the file has five items, one of them discontinued, two of them at zero:</p><pre><code>item(hammer,      tools,   12).
+item(screwdriver, tools,    0).
+item(rope,        outdoor,  5).
+item(tent,        outdoor,  0).
+item(kettle,      kitchen,  3).
+
+discontinued(tent).
+
+in_stock(Item)      :- item(Item, _, N), N &gt; 0.
+out_of_stock(Item)  :- item(Item, _, _), \+ in_stock(Item).
+orderable(Item)     :- item(Item, _, _), \+ discontinued(Item).</code></pre><pre><code>?- out_of_stock(X).
+X = screwdriver ;
+X = tent ;
+false.</code></pre><h3>The closed world</h3><p><code>\+ G</code> does not mean "G is false". It means "I could not prove G from what I was told". Prolog assumes that what it has been told is all there is — the <strong>closed-world assumption</strong> — so anything absent from the database counts as false.</p><p>Usually that is what you want: the stock room has five items and no others. It stops being what you want the moment your database is incomplete. "Not provable that this flight is full" is not the same claim as "this flight has seats", and a program that confuses them will sell you a seat that does not exist.</p><aside class="note note-impl"><span class="note-tag">An unknown predicate is not false</span><div>Missing <strong>clauses</strong> are false; a missing <strong>predicate</strong> is an error, which is a deliberate distinction. <code>\+ flies(pig)</code> raises <code>Unknown procedure: flies/1</code> rather than quietly succeeding, so a typo in a predicate name does not turn into a silent "no". See <code>unknown</code> in the <a href="reference.html">flags</a> if you want the other behaviour.</div></aside><h3>The order of goals now matters</h3><p>This is the part that catches everyone. <code>\+</code> is only safe when its goal has no unbound variables you care about. Compare:</p><pre><code>?- item(X, _, _), \+ in_stock(X).
+X = screwdriver ;
+X = tent ;
+false.
+
+?- \+ in_stock(X), item(X, _, _).
+false.</code></pre><p>Same two goals, opposite results. In the first, <code>item/3</code> binds X to one item at a time, and <code>\+ in_stock(X)</code> asks a question about <strong>that</strong> item. In the second, X is still unbound, so <code>in_stock(X)</code> asks "is anything in stock?" — it succeeds, and the negation of a success is failure. The whole query dies before <code>item/3</code> is even reached.</p><p>The rule to carry around: <strong>generate first, negate second</strong>. Put the goals that bind the variables before the <code>\+</code> that tests them.</p><h3>It never binds anything</h3><p>A goal inside <code>\+</code> is proved and then thrown away, bindings and all. That is inherent — if it had succeeded there would be nothing to report, and it did not succeed, so there is nothing to report either:</p><pre><code>?- \+ \+ (X = hammer), write(X), nl.
+_G1938
+true.</code></pre><p>The doubled <code>\+ \+</code> is the idiom for "does this goal have a solution?" when you deliberately want the bindings discarded — it is how you test a goal without letting it change anything.</p><h3>Negation inside negation</h3><p><code>\+</code> composes, and the nested form is how you say "for all". The orders in the file are lists of <code>N of Item</code>, and an order is fillable when there is no line whose item is out of stock:</p><pre><code>order(alice, [3 of hammer, 2 of rope]).
+order(bob,   [1 of kettle]).
+order(cara,  [2 of tent, 1 of rope]).
+
+fillable(Customer) :-
+    order(Customer, Lines),
+    \+ ( member(_ of Item, Lines), \+ in_stock(Item) ).</code></pre><pre><code>?- fillable(C).
+C = alice ;
+C = bob ;
+false.</code></pre><p>Read the inner part as "there is a line that is not in stock", and the outer <code>\+</code> as "there is no such line". Cara's order asks for a tent, so she is not in the list. This shape — <code>\+ (Generate, \+ Test)</code> — is common enough to have a name of its own, <code>forall/2</code>:</p><pre><code>?- forall(item(_, _, N), N &gt;= 0).
+true.
+
+?- forall(item(I, _, _), orderable(I)).
+false.</code></pre><aside class="note note-impl"><span class="note-tag">What this interpreter does not have</span><div>Serious Prolog systems offer <code>dif/2</code>, which <em>delays</em> an inequality until the variables are bound instead of guessing now. This interpreter has no constraint store, so it has no <code>dif/2</code> — constraints are on the project's roadmap. Until then, bind before you test.</div></aside></section><section id="cut"><h2>The cut</h2><p>The cut, written <code>!</code>, is a goal that always succeeds and, in succeeding, throws away choice points. It is the most powerful and the most misused thing in the language, so it is worth being exact about what it discards.</p><p>When <code>!</code> is reached in the body of a clause of <code>p/1</code>, two sets of choice points go away: the <strong>remaining clauses</strong> of <code>p/1</code>, and any alternatives left behind by the goals <strong>to the left of the cut in that same body</strong>. Everything older — in particular anything the caller was holding — is untouched.</p><figure><div class="svg-frame"><svg viewBox="0 0 620 262" role="img" aria-label="Two stacks of choice points side by side. On the left, four choice points while the body of a clause runs. On the right, after the cut, only the caller's choice point remains; the other three are gone." xmlns="http://www.w3.org/2000/svg"><g><rect x="40" y="70" width="210" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="145" y="90" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">b(X) left an alternative</text></g><g opacity="0.35"><rect x="370" y="70" width="210" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/><text x="475" y="90" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">b(X) left an alternative</text></g><g><rect x="40" y="110" width="210" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="145" y="130" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">a(X) left an alternative</text></g><g opacity="0.35"><rect x="370" y="110" width="210" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/><text x="475" y="130" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">a(X) left an alternative</text></g><g><rect x="40" y="150" width="210" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="145" y="170" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">clauses 2 and 3 of p/1</text></g><g opacity="0.35"><rect x="370" y="150" width="210" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/><text x="475" y="170" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">clauses 2 and 3 of p/1</text></g><g><rect x="40" y="190" width="210" height="32" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="145" y="210" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">the caller's choice point</text></g><g><rect x="370" y="190" width="210" height="32" rx="3" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/><text x="475" y="210" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor" text-anchor="middle">the caller's choice point</text></g><text x="145" y="52" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">while proving the body of p/1</text><text x="475" y="52" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">the instant ! is reached</text><line x1="32" y1="234" x2="258" y2="234" stroke="currentColor" stroke-width="1.1" opacity="0.5"/><line x1="362" y1="234" x2="588" y2="234" stroke="currentColor" stroke-width="1.1" opacity="0.5"/><text x="145" y="248" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">older, deeper in the stack</text><text x="475" y="248" font-family="IBM Plex Sans, sans-serif" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">the only one left</text><line x1="272" y1="135" x2="348" y2="135" stroke="var(--accent)" stroke-width="1.4" opacity="0.9"/><path d="M348 135 l-8 -4 l0 8 z" fill="var(--accent)"/><text x="310" y="126" font-family="IBM Plex Mono, monospace" font-size="15" fill="var(--accent)" text-anchor="middle">!</text></svg></div><figcaption>The cut is a stack height. Everything piled up since p/1 was entered is dropped; the caller's choice points survive, which is why a cut can never make the predicate that called you deterministic.</figcaption></figure><p>That last point is worth a demonstration. <code>first_in_stock/1</code> cuts after its first success:</p><pre><code>first_in_stock(Item) :- item(Item, _, N), N &gt; 0, !.
+
+?- member(X, [a,b]), first_in_stock(I).
+X = a,
+I = hammer ;
+X = b,
+I = hammer ;
+false.</code></pre><p><code>member/2</code> still backtracked twice. The cut made <code>first_in_stock/1</code> give one answer instead of three; it did not reach out and freeze the goal that called it.</p><h3>A cut that only saves work</h3><p>Here is a classification written the honest way, with tests that exclude one another:</p><pre><code>level(N, low)    :- N &lt; 5.
+level(N, medium) :- N &gt;= 5, N &lt; 20.
+level(N, high)   :- N &gt;= 20.</code></pre><pre><code>?- level(3, L).
+L = low ;
+false.</code></pre><p>Correct, but the <code>;</code> shows the cost: after answering <code>low</code>, Prolog still had to enter the other two clauses and fail their tests to prove there was nothing more. The cut says "do not bother":</p><pre><code>level_cut(N, low)    :- N &lt; 5, !.
+level_cut(N, medium) :- N &lt; 20, !.
+level_cut(_, high).</code></pre><pre><code>?- level_cut(3, L).
+L = low.
+
+?- level_cut(10, L).
+L = medium.</code></pre><p>Notice that the second clause no longer needs <code>N &gt;= 5</code>. It cannot be reached unless the first clause's test failed, so <code>N &gt;= 5</code> is already known. That is the real economy of the cut: it lets later clauses assume the earlier ones did not apply.</p><p>A cut that only removes work Prolog was going to waste, without changing which answers come out, is traditionally called a <strong>green cut</strong>. Remove it and the program still means the same thing; it is just slower.</p><h3>A cut that changes the answer</h3><p>The trouble is that the same technique, applied where the answer might arrive as an input, silently breaks. The classic case is a maximum:</p><pre><code>max_of(X, Y, X) :- X &gt;= Y, !.
+max_of(_, Y, Y).</code></pre><pre><code>?- max_of(7, 3, M).
+M = 7.
+
+?- max_of(3, 7, M).
+M = 7.</code></pre><p>Both right. Now ask it a question instead of asking it to compute — check a claim that is plainly false:</p><pre><code>?- max_of(7, 3, 3).
+true.</code></pre><p>The first clause's head is <code>max_of(X, Y, X)</code>, and unifying <code>X</code> with both 7 and 3 is impossible, so that clause is rejected <strong>before its test and its cut are ever reached</strong>. The second clause has no test at all — it relied entirely on the cut in the first one to protect it — so it happily agrees that the maximum of 7 and 3 is 3.</p><p>This is a <strong>red cut</strong>: take it out and the program changes meaning. The failure mode is nasty because the predicate looks fine under every test you are likely to write, and only misbehaves when someone uses it in a direction you did not have in mind. <code>level_cut/2</code> above has exactly the same flaw — <code>level_cut(3, high)</code> succeeds.</p><aside class="note note-try"><span class="note-tag">See it for yourself</span><div>Try <code>level_cut(3, high).</code> and then <code>level(3, high).</code> The version without cuts answers correctly; the version with them does not.</div></aside><h3>Say it with if-then-else instead</h3><p>Almost every red cut is a <code>( Cond -&gt; Then ; Else )</code> that has not been written out. Level 2 met this form already; here is why it is safer. The condition is a test, the branches are separate, and nothing depends on the head having failed to unify:</p><pre><code>max_safe(X, Y, M) :- ( X &gt;= Y -&gt; M = X ; M = Y ).</code></pre><pre><code>?- max_safe(3, 7, M).
+M = 7.
+
+?- max_safe(7, 3, 3).
+false.</code></pre><p>Same determinism, same speed, and it now answers the checking question correctly. The output variable <code>M</code> is bound in the branch rather than in the head, so there is no way to smuggle a wrong answer in through an argument.</p><aside class="note note-impl"><span class="note-tag">When a cut is genuinely the right tool</span><div>Keep the cut for the cases if-then-else cannot express: committing after a goal that is a <strong>generator</strong> rather than a test (<code>item(I,_,N), N &gt; 0, !</code>), and the base clause of a recursion that must not be retried. Elsewhere, prefer the arrow — a reader can see its scope without reconstructing which clauses could still match.</div></aside></section><section id="packaged"><h2>The cut, already wrapped up for you</h2><p>Three predicates you will use constantly are all cuts underneath. Reaching for them instead of writing <code>!</code> keeps the commitment visible and confined to one goal.</p><div class="scroll"><table class="mono1"><thead><tr><th>Predicate</th><th>Means</th><th>Roughly</th></tr></thead><tbody><tr><td>once(:G)</td><td>Prove G, keep the first solution only.</td><td><code>G, !</code></td></tr><tr><td>\+ :G</td><td>G has no solution.</td><td><code>( G -&gt; fail ; true )</code></td></tr><tr><td>ignore(:G)</td><td>Prove G if you can; succeed either way.</td><td><code>( G -&gt; true ; true )</code></td></tr><tr><td>forall(:C, :A)</td><td>A holds for every solution of C.</td><td><code>\+ ( C, \+ A )</code></td></tr></tbody></table></div><pre><code>?- once(item(X, _, _)).
+X = hammer.
+
+?- ignore(item(unicorn, _, _)).
+true.</code></pre><p><code>once/1</code> is the one to reach for when a goal has several solutions but you only need the existence of one — a lookup, a first match, a witness. Unlike a cut written into the predicate, it commits at the <strong>call site</strong>, so the predicate itself stays usable by callers who do want every answer.</p><aside class="note note-impl"><span class="note-tag">Cuts are local to the goal they are in</span><div>A cut inside <code>findall/3</code>, <code>\+</code>, <code>once/1</code> or the condition of an if-then-else is confined to that goal — it cannot prune anything outside. <code>findall(X, (member(X,[1,2,3]), !), L)</code> gives <code>L = [1]</code>, not an empty list and not a pruned outer query.</div></aside></section><section id="structures"><h2>Terms as records</h2><p>You have been using compound terms all along — <code>parent(esther, hannah)</code> is one. The same terms make perfectly good records, and Prolog can take them apart without you writing an accessor for every field.</p><div class="scroll"><table class="mono1"><thead><tr><th>Predicate</th><th>What it does</th></tr></thead><tbody><tr><td>functor(?T, ?Name, ?Arity)</td><td>The name and argument count of a term, or builds one with fresh arguments when T is unbound.</td></tr><tr><td>arg(?N, +T, ?A)</td><td>The Nth argument, counting from 1. Backtracks over N when N is unbound.</td></tr><tr><td>?T =.. ?List</td><td>Term to list and back: <code>[Name|Args]</code>. Pronounced "univ".</td></tr><tr><td>copy_term(+T, -Copy)</td><td>A copy with fresh variables.</td></tr></tbody></table></div><pre><code>?- functor(3 of hammer, F, A).
+F = of,
+A = 2.
+
+?- arg(2, 3 of hammer, X).
+X = hammer.
+
+?- 3 of hammer =.. L.
+L = [of,3,hammer].
+
+?- T =.. [costs, rope, 12].
+T = rope costs 12.</code></pre><p><code>=..</code> is how you write code that works on terms it was not told about in advance — a printer, a term rewriter, a translator. Reach for <code>arg/3</code> and <code>functor/3</code> first when you know the shape and only want a field; they do not build an intermediate list.</p><aside class="note note-impl"><span class="note-tag">Prefer plain patterns where you can</span><div><code>line_total(N of Item, Total)</code> picks both fields apart in the head, with no accessor call at all. Unification is the fastest and clearest way to reach into a term whose shape you know; <code>=..</code> is for when you do not.</div></aside></section><section id="operators"><h2>Your own notation</h2><p><code>3 of hammer</code> and <code>rope costs 12</code> are not built into anything. They are ordinary two-argument terms that the reader was taught to accept in infix position, by two directives at the top of the file:</p><pre><code>:- op(700, xfx, costs).
+:- op(400, xfx, of).
+
+hammer      costs 24.
+screwdriver costs  9.
+rope        costs 12.
+tent        costs 95.
+kettle      costs 15.</code></pre><p><code>op(Priority, Type, Name)</code> declares Name as an operator. Priority runs from 1 to 1200, and <strong>lower binds tighter</strong>. Type says where the operator sits and how it associates:</p><div class="scroll"><table class="mono1"><thead><tr><th>Type</th><th>Shape</th><th>Example</th></tr></thead><tbody><tr><td>xfx</td><td>infix, neither side may contain an operator of equal priority</td><td><code>=</code>, <code>is</code>, <code>costs</code></td></tr><tr><td>xfy</td><td>infix, right associative</td><td><code>,</code>, <code>;</code>, <code>-&gt;</code></td></tr><tr><td>yfx</td><td>infix, left associative</td><td><code>+</code>, <code>-</code>, <code>*</code></td></tr><tr><td>fy</td><td>prefix, argument may equal the priority</td><td><code>\+</code>, unary <code>-</code></td></tr><tr><td>fx</td><td>prefix, argument must be lower</td><td><code>:-</code>, <code>?-</code></td></tr><tr><td>xf, yf</td><td>postfix</td><td>— none predefined</td></tr></tbody></table></div><p>The priorities in the file are chosen so that <code>of</code> binds tighter than <code>costs</code>. That is not decoration; it decides how a term is read:</p><pre><code>?- write_canonical(2 of hammer costs 5), nl.
+costs(of(2,hammer),5)
+true.</code></pre><p>Had <code>of</code> been given the larger priority, the same characters would have read as <code>of(2, costs(hammer, 5))</code> — a different term, and a bug you would have to find at run time.</p><h3>Only the syntax changes</h3><p>An operator declaration affects the reader and the writer, nothing else. The term underneath is exactly what it always was:</p><pre><code>?- X = (hammer costs 24), write_canonical(X), nl.
+costs(hammer,24)
+X = hammer costs 24.</code></pre><p>Which means everything still works the way it did. <code>costs/2</code> is a predicate with five clauses; you can call it, index it, and run it backwards:</p><pre><code>?- hammer costs P.
+P = 24.
+
+?- Item costs 15.
+Item = kettle.</code></pre><p>And rules can be written in the notation too, which is where it starts to pay for itself:</p><pre><code>line_total(N of Item, Total) :-
+    Item costs Price,
+    Total is N * Price.
+
+order_total([], 0).
+order_total([L|Ls], Total) :-
+    line_total(L, T),
+    order_total(Ls, Rest),
+    Total is T + Rest.</code></pre><pre><code>?- order_total([3 of hammer, 2 of rope], T).
+T = 96.
+
+?- order(C, Ls), order_total(Ls, Total).
+C = alice,
+Ls = [3 of hammer,2 of rope],
+Total = 96 ;
+C = bob,
+Ls = [1 of kettle],
+Total = 15 ;
+C = cara,
+Ls = [2 of tent,1 of rope],
+Total = 202.</code></pre><aside class="note note-impl"><span class="note-tag">Operators are global, and take effect while the file is read</span><div><code>op/3</code> is a side effect on the reader, so a declaration must appear <strong>before</strong> the clauses that use it — that is why it is written as a <code>:-</code> directive at the top of the file. It also stays in force for everything read afterwards, including the toplevel. Declare few, declare them at the top, and check <code>current_op/3</code> before you take a name.</div></aside><pre><code>?- current_op(P, T, of).
+P = 400,
+T = xfx ;
+false.</code></pre></section><section id="dcg"><h2>Grammars</h2><p>Sequences — words in a sentence, characters in a line, tokens in a file — are lists, and everything you wrote in Level 2 works on them. But writing a parser that way means threading "the list I have left" through every rule by hand, and it buries the grammar under plumbing.</p><p>Prolog has a notation that writes the plumbing for you. A rule with <code>--&gt;</code> instead of <code>:-</code> is a <strong>definite clause grammar</strong> rule:</p><pre><code>sentence    --&gt; noun_phrase, verb_phrase.
+
+noun_phrase --&gt; determiner, noun.
+verb_phrase --&gt; verb, noun_phrase.
+
+determiner --&gt; [the].
+determiner --&gt; [a].
+
+noun --&gt; [dog].
+noun --&gt; [cat].
+
+verb --&gt; [sees].
+verb --&gt; [chases].</code></pre><p>A list on the right-hand side is a <strong>terminal</strong> — the literal tokens to consume. Anything else is another grammar rule. <code>phrase/2</code> runs a grammar against a list and demands that the whole list be consumed:</p><pre><code>?- phrase(sentence, [the,dog,sees,a,cat]).
+true ;
+false.
+
+?- phrase(sentence, [the,dog,sees]).
+false.</code></pre><p>The <code>;</code> in the first answer is the grammar being honest: after matching <code>[the]</code>, the rule <code>determiner --&gt; [a]</code> was still untried, so a choice point remained until we asked. Nothing was wrong — there was simply no second parse.</p><h3>What the arrow actually does</h3><p>There is no new machinery here. <code>--&gt;</code> is read by the same reader as everything else, and a rule written with it is translated into an ordinary clause with two extra arguments: the list coming in and the list left over. You can look at the result:</p><pre><code>?- listing(noun_phrase/2).
+noun_phrase(A,B) :-
+    determiner(A,C),
+    noun(C,B).
+
+true.</code></pre><p><code>determiner</code> takes the whole list A and leaves C; <code>noun</code> takes C and leaves B. The rest of the list flows from one non-terminal to the next, which is precisely the bookkeeping you would otherwise write by hand. A grammar of <em>n</em> rules is <em>n</em> ordinary predicates of arity two.</p><p>Because they are ordinary predicates, they run in both directions. Give <code>phrase/2</code> an unbound list and the grammar becomes a generator:</p><pre><code>?- phrase(noun_phrase, NP).
+NP = [the,dog] ;
+NP = [the,cat] ;
+NP = [a,dog] ;
+NP = [a,cat].
+
+?- aggregate_all(count, phrase(sentence, _), N).
+N = 32.</code></pre><h3>Arguments and side conditions</h3><p>A grammar that only says yes or no is rarely enough; you want the thing it parsed. Non-terminals take arguments like any predicate, and a goal in braces <code>{ }</code> is an ordinary Prolog goal run at that point in the parse, consuming nothing.</p><p>Here is the order grammar from the file. It turns text into the <code>N of Item</code> structures the rest of the program already understands:</p><pre><code>lines([L|Ls]) --&gt; line(L), more(Ls).
+
+more(Ls) --&gt; ",", blanks, lines(Ls).
+more([])  --&gt; blanks.
+
+line(N of Item) --&gt; count(N), blanks, word(Cs), { atom_codes(Item, Cs) }.
+
+count(N) --&gt; digits(Ds), { Ds \== [], number_codes(N, Ds) }.
+
+digits([D|Ds]) --&gt; [D], { D &gt;= 0'0, D =&lt; 0'9 }, !, digits(Ds).
+digits([])     --&gt; [].
+
+word([C|Cs]) --&gt; [C], { C &gt;= 0'a, C =&lt; 0'z }, !, word(Cs).
+word([])     --&gt; [].
+
+blanks --&gt; " ", !, blanks.
+blanks --&gt; [].</code></pre><pre><code>?- phrase(lines(L), "3 hammer, 2 rope").
+L = [3 of hammer,2 of rope] ;
+false.
+
+?- parse_order("3 hammer, 2 rope", L), order_total(L, T).
+L = [3 of hammer,2 of rope],
+T = 96.</code></pre><p>Three things in there are worth naming. A double-quoted string is a list of character codes in this system, so <code>","</code> is a terminal like any other list. <code>0'0</code> is the code of the character <code>0</code>, which is how you write a character in a numeric comparison. And the <code>!</code> in <code>digits</code> and <code>word</code> is a cut inside a grammar rule — it means the same thing it always did, and it is there to stop the parser from also offering the shorter matches.</p><aside class="note note-try"><span class="note-tag">Take the cuts out</span><div>Delete the <code>!</code> from <code>digits//1</code>, reload, and ask <code>phrase(lines(L), "12 kettle").</code> again. You will get <code>[12 of kettle]</code>, then <code>[1 of ...]</code> — the grammar will happily stop reading digits early. The cut is what makes it greedy.</div></aside><h3>Leftovers</h3><p><code>phrase/3</code> takes a third argument for what is left unconsumed, which is how you use a grammar as one stage of something larger:</p><pre><code>?- phrase(digits(D), "42x", Rest).
+D = [52,50],
+Rest = [120].</code></pre><p><code>[52,50]</code> is <code>"42"</code> and <code>[120]</code> is <code>"x"</code> — codes, printed as the numbers they are. Wrap them with <code>number_codes/2</code> or <code>atom_codes/2</code> when you want something readable, as <code>count//1</code> does.</p><aside class="note note-impl"><span class="note-tag">The whole translation</span><div><code>--&gt;</code> handles conjunction, disjunction, if-then-else, <code>\+</code>, <code>!</code>, <code>{ }</code> goals, terminals, <code>[]</code>, <code>call//N</code> and pushback lists. The translator is <code>'$dcg_translate'/2</code> in <code>lib/boot.pl</code> — about forty lines of Prolog, readable in one sitting, and a good example of the language being extended in itself.</div></aside></section><section id="errors"><h2>When control goes wrong</h2><div class="scroll"><table class=""><thead><tr><th>Symptom</th><th>Usual cause</th></tr></thead><tbody><tr><td>A negated goal always fails</td><td>Its variables were still unbound, so it asked "is there any" rather than "is this one". Move the generator before the <code>\+</code>.</td></tr><tr><td>A predicate gives the right answer but the wrong one when checked</td><td>A red cut. The clause after the cut has no test of its own and is reached whenever the head above it failed to unify. Rewrite as <code>( Cond -&gt; Then ; Else )</code>.</td></tr><tr><td>Adding a cut made a caller lose answers</td><td>It did not — the cut is confined to its own predicate. Something else changed; check whether you also removed a test the cut had made look redundant.</td></tr><tr><td>A term reads as a different shape than you meant</td><td>Operator priorities. Check with <code>write_canonical/1</code>, and remember lower priority binds tighter.</td></tr><tr><td>Operator not recognised while loading a file</td><td>The <code>:- op(...)</code> directive comes after the clauses that use it. It must be read first.</td></tr><tr><td>A grammar loops or returns too many parses</td><td>Left recursion (<code>xs --&gt; xs, x</code>), or a rule that can match the empty list in a position where the parser can retry it for ever.</td></tr></tbody></table></div><aside class="note note-try"><span class="note-tag">The test that catches red cuts</span><div>For every predicate with a cut, call it with the output argument already bound to a wrong value. <code>max_of(7, 3, 3)</code> should fail. If it succeeds, the cut is doing work the clause heads should have done.</div></aside></section><section id="exercises"><h2>Exercises</h2><p>All of these use <code>tutorial/level3.pl</code>. Several have more than one reasonable answer; the point of the first few is to notice when <code>\+</code> is safe.</p><ol class="task"><li><p><code>unavailable(?Item)</code>: items that cannot be shipped — out of stock <strong>or</strong> discontinued — with each item appearing once.</p></li><li><p><code>unordered(?Item)</code>: items in the catalogue that appear on nobody's order. You will need a <code>\+</code> around a conjunction.</p></li><li><p><code>cheapest(?Item)</code>: the item no other item undercuts. Write it with <code>\+</code> and no sorting at all.</p></li><li><p>Fix <code>max_of/3</code> so that <code>max_of(7, 3, 3)</code> fails, <strong>without</strong> using if-then-else. What did you have to add, and to which clause?</p></li><li><p><code>discount(+Total, -Final)</code>: nothing under 50, 5% off from 50 to 199, 10% off from 200. Write it twice — once with cuts, once with if-then-else — and decide which you would keep.</p></li><li><p><code>by_value(-Sorted)</code>: every customer's order total, sorted cheapest first. <code>setof/3</code> and a <code>Key-Value</code> pair will do it in one line.</p></li><li><p>Give the sentence grammar an optional adjective, so that <code>[the,big,dog,sees,a,cat]</code> parses. How many sentences does it generate now, and why that many?</p></li><li><p><code>total_of_text(+Text, -Total)</code>: parse an order written as text and price it, in one predicate.</p></li></ol><details class="ex"><summary>Solutions</summary><div class="ex-body"><pre><code>% 1
+unavailable(I) :- item(I, _, _), \+ ( in_stock(I), \+ discontinued(I) ).
+
+% 2
+unordered(I) :- item(I, _, _), \+ ( order(_, Ls), member(_ of I, Ls) ).
+
+% 3
+cheapest(I) :- I costs P, \+ ( _ costs Q, Q &lt; P ).
+
+% 4
+max_fixed(X, Y, X) :- X &gt;= Y, !.
+max_fixed(X, Y, Y) :- X &lt;  Y.
+
+% 5
+discount(T, F) :- T &lt;  50, !, F = T.
+discount(T, F) :- T &lt; 200, !, F is T * 95 // 100.
+discount(T, F) :- F is T * 90 // 100.
+
+discount2(T, F) :-
+    (   T &lt;  50 -&gt;  F = T
+    ;   T &lt; 200 -&gt;  F is T * 95 // 100
+    ;               F is T * 90 // 100
+    ).
+
+% 6
+order_value(C, T) :- order(C, Ls), order_total(Ls, T).
+by_value(Sorted)  :- setof(T-C, order_value(C, T), Sorted).
+
+% 7
+noun_phrase --&gt; determiner, adjective, noun.
+noun_phrase --&gt; determiner, noun.
+adjective   --&gt; [big].
+adjective   --&gt; [small].
+
+% 8
+total_of_text(Text, Total) :-
+    parse_order(Text, Lines),
+    order_total(Lines, Total).</code></pre><pre><code>?- findall(I, unavailable(I), L).
+L = [screwdriver,tent].
+
+?- findall(I, unordered(I), L).
+L = [screwdriver].
+
+?- findall(I, cheapest(I), L).
+L = [screwdriver].
+
+?- by_value(S).
+S = [15-bob,96-alice,202-cara].
+
+?- total_of_text("3 hammer, 2 rope", T).
+T = 96.</code></pre><p><strong>1</strong> The single <code>\+</code> around a conjunction gives one solution per item, which is what keeps the duplicates away. Writing it as <code>out_of_stock(I) ; discontinued(I)</code> would report the tent twice.</p><p><strong>3</strong> "No item costs less" is a <code>\+</code> over a generator, and it is safe because <code>I costs P</code> bound <code>P</code> first. Swap the two goals and it fails for everything.</p><p><strong>4</strong> The second clause needs its own test, <code>X &lt; Y</code>. Once it has one, the cut in the first clause is only saving work — it has become green, and you could delete it without changing a single answer.</p><p><strong>5</strong> Both give <code>30-30</code>, <code>96-91</code> and <code>202-181</code>. The cut version is shorter; the arrow version says out loud that the three cases are alternatives, and cannot be broken by someone calling it with <code>Final</code> already bound. Most people keep the second.</p><p><strong>7</strong> 288. A noun phrase is now <code>2 determiners × (2 adjectives + nothing) × 2 nouns = 12</code>, and a sentence is two noun phrases with a verb between them: <code>12 × 2 × 12</code>.</p></div></details></section><section id="next"><h2>Where this goes next</h2><p>Between the three levels you now have the whole working language: facts and rules, unification and backtracking, lists and aggregation, and — as of this page — control over which proofs get attempted and notation of your own for the data.</p><p>What is left is mostly breadth, and the <a href="reference.html">language reference</a> is the place for it: exceptions with <code>catch/3</code> and <code>throw/1</code>, the database predicates <code>assertz/1</code> and <code>retract/1</code>, streams and file I/O, <code>format/2</code>, and the flags that change how the reader behaves.</p><p>If you would rather know how any of this works underneath, the <a href="internals.html">engine internals</a> page describes the machine that runs it — and the cut in particular turns out to be exactly what the figure above suggests: one integer, remembered per goal, holding the height the choice point stack must be cut back to.</p><ul><li>Level 1 — <a href="tutorial-1.html">facts, rules and the search</a>.</li><li>Level 2 — <a href="tutorial-2.html">lists and collecting answers</a>.</li><li>The examples in <code>examples/</code> are the next thing to read: the eight queens, the zebra puzzle and a calculator built on the grammar notation from this page.</li></ul></section>
+    <footer>Generated from the interpreter's own tables and checked against the
+    running system. Source: <code>src/</code> for the engine, <code>lib/boot.pl</code>
+    for the library written in Prolog.</footer>
+  </main>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('pfilter');
+  var count = document.getElementById('pcount');
+  var preds = Array.prototype.slice.call(document.querySelectorAll('.pred'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.pred-group'));
+  var total = preds.length;
+
+  function report(n, filtering) {
+    if (!count) return;
+    count.textContent = filtering ? n + ' of ' + total + ' shown'
+                                  : total + ' predicates';
+  }
+  report(total, false);
+
+  if (input && count) {
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      preds.forEach(function (el) {
+        var hit = !q || el.getAttribute('data-key').indexOf(q) !== -1;
+        el.classList.toggle('hidden', !hit);
+        if (hit) shown++;
+      });
+      groups.forEach(function (g) {
+        var any = false, el = g.nextElementSibling;
+        while (el && el.classList.contains('pred')) {
+          if (!el.classList.contains('hidden')) { any = true; break; }
+          el = el.nextElementSibling;
+        }
+        g.classList.toggle('hidden', !any);
+      });
+      report(shown, q.length > 0);
+    });
+  }
+
+  /* Highlight the section the reader is in. */
+  var links = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a'), function (a) {
+    links[a.getAttribute('href').slice(1)] = a;
+  });
+  var targets = document.querySelectorAll('section[id]');
+  var current = null;
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = links[entry.target.id];
+      if (!link || link === current) return;
+      if (current) current.classList.remove('active');
+      link.classList.add('active');
+      current = link;
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  Array.prototype.forEach.call(targets, function (t) { observer.observe(t); });
+})();
+</script>

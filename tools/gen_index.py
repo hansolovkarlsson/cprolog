@@ -221,8 +221,8 @@ def render():
     cards = ''.join([
         '<a class="card" href="%s"><h3>Tutorial</h3><p>New to Prolog, or returning to '
         'it? Level 1 covers facts, rules, unification and the search; level 2 '
-        'covers lists and collecting answers. Every query is one you run against '
-        'this interpreter.</p></a>'
+        'lists and collecting answers; level 3 negation, the cut, operators '
+        'and grammars. Every query is one you run against this interpreter.</p></a>'
         % (os.environ.get('DOC_URL_TUTORIAL1') or 'tutorial-1.html'),
         '<a class="card" href="%s"><h3>Language reference</h3><p>Syntax, control, '
         'arithmetic, every builtin predicate, grammars, errors, and where it parts '

@@ -563,8 +563,8 @@ youngest_child(P, C) :-
 section('next', 'Where this goes next', ''.join([
     para("You can now write most of what day-to-day Prolog consists of: walk a "
          "structure, build one, and ask about all the answers at once."),
-    para("Level 3 turns to control — the parts that decide **which** proofs "
-         "Prolog looks for:"),
+    para("[Level 3](tutorial-3.html) turns to control — the parts that decide "
+         "**which** proofs Prolog looks for:"),
     ul([
         "**Negation** — `\\\\+`, what \"not\" can and cannot mean when your "
         "program only knows what you told it.",

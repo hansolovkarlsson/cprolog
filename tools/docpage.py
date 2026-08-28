@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Shared page furniture for the generated documentation.
 
-    Both doc/reference.html and doc/internals.html are built from this module:
-    it owns the escaping helpers, the block builders, the design tokens and the
-    page shell, so the two documents stay a matched pair.
+    Every page under docs/ is built from this module: it owns the escaping
+    helpers, the block builders, the design tokens and the page shell, so the
+    overview, the three tutorial levels, the reference and the internals
+    document all stay a matched set.
 """
 
 import html, re, io, os
@@ -32,8 +33,12 @@ def inline(s):
         if i % 2:
             out.append('<code>%s</code>' % part)
             continue
-        # **bold** and [text](target), outside code spans only
+        # **bold**, *emphasis* and [text](target), outside code spans only.
+        # Bold first, so that its asterisks are gone before emphasis is tried;
+        # emphasis needs non-space on both sides, which keeps a multiplication
+        # sign written in prose from being mistaken for it.
         part = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', part)
+        part = re.sub(r'\*(?!\s)([^*]+?)(?<!\s)\*', r'<em>\1</em>', part)
         part = re.sub(r'\[([^\]]+)\]\(([^)\s]+)\)', r'<a href="\2">\1</a>', part)
         out.append(part)
     return ''.join(out)
@@ -98,7 +103,9 @@ def figure(svg, caption):
     return '<figure>%s<figcaption>%s</figcaption></figure>' % (svg, inline(caption))
 # ---------------------------------------------------------------- page shell
 
-CSS = """
+# A raw string: the CSS escapes below (\25B8) must reach the browser intact,
+# and Python would otherwise read \25 as an octal escape.
+CSS = r"""
 :root {
   color-scheme: light;
   --paper:      #F6F7FA;
@@ -430,15 +437,16 @@ table.ops td:first-child { color: var(--muted); }
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
+  line-height: 1.4;
   color: var(--ochre);
-  white-space: nowrap;
   padding-top: 0.28rem;
-  flex: 0 0 auto;
+  flex: 0 0 7.5rem;
   width: 7.5rem;
 }
 @media (max-width: 620px) {
   .note { flex-direction: column; gap: 0.3rem; }
-  .note-tag { width: auto; padding-top: 0; }
+  /* Stacked, the basis above would become a height, so it has to go back. */
+  .note-tag { flex: 0 0 auto; width: auto; padding-top: 0; }
 }
 
 .visually-hidden {
@@ -652,7 +660,8 @@ JS = """
 FAVICON = ('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'26\' font-size=\'26\'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">')
 
 LEVELS = [('tutorial-1.html', 'Level 1', 'DOC_URL_TUTORIAL1'),
-          ('tutorial-2.html', 'Level 2', 'DOC_URL_TUTORIAL2')]
+          ('tutorial-2.html', 'Level 2', 'DOC_URL_TUTORIAL2'),
+          ('tutorial-3.html', 'Level 3', 'DOC_URL_TUTORIAL3')]
 
 DOCS = [('index.html',      'Overview',           'DOC_URL_INDEX'),
         ('tutorial-1.html', 'Tutorial',           'DOC_URL_TUTORIAL1'),

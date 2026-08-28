@@ -44,6 +44,9 @@ jobs:
       - name: Examples
         run: make CC=$CC examples
 
+      - name: Tutorial programs
+        run: make CC=$CC tutorials
+
       # Left until last: this target rebuilds from clean and then cleans up
       # after itself, so anything above it would have to be built again.
       - name: Test suite under the address and undefined behaviour sanitizers

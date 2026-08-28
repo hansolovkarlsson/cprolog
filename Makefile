@@ -47,6 +47,14 @@ test-asan:
 
 check: test test-gc
 
+# The tutorial programs are what the published tutorial pages quote from, so
+# loading each one and running a query out of its page keeps the two in step.
+tutorials: $(BIN)
+	./$(BIN) -q tutorial/level1.pl -g "ancestor(esther,D), format('~w~n',[D])"
+	./$(BIN) -q tutorial/level2.pl -g "eldest_child(esther,C), format('~w~n',[C])"
+	./$(BIN) -q tutorial/level3.pl -g "parse_order(\"3 hammer, 2 rope\", L), order_total(L,T), format('~w~n',[T])"
+	./$(BIN) -q tutorial/level3.pl -g "fillable(C), format('~w~n',[C])"
+
 examples: $(BIN)
 	./$(BIN) -q examples/hanoi.pl -g "hanoi(3)"
 	./$(BIN) -q examples/queens.pl -g "queens(8,Qs), print_board(Qs)"
@@ -56,7 +64,7 @@ examples: $(BIN)
 
 # The documentation is generated; tools/docpage.py holds the shared shell.
 doc: docs/index.html docs/tutorial-1.html docs/tutorial-2.html \
-     docs/reference.html docs/internals.html
+     docs/tutorial-3.html docs/reference.html docs/internals.html
 
 docs/index.html: tools/gen_index.py tools/docpage.py
 	python3 tools/gen_index.py
@@ -66,6 +74,9 @@ docs/tutorial-1.html: tools/gen_tutorial1.py tools/docpage.py tutorial/level1.pl
 
 docs/tutorial-2.html: tools/gen_tutorial2.py tools/docpage.py tutorial/level2.pl
 	python3 tools/gen_tutorial2.py
+
+docs/tutorial-3.html: tools/gen_tutorial3.py tools/docpage.py tutorial/level3.pl
+	python3 tools/gen_tutorial3.py
 
 docs/reference.html: tools/gen_reference.py tools/docpage.py
 	python3 tools/gen_reference.py
@@ -80,4 +91,4 @@ install: $(BIN)
 clean:
 	rm -f $(OBJS) $(BIN) src/boot_pl.c
 
-.PHONY: all test test-gc test-asan check examples doc install clean
+.PHONY: all test test-gc test-asan check examples tutorials doc install clean

@@ -336,15 +336,16 @@ table.ops td:first-child { color: var(--muted); }
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
+  line-height: 1.4;
   color: var(--ochre);
-  white-space: nowrap;
   padding-top: 0.28rem;
-  flex: 0 0 auto;
+  flex: 0 0 7.5rem;
   width: 7.5rem;
 }
 @media (max-width: 620px) {
   .note { flex-direction: column; gap: 0.3rem; }
-  .note-tag { width: auto; padding-top: 0; }
+  /* Stacked, the basis above would become a height, so it has to go back. */
+  .note-tag { flex: 0 0 auto; width: auto; padding-top: 0; }
 }
 
 .visually-hidden {
@@ -399,11 +400,11 @@ details.ex > summary {
 }
 details.ex > summary::-webkit-details-marker { display: none; }
 details.ex > summary::before {
-  content: "B8 A0";
+  content: "\25B8\00A0";
   display: inline-block;
   transition: transform 0.15s ease;
 }
-details.ex[open] > summary::before { content: "BE A0"; }
+details.ex[open] > summary::before { content: "\25BE\00A0"; }
 details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   details.ex > summary::before { transition: none; }

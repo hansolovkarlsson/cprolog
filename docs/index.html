@@ -337,15 +337,16 @@ table.ops td:first-child { color: var(--muted); }
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
+  line-height: 1.4;
   color: var(--ochre);
-  white-space: nowrap;
   padding-top: 0.28rem;
-  flex: 0 0 auto;
+  flex: 0 0 7.5rem;
   width: 7.5rem;
 }
 @media (max-width: 620px) {
   .note { flex-direction: column; gap: 0.3rem; }
-  .note-tag { width: auto; padding-top: 0; }
+  /* Stacked, the basis above would become a height, so it has to go back. */
+  .note-tag { flex: 0 0 auto; width: auto; padding-top: 0; }
 }
 
 .visually-hidden {
@@ -400,11 +401,11 @@ details.ex > summary {
 }
 details.ex > summary::-webkit-details-marker { display: none; }
 details.ex > summary::before {
-  content: "B8 A0";
+  content: "\25B8\00A0";
   display: inline-block;
   transition: transform 0.15s ease;
 }
-details.ex[open] > summary::before { content: "BE A0"; }
+details.ex[open] > summary::before { content: "\25BE\00A0"; }
 details.ex > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   details.ex > summary::before { transition: none; }
@@ -683,7 +684,7 @@ make<br>./prolog<br>make check<span style="color: var(--muted)">      # 248 test
 
 <section class="band">
   <h2>Documentation</h2>
-  <div class="cards"><a class="card" href="tutorial-1.html"><h3>Tutorial</h3><p>New to Prolog, or returning to it? Level 1 covers facts, rules, unification and the search; level 2 covers lists and collecting answers. Every query is one you run against this interpreter.</p></a><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a></div>
+  <div class="cards"><a class="card" href="tutorial-1.html"><h3>Tutorial</h3><p>New to Prolog, or returning to it? Level 1 covers facts, rules, unification and the search; level 2 lists and collecting answers; level 3 negation, the cut, operators and grammars. Every query is one you run against this interpreter.</p></a><a class="card" href="reference.html"><h3>Language reference</h3><p>Syntax, control, arithmetic, every builtin predicate, grammars, errors, and where it parts company with the ISO standard.</p></a><a class="card" href="internals.html"><h3>Engine internals</h3><p>Terms in memory, the solver loop, choice points and cut, the three memory regions and the collector — with the measurements and the bugs the design produced.</p></a></div>
 </section>
 
 <section class="band">

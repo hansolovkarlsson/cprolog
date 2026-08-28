@@ -39,7 +39,7 @@ something. All of it is generated into `docs/` by `make doc`.
 
 ```
 make            # build ./prolog
-make test       # run the regression suite (250 tests)
+make test       # run the regression suite (256 tests)
 make test-gc    # the same suite with the collector running constantly
 make test-asan  # the same suite under ASan + UBSan
 make examples   # run the example programs

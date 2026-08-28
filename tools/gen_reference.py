@@ -777,7 +777,9 @@ ERRORS = [
     ['evaluation_error(int_overflow)', 'An integer result does not fit in 64 bits.'],
     ['evaluation_error(undefined)',
      'An arithmetic function has no value there, such as sqrt of a negative number.'],
-    ['representation_error(max_arity)', 'A term of more than 256 arguments.'],
+    ['representation_error(max_arity)',
+     'A term of more than 256 arguments, from `=../2` or `functor/3`. The '
+     'reader reports the same limit as a syntax error.'],
     ['representation_error(character_code)', 'A character code outside Unicode.'],
     ['permission_error(modify, static_procedure, PI)',
      'An attempt to assert to, retract from or inspect a predicate written in C.'],
@@ -818,8 +820,8 @@ FLAGS = [
      'What calling an undefined predicate does: error or fail.'],
     ['dialect', 'cprolog', 'read-only', 'Identifies this implementation.'],
     ['version', '10000', 'read-only', 'Version as a single integer.'],
-    ['max_arity', 'unbounded', 'read-only',
-     'Reported as unbounded; the reader stops at 256 arguments.'],
+    ['max_arity', '256', 'read-only',
+     'The largest number of arguments a compound term may have.'],
 ]
 
 section('flags', 'Flags', ''.join([
@@ -845,7 +847,10 @@ section('limits', 'Deviations and limits', ''.join([
         "There is no distinct string type; double-quoted text is a code list, a char "
         "list or an atom according to the `double_quotes` flag, and `sub_string/5` and "
         "`term_string/2` are synonyms of their atom counterparts.",
-        "The maximum arity of a term is 256.",
+        "The maximum arity of a term is 256, which is what "
+        "`current_prolog_flag(max_arity, N)` reports. The reader, `=../2` and "
+        "`functor/3` all stop there; the reader raises a syntax error and the "
+        "other two `representation_error(max_arity)`.",
         "Unification has no occurs check by default, so a cyclic term can be built; "
         "printing or copying one will not terminate.",
     ]),

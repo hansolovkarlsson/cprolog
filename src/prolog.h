@@ -33,6 +33,11 @@ struct Term {
 #define IV(t)      ((t)->u.i)
 #define FV(t)      ((t)->u.f)
 
+/* The largest number of arguments a compound term may have.  The reader,
+   =../2 and functor/3 all enforce it, and current_prolog_flag(max_arity, N)
+   reports it. */
+#define MAX_ARITY 256
+
 /* A term is "callable" if it is an atom or a compound term. */
 #define IS_CALLABLE(t) ((t)->tag == TAG_ATOM || (t)->tag == TAG_STR)
 #define IS_NUM(t)      ((t)->tag == TAG_INT || (t)->tag == TAG_FLT)

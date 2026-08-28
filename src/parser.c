@@ -660,10 +660,10 @@ static int parse_list(Parser *p, Term **out)
 static int atom_or_compound(Parser *p, int atom, Term **out)
 {
     if (p->tok.kind == TK_PUNCT && p->tok.atom == '(' && !p->tok.layout) {
-        Term *args[256], *s;
+        Term *args[MAX_ARITY], *s;
         int n = 0, i;
         if (next_token(p) < 0) return -1;
-        if (parse_arglist(p, args, &n, 256) < 0) return -1;
+        if (parse_arglist(p, args, &n, MAX_ARITY) < 0) return -1;
         if (expect_punct(p, ')', "expected ) in arguments") < 0) return -1;
         s = mk_str(atom, n);
         for (i = 0; i < n; i++) ARG(s, i) = args[i];
@@ -764,13 +764,13 @@ static int parse_primary(Parser *p, int maxprec, Term **out, int *outprec)
     case TK_ATOM: {
         int pprec, argp;
         if (t.func) {
-            Term *args[256], *s;
+            Term *args[MAX_ARITY], *s;
             int n = 0, i;
             if (next_token(p) < 0) return -1;   /* the '(' */
             if (p->tok.kind != TK_PUNCT || p->tok.atom != '(')
                 return syntax_err(p, "expected (");
             if (next_token(p) < 0) return -1;
-            if (parse_arglist(p, args, &n, 256) < 0) return -1;
+            if (parse_arglist(p, args, &n, MAX_ARITY) < 0) return -1;
             if (expect_punct(p, ')', "expected ) in arguments") < 0) return -1;
             s = mk_str(t.atom, n);
             for (i = 0; i < n; i++) ARG(s, i) = args[i];

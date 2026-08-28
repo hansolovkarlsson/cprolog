@@ -194,6 +194,34 @@ test(tm_numbervars,   (T = f(_,_), numbervars(T, 0, E), E =:= 2,
                        with_output_to(atom(A), write(T)), A == 'f(A,B)')).
 test(tm_setarg,       (T = f(a), setarg(1, T, b), T == f(b))).
 
+/*  The arity limit is one number, MAX_ARITY in src/prolog.h, and the reader,
+    =../2 and functor/3 all stop at the same place. current_prolog_flag/2
+    reports it, so these tests are written against the flag rather than
+    against a literal 256.
+*/
+test(tm_max_arity_flag,
+     (current_prolog_flag(max_arity, N), integer(N), N > 0)).
+test(tm_max_arity_functor,
+     (current_prolog_flag(max_arity, N),
+      functor(T, f, N), functor(T, f, A), A =:= N)).
+test(tm_max_arity_functor_over,
+     (current_prolog_flag(max_arity, N), N1 is N + 1,
+      catch(functor(_, f, N1), error(E, _), true),
+      E == representation_error(max_arity))).
+test(tm_max_arity_univ,
+     (current_prolog_flag(max_arity, N),
+      length(L, N), T =.. [f|L], functor(T, f, A), A =:= N)).
+test(tm_max_arity_univ_over,
+     (current_prolog_flag(max_arity, N), N1 is N + 1,
+      length(L, N1),
+      catch(_ =.. [f|L], error(E, _), true),
+      E == representation_error(max_arity))).
+test(tm_max_arity_reader,
+     (current_prolog_flag(max_arity, N),
+      numlist(1, N, Ns), atomic_list_concat(Ns, ',', Args),
+      atomic_list_concat(['f(', Args, ')'], Text),
+      atom_to_term(Text, T, _), functor(T, f, A), A =:= N)).
+
 /* ---------------- atoms and text ---------------- */
 
 test(at_length,       atom_length(hello, 5)).

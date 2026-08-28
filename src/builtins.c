@@ -395,6 +395,7 @@ BI(bi_functor)
         if (ar->tag != TAG_INT) return type_error("integer", ar);
         n = IV(ar);
         if (n < 0) return domain_error("not_less_than_zero", ar);
+        if (n > MAX_ARITY) return representation_error("max_arity");
         if (n == 0) RET(unify(A[0], nm));
         if (nm->tag != TAG_ATOM) {
             if (IS_NUM(nm)) return type_error("atomic", nm);
@@ -440,11 +441,11 @@ BI(bi_univ)
         RET(unify(A[1], list));
     } else {
         Term *l = deref(A[1]), *head;
-        Term *items[256];
+        Term *items[MAX_ARITY + 1];    /* the name, then its arguments */
         int n = 0;
         if (l->tag == TAG_VAR) return instantiation_error();
         while (l->tag == TAG_STR && FN(l) == a_dot && AR(l) == 2) {
-            if (n >= 256) return representation_error("max_arity");
+            if (n > MAX_ARITY) return representation_error("max_arity");
             items[n++] = deref(ARG(l, 0));
             l = deref(ARG(l, 1));
         }
@@ -2047,7 +2048,7 @@ BI(bi_flag)
         RET(unify(A[1], mk_atom_str(m_flag_unknown_error ? "error" : "fail")));
     if (!strcmp(nm, "dialect")) RET(unify(A[1], mk_atom_str("cprolog")));
     if (!strcmp(nm, "version")) RET(unify(A[1], mk_int(10000)));
-    if (!strcmp(nm, "max_arity")) RET(unify(A[1], mk_atom_str("unbounded")));
+    if (!strcmp(nm, "max_arity")) RET(unify(A[1], mk_int(MAX_ARITY)));
     return PL_FAIL;
 }
 

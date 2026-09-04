@@ -33,7 +33,7 @@ jobs:
       ASAN_OPTIONS: detect_leaks=0
       UBSAN_OPTIONS: print_stacktrace=1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build, warnings are errors
         run: make CC=$CC CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror"
@@ -56,7 +56,7 @@ jobs:
     name: documentation is in sync
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # docs/ is generated from tools/. Regenerating must not change anything,
       # or the published pages have drifted from their generators.

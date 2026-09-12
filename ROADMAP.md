@@ -15,11 +15,6 @@ produced some of the entries below.
   `at_end_of_stream/0,1` and `put_char/2` are ISO and are not implemented. The
   stream layer already has the pushback needed for `peek_char`.
 
-- **Eight-byte heap alignment.** Every allocation is rounded to 16 bytes where
-  8 would do, so a 24-byte term cell occupies 32. Eight-byte alignment is
-  enough for every member of the term union on the supported platforms and
-  would cut roughly a quarter off the heap. One line, plus measurement.
-
 - **Real singleton reporting.** `read_term/2,3` accepts `singletons(L)` and
   always reports `[]`. The reader already counts variable occurrences.
 

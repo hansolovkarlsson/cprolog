@@ -8,6 +8,19 @@ There are no releases yet, so entries are grouped by the day they landed on
 
 ## 2026-09-12
 
+### Changed
+
+- **Heap allocations are rounded to 8 bytes, not 16.** Eight is the alignment
+  of the widest member of the term union on every platform this targets, so a
+  24-byte cell occupies 24 where it occupied 32, and a list cell 40 where it
+  occupied 48. Measured with the collector held off: a 200,000-element
+  `numlist` allocates 93 MB instead of 115 MB, and 90,000 `X-Y` pairs 12 MB
+  instead of 16 MB. A fifth off, not the quarter the roadmap estimated, because
+  argument vectors were already multiples of 8. Speed unchanged: naive reverse
+  at 24.7M inferences ran 1.71–1.74 s before and 1.72–1.76 s after. The
+  sanitizer leg is the check that would have caught a member needing more.
+  (`f3d7102`)
+
 ### Fixed
 
 - **Thirteen tests had never run.** In the arithmetic section of

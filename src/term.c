@@ -47,7 +47,7 @@ void *heap_alloc(size_t n)
     HeapChunk *c;
     void *p;
 
-    n = (n + 15) & ~(size_t)15;             /* keep everything aligned */
+    n = (n + 7) & ~(size_t)7;               /* 8 is enough for every member of Term */
     if (!heap_cur) heap_init();
     if (heap_cur->used + n <= heap_cur->size) {
         p = heap_cur->data + heap_cur->used;
@@ -127,7 +127,7 @@ void *arena_alloc(Arena *a, size_t n)
     ABlock *b;
     void *p;
 
-    n = (n + 15) & ~(size_t)15;
+    n = (n + 7) & ~(size_t)7;
     if (a->block && a->block->used + n <= a->block->size) {
         p = a->block->data + a->block->used;
         a->block->used += n;

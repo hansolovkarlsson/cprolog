@@ -244,10 +244,12 @@ struct Term {
          "the standard order on variables a stable answer and lets unification always "
          "bind the younger variable to the older."),
     note('impl', 'Allocation granularity',
-         "The heap rounds every allocation up to 16 bytes, so a 24-byte cell actually "
-         "occupies 32 and a two-argument compound 48. Eight-byte alignment would be "
-         "enough for every member of the union on the platforms this targets, and would "
-         "cut a quarter off the heap; it is the cheapest unclaimed saving in the system."),
+         "The heap rounds every allocation up to 8 bytes, which is the alignment of the "
+         "widest member of the union on the platforms this targets, so a 24-byte cell "
+         "occupies 24 and a two-argument compound 40. It rounded to 16 until 2026-09-12, "
+         "when a 24-byte cell occupied 32; the change was one constant in two allocators "
+         "and took a fifth off a list-heavy heap: 115 MB to 93 MB for a 200,000-element "
+         "numlist, measured with the collector held off."),
 ]))
 
 section('unify', 'Unification and the trail', ''.join([
@@ -608,8 +610,6 @@ section('weaknesses', 'Where the design is weak', ''.join([
         "that keeps one choice point open never collects at all.",
         "Retracted clauses are held until the predicate is abolished, so a long-running "
         "program that retracts millions of clauses from one predicate accumulates them.",
-        "Every heap allocation is rounded to 16 bytes where 8 would do, which costs about "
-        "a quarter of the heap.",
         "Integers are 64-bit with overflow raised as an error rather than promoted to "
         "bignums, and there are no modules, tabling or constraints.",
     ]),

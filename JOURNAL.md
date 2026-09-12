@@ -148,6 +148,63 @@ honestly.
   reaching six pages as literal asterisks. All three had been live since the
   site went up.
 
+## Day three — a way in, and a green light that was still talking
+
+Nothing about the interpreter changed today. The work was about what a reader
+arrives to, which is a different problem and had been left undone.
+
+### The records needed a keeper
+
+The four records have been at the top of the tree since the first commit, and
+nothing said so. That is fine while the only person opening the repository is
+the one who wrote it. It stops being fine the moment anybody else arrives,
+because the obvious guess is wrong here: `docs/` looks like where the documents
+live, and it is not. It holds generated HTML, built from the Markdown at the
+root by `tools/gen_*.py`. Someone who edits a file in `docs/` loses the work at
+the next `make doc` and finds out only if they look.
+
+`CLAUDE.md` now says that, along with what each record collects and the rule
+worth more than the rest of it: every record opens with a note stating its own
+job, and that note decides what belongs in it. The gloss is deliberately thin,
+because a summary rots while the document it summarises stays right.
+
+### The ledger that was already whole
+
+A convention for laying out projects like this one asks for five records, the
+fifth being a `COMPLETED.md` that holds what was built, opposite the roadmap's
+what is left. This project has four, and adding the fifth would have been the
+easy thing to do.
+
+It would also have been wrong. [ROADMAP.md](ROADMAP.md) has said since it was
+written that finished work moves to [CHANGELOG.md](CHANGELOG.md), and the
+changelog is written that way — its `max_arity` entry is not a line announcing a
+release, it is the whole account of what was wrong and what fixed it, with the
+hash to read it by. The role is filled. A `COMPLETED.md` beside it would have
+produced two documents that both look authoritative and disagree inside a month.
+
+The cost of separating them later, if that is ever wanted, is now measured:
+four inbound links to `CHANGELOG.md` across the Markdown, and eighteen
+references to record filenames inside `tools/*.py`, where each generator carries
+a map rewriting links between records into site URLs. Renaming a record here is
+not a rename; it is a rename and a generator change.
+
+### Green is not the same as quiet
+
+CI passed on the day's first commit — four jobs, twenty-eight seconds, the
+documentation-in-sync check among them. It also hung the same annotation on
+every one of those jobs: `actions/checkout@v4` targets Node.js 20, which the
+runners no longer provide, so each job was being forced onto Node.js 24.
+
+Nothing was broken, and nothing would have been until the forcing turns into a
+refusal. The bump to `@v5` was two lines and safe to make without reading the
+release notes, because this workflow passes the action no inputs at all; the
+only difference is the runtime the action itself runs on.
+
+The lesson is small and worth the paragraph anyway. The annotation was visible
+only because the run was opened and read, rather than glanced at as a green
+badge — and the badge had been green, carrying this, for some time. What a check
+reports is not the same as whether it passed.
+
 ## How the work is checked
 
 The standing discipline, in the order the checks run:

@@ -6,6 +6,22 @@ There are no releases yet, so entries are grouped by the day they landed on
 `main`. Commit hashes are given so each entry can be read in full with
 `git show`.
 
+## 2026-09-12
+
+### Fixed
+
+- **Thirteen tests had never run.** In the arithmetic section of
+  `tests/test.pl`, thirteen tests were written as `test(name, G1, G2)` with no
+  parentheses around the conjunction, so they consulted as `test/3` and `test/4`
+  facts and the harness's `forall(test(Name, Goal), ...)` never reached them.
+  The suite reported 256 from the first commit while the file held 269. All
+  thirteen pass; they are `test/2` now, and every count that quoted 256 says
+  269. (`af41122`)
+
+### Tests
+
+- 256 → 269. No test was added: the thirteen were there all along.
+
 ## 2026-08-28
 
 ### Added

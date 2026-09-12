@@ -9,7 +9,7 @@ shipped. This is the failures.
 
 ## Scope
 
-Sixteen defects, in three cohorts that failed for three different reasons:
+Seventeen defects, in four cohorts that failed for four different reasons:
 
 - **Design era** — five bugs about memory lifetime and ordering, produced by the
   choice to copy structures and manage memory by hand. Fixed before the first
@@ -22,6 +22,9 @@ Sixteen defects, in three cohorts that failed for three different reasons:
 - **Consistency** — eight defects in which the code, the documentation and the
   flag reporting the behaviour did not agree with each other. All found while
   writing the tutorials.
+- **The suite about itself**: one defect in the test file, invisible to the
+  suite because the suite was the thing that was wrong. Found by an audit that
+  counted the file against the runner.
 
 ## Cohort A — the design era
 
@@ -192,6 +195,42 @@ bug. Neither would have been caught by re-reading.
 *What this says:* worked solutions are code. The fact that they live in a
 document does not change what they are.
 
+## Cohort D — the suite about itself
+
+One defect, and it gets a cohort of its own because it failed for a reason none
+of the three above name: the check that would have found it was the check that
+had it.
+
+### Thirteen tests that never ran
+
+The arithmetic section of `tests/test.pl` held thirteen tests written as
+
+    test(ar_add,          X is 2 + 3, X =:= 5).
+
+with no parentheses around the conjunction, next to a hundred written as
+`test(name, (G1, G2))`. Prolog reads the first form as a fact of arity three,
+or four for `ar_intdiv`, and the harness runs `forall(test(Name, Goal), ...)`,
+which is `test/2`. The thirteen consulted without complaint, sat in the database
+under a name nothing queried, and the suite printed **256** from the first
+commit (`e31b881`) while the file held 269.
+
+Every record quoted the 256: the README twice, this document, the journal, the
+site's front page. All of them were true of what ran and none of them was true
+of what was written.
+
+Found on 2026-09-12 by an audit whose rule is that every number in its report is
+one it watched come out of a command. It counted `^test\(` lines in the file,
+got 269, counted what the harness enumerated, got 256, and `comm` named the
+thirteen. Run by hand as conjunctions, all thirteen pass: the interpreter was
+never wrong about arithmetic, only the suite about itself. They are `test/2` now,
+and the suite is 269. (`af41122`)
+
+*What this says:* a suite reports what it ran, not what was written, and the
+gap between the two is a number no check was producing. A count that has been
+stable since the first commit is not a count that has been verified; it is one
+nobody has had a reason to look at. And the day-three lesson has a mirror
+image: green is not the same as quiet, and quiet is not the same as complete.
+
 ## What found what
 
 | Found by | Count |
@@ -202,15 +241,16 @@ document does not change what they are.
 | Rendering the pages and looking at them | 3 |
 | Address sanitizer | 1 |
 | Reading the code | 1 |
+| An audit counting the test file against the runner | 1 |
 
 Two things stand out.
 
-**The test suite found three of sixteen.** It is a good suite — 269 tests, run
-twice per leg, run again under two sanitizers — and it found under a fifth of
-the defects. Everything it found was a wrong *answer*. Everything it missed was a
-wrong *limit*, a wrong *platform assumption*, or a wrong *claim in the
-documentation*, and no realistic number of additional tests would have changed
-that.
+**The test suite found three of seventeen.** It is a good suite — 269 tests,
+run twice per leg, run again under two sanitizers — and it found under a fifth
+of the defects. Everything it found was a wrong *answer*. Everything it missed
+was a wrong *limit*, a wrong *platform assumption*, a wrong *claim in the
+documentation*, or, in the last case, a wrong *count of itself*, and no
+realistic number of additional tests would have changed that.
 
 **Writing the documentation found the most.** Five defects, and they were the
 ones nothing else could have reached, because the question a document asks is
@@ -251,3 +291,7 @@ expensive ones:
 - **The reader reports the arity limit as a syntax error**, not
   `representation_error(max_arity)`. Documented rather than fixed, because
   fixing it means reworking the parser's error path.
+- **Nothing stops a test from consulting under the wrong arity again.** The
+  thirteen were fixed by hand; the harness still runs `test/2` and says nothing
+  about a `test/3` beside it. A harness that refused to start while any other
+  arity of `test` existed would have failed on the first commit.

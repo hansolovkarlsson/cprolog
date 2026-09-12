@@ -205,6 +205,74 @@ only because the run was opened and read, rather than glanced at as a green
 badge — and the badge had been green, carrying this, for some time. What a check
 reports is not the same as whether it passed.
 
+## Day four — the suite that counted itself wrong
+
+Eight days after day three, and again nothing about the interpreter changed.
+The day was two sweeps over the project and one fix that the second of them
+turned up.
+
+### A setup pass that wrote nothing
+
+The first sweep asked whether the tree had the shape the projects here share:
+a roadmap, a ledger of finished work, a postmortem, a journal, a changelog, a
+gitignored `scratch/` for the standup. It found every role filled and wrote
+nothing, which is the outcome that pass is supposed to have on a project that
+has already settled its own conventions. The one shape it noted is the one day
+three recorded on purpose: there is no `COMPLETED.md`, and the changelog holds
+that role. Noted, not offered.
+
+### An audit that checked the numbers
+
+The second sweep reads the segment since the last line drawn and questions
+everything in it: what was finished, what is open that nothing records, whether
+the records kept up, whether their claims are still true, whether the code that
+landed reads clean, and whether the tree is green. Its one rule is that every
+number in its report is one it watched come out of a command.
+
+Most of the checks came back true. "About 6,600 lines of C" is 6,617 without
+the generated `boot_pl.c`; "616 lines of library" is 616 exactly; the README's
+table of source files matches `ls src`; the postmortem's "sixteen defects" adds
+up by cohort and again by what found them; every relative link between the
+records resolves inside the tree. The segment's three commits and the
+uncommitted day-three journal section read clean, and the tree was 256 of 256
+on both legs of `make check` and both legs of `make test-asan`.
+
+Then the rule paid for itself. The audit counted `^test\(` lines in
+`tests/test.pl` to check the 256 against the file, and got 269.
+
+### Thirteen tests that were never there
+
+The difference was not a miscount. Thirteen tests in the arithmetic section
+were written as `test(ar_add, X is 2 + 3, X =:= 5).` with no parentheses around
+the body, beside a hundred written the other way. Prolog reads that as a fact of
+`test/3`, or `test/4` for the one with three goals, and the harness runs
+`forall(test(Name, Goal), ...)`, which is `test/2`. The thirteen consulted
+cleanly, sat in the database under an arity nothing asked for, and the suite
+printed 256 from the first commit. Every record that quoted the number was
+quoting what ran, and none of them was quoting what was written.
+
+Run by hand as conjunctions, all thirteen pass. The interpreter was never wrong
+about arithmetic; the suite was wrong about itself, and it had no way to say so,
+because the thing that would have noticed was the thing with the defect. The
+fix is thirteen pairs of parentheses (`af41122`), and the suite is 269.
+
+That moved every 256 in the records and on the site. Six were present-tense
+counts and went to 269. Two were left as they are: the postmortem's line that
+the tutorials found things "the 256-test suite never would have", and the site
+subtitle that scored what the suite found, because both describe the suite as
+it was on the day they were written and rewriting a score is not a re-sync.
+Then the tally the subtitle quotes changed too, once this defect was entered
+as the seventeenth, and the subtitle followed it.
+
+### What the audit did not settle
+
+The journal and the postmortem have been published pages on the site since
+2026-08-28 (`5658209`), and the changelog says nothing about them. Its opening
+note admits what shipped and is visible from outside, and two new public pages
+are that. The day-three closeout held the changelog on the ground that a
+session-facing `CLAUDE.md` and a CI action version are neither, which is right
+about those two and does not cover the pages. Left as a question, not an edit.
+
 ## How the work is checked
 
 The standing discipline, in the order the checks run:

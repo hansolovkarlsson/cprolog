@@ -471,6 +471,17 @@ mk_atom_(N, A) :- atom_concat(item_, N, A).
 
 /* ---------------- the harness ---------------- */
 
+/*  A test written test(name, G1, G2) instead of test(name, (G1, G2)) consults
+    as test/3, and forall(test(Name, Goal), ...) never sees it. Thirteen sat
+    that way from the first commit. So refuse to start while any arity of
+    test other than 2 exists: a suite that cannot count itself is not a suite.
+*/
+run_tests :-
+    findall(N, (current_predicate(test/N), N =\= 2), Wrong),
+    Wrong \== [],
+    !,
+    format("test/~w exists: a test body with more than one goal needs parentheses~n", Wrong),
+    halt(1).
 run_tests :-
     nb_setval(passed, 0),
     nb_setval(failed, 0),

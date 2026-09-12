@@ -273,6 +273,23 @@ are that. The day-three closeout held the changelog on the ground that a
 session-facing `CLAUDE.md` and a CI action version are neither, which is right
 about those two and does not cover the pages. Left as a question, not an edit.
 
+### The harness learns to count itself
+
+After the first closeout of the day, one more change: the harness now refuses
+to start while any arity of `test` other than 2 exists. A first `run_tests`
+clause collects them with `current_predicate(test/N)`, names the arity, says
+that a body with more than one goal needs parentheses, and halts 1. Planting
+`test(planted, true, true).` at the end of a copy of the suite produces exactly
+that, and the real suite is unchanged at 269.
+
+It is a small check and it is the right shape for the defect above it. The
+thirteen were fixed by hand, and by hand is how they were written; nothing
+about the fix stopped the fourteenth. What the harness could not do was see a
+fact it never asked for, and now it asks. The postmortem's *What is probably
+still wrong* had held this for a few hours, and it moved to *What changed as a
+result* the same evening, which is the shortest stay anything has had on that
+list.
+
 ## How the work is checked
 
 The standing discipline, in the order the checks run:

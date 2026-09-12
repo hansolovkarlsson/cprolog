@@ -272,6 +272,7 @@ Each standing check exists because of something above:
 | `make doc` + `git diff --exit-code` | pages drifting from their generators |
 | `make tutorials` | four tutorial programs that nothing was loading |
 | Tests written against `current_prolog_flag(max_arity, N)` rather than `256` | `max_arity`, so the tests stay honest if the limit moves |
+| `run_tests` refuses to start while any arity of `test` other than 2 exists | the thirteen tests that consulted as `test/3` and were never run |
 
 ## What is probably still wrong
 
@@ -291,7 +292,3 @@ expensive ones:
 - **The reader reports the arity limit as a syntax error**, not
   `representation_error(max_arity)`. Documented rather than fixed, because
   fixing it means reworking the parser's error path.
-- **Nothing stops a test from consulting under the wrong arity again.** The
-  thirteen were fixed by hand; the harness still runs `test/2` and says nothing
-  about a `test/3` beside it. A harness that refused to start while any other
-  arity of `test` existed would have failed on the first commit.

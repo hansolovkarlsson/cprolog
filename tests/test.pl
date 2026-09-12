@@ -41,18 +41,18 @@ test(type_ground,     (ground(f(a)), \+ ground(f(_)))).
 
 /* ---------------- arithmetic ---------------- */
 
-test(ar_add,          X is 2 + 3, X =:= 5).
-test(ar_prec,         X is 2 + 3 * 4, X =:= 14).
-test(ar_float,        X is 7 / 2, X =:= 3.5).
-test(ar_intdiv,       X is 6 / 3, integer(X), X =:= 2).
-test(ar_idiv,         X is 7 // 2, X =:= 3).
-test(ar_negdiv,       X is -7 // 2, X =:= -3).
-test(ar_div_floor,    X is -7 div 2, X =:= -4).
+test(ar_add,          (X is 2 + 3, X =:= 5)).
+test(ar_prec,         (X is 2 + 3 * 4, X =:= 14)).
+test(ar_float,        (X is 7 / 2, X =:= 3.5)).
+test(ar_intdiv,       (X is 6 / 3, integer(X), X =:= 2)).
+test(ar_idiv,         (X is 7 // 2, X =:= 3)).
+test(ar_negdiv,       (X is -7 // 2, X =:= -3)).
+test(ar_div_floor,    (X is -7 div 2, X =:= -4)).
 test(ar_mod,          (X is -7 mod 2, X =:= 1)).
 test(ar_rem,          (X is -7 rem 2, X =:= -1)).
-test(ar_pow_int,      X is 2 ** 10, X =:= 1024).
-test(ar_pow_caret,    X is 2 ^ 10, X =:= 1024).
-test(ar_pow_float,    X is 2.0 ** 0.5, abs(X - 1.4142135) < 0.001).
+test(ar_pow_int,      (X is 2 ** 10, X =:= 1024)).
+test(ar_pow_caret,    (X is 2 ^ 10, X =:= 1024)).
+test(ar_pow_float,    (X is 2.0 ** 0.5, abs(X - 1.4142135) < 0.001)).
 test(ar_min_max,      (X is min(3, 5), Y is max(3, 5), X =:= 3, Y =:= 5)).
 test(ar_abs_sign,     (X is abs(-3), Y is sign(-3), X =:= 3, Y =:= -1)).
 test(ar_bits,         (X is 5 /\ 3, Y is 5 \/ 3, Z is 5 xor 3, W is \ 5,
@@ -61,16 +61,16 @@ test(ar_shift,        (X is 1 << 10, Y is 1024 >> 3, X =:= 1024, Y =:= 128)).
 test(ar_shift_neg,    (X is -1 << 2, Y is -8 >> 1, X =:= -4, Y =:= -4)).
 test(ar_shift_range,  (catch(_ is 1 << 64, error(evaluation_error(undefined),_), true),
                        catch(_ is 1 << -1, error(evaluation_error(undefined),_), true))).
-test(ar_gcd,          X is gcd(12, 18), X =:= 6).
+test(ar_gcd,          (X is gcd(12, 18), X =:= 6)).
 test(ar_trig,         (X is cos(0.0), X =:= 1.0)).
-test(ar_sqrt,         X is sqrt(16.0), X =:= 4.0).
+test(ar_sqrt,         (X is sqrt(16.0), X =:= 4.0)).
 test(ar_round,        (A is round(2.5), B is truncate(2.7), C is ceiling(2.1),
                        D is floor(-2.1), A =:= 3, B =:= 2, C =:= 3, D =:= -3)).
 test(ar_float_parts,  (X is float_integer_part(3.7), Y is float_fractional_part(3.5),
                        X =:= 3.0, Y =:= 0.5)).
 test(ar_compare,      (1 < 2, 2 =< 2, 3 > 2, 3 >= 3, 1 =:= 1.0, 1 =\= 2)).
 test(ar_pi,           (X is pi, X > 3.14, X < 3.15)).
-test(ar_eval_list,    X is "a", X =:= 97).
+test(ar_eval_list,    (X is "a", X =:= 97)).
 test(ar_succ,         (succ(3, X), succ(Y, 4), X =:= 4, Y =:= 3)).
 test(ar_plus,         (plus(1, 2, X), plus(1, Y, 3), X =:= 3, Y =:= 2)).
 test(ar_zero_div,     catch(_ is 1 // 0, error(evaluation_error(zero_divisor), _), true)).

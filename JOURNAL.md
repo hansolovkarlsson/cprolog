@@ -223,7 +223,7 @@ Every one of these was added in response to something it would have caught.
 ## Where it stands
 
 About 6,600 lines of hand-written C, 616 lines of library written in Prolog,
-a 256-test suite, five examples, four tutorial levels, and a reference and
+a 269-test suite, five examples, four tutorial levels, and a reference and
 internals document generated from the interpreter's own tables.
 
 What it is not: fast, modular, tabled, constrained, or capable of integers

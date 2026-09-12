@@ -42,7 +42,7 @@ generated into `docs/` by `make doc`.
 
 ```
 make            # build ./prolog
-make test       # run the regression suite (256 tests)
+make test       # run the regression suite (269 tests)
 make test-gc    # the same suite with the collector running constantly
 make test-asan  # the same suite under ASan + UBSan
 make examples   # run the example programs
@@ -201,7 +201,7 @@ These are deliberate, and each would be a substantial piece of work:
 
 ## Testing
 
-`tests/test.pl` holds 256 tests as `test(Name, Goal)` facts covering
+`tests/test.pl` holds 269 tests as `test(Name, Goal)` facts covering
 unification and the standard order, arithmetic and its errors, control and cut,
 exceptions, all-solutions predicates, term inspection, atoms and UTF-8 text,
 sorting, the list library, the database, the reader and writer (including

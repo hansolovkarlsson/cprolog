@@ -205,7 +205,7 @@ document does not change what they are.
 
 Two things stand out.
 
-**The test suite found three of sixteen.** It is a good suite — 256 tests, run
+**The test suite found three of sixteen.** It is a good suite — 269 tests, run
 twice per leg, run again under two sanitizers — and it found under a fifth of
 the defects. Everything it found was a wrong *answer*. Everything it missed was a
 wrong *limit*, a wrong *platform assumption*, or a wrong *claim in the

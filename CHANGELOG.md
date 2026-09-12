@@ -8,6 +8,14 @@ There are no releases yet, so entries are grouped by the day they landed on
 
 ## 2026-09-12
 
+### Added
+
+- **The suite refuses to start while a test of the wrong arity exists.**
+  `run_tests` collects every arity of `test` other than 2 and, if there is one,
+  prints `test/3 exists: a test body with more than one goal needs parentheses`
+  and exits 1. A test written without the parentheses now fails the suite
+  instead of vanishing from it. (`9e6ea98`)
+
 ### Changed
 
 - **Heap allocations are rounded to 8 bytes, not 16.** Eight is the alignment

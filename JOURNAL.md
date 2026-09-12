@@ -290,6 +290,40 @@ still wrong* had held this for a few hours, and it moved to *What changed as a
 result* the same evening, which is the shortest stay anything has had on that
 list.
 
+### A quarter that measured a fifth
+
+The cheapest item on the roadmap, after the second closeout: every heap
+allocation was rounded to 16 bytes where 8 would do. Nothing in the term union
+is wider than 8, nothing tags low pointer bits, and `sizeof(Term)` is 24, so a
+cell was occupying 32 for no reason. The change is one constant in each of the
+two allocators (`f3d7102`).
+
+The measurement went wrong before it went right. The first pass ran a
+200,000-element `numlist` on each binary and read `statistics(heap, ...)`, and
+the new build showed 61% less heap. That is not a number eight-byte rounding
+can produce, and it was not the rounding: the collector runs at a threshold on
+bytes allocated, the two builds crossed it at different points, and
+`heap_in_use` reports live data plus whatever has accumulated since the last
+collection. A heap figure read from a running collector compares two
+collection schedules, not two allocators. `PROLOG_GC_THRESHOLD` set far past
+the workload held the collector off in both, and then the raw allocation was
+115 MB against 93 MB: 19.4% on the list, 22.7% on a `findall` of pairs, 19.8%
+across both.
+
+A fifth, then, and the roadmap had said a quarter. The estimate counted cells
+and forgot that argument vectors were already multiples of 8, so only the
+24-byte objects gained. Speed did not move: naive reverse over 24.7 million
+inferences ran within three hundredths of a second of itself before and after.
+The internals page had carried the 16-byte rounding as "the cheapest unclaimed
+saving in the system" and listed it among the known limits; it now states the
+8-byte rounding with the figure, and the limit is gone from the list. CI ran
+the result under UBSan on Linux with both compilers and on macOS, which is the
+evidence that no member of the union wanted 16.
+
+The habit worth the paragraph is the wrong first number. It was plausible
+enough to write down and wrong enough to have gone into the changelog, and it
+was caught only because 61% was too good for what one constant could do.
+
 ## How the work is checked
 
 The standing discipline, in the order the checks run:
